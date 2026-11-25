@@ -14,7 +14,9 @@ import { AppleHealthPanel } from './AppleHealthPanel';
 import type { HealthApi } from '../../hooks/useHealthSync';
 import { useHealthConsent } from '../privacy/HealthConsent';
 import { consentDate } from '../../lib/consent';
-import { LICENSES_URL, PRIVACY_URL } from '../../lib/links';
+import { LICENSES_URL, NEWS_URL, PRIVACY_URL } from '../../lib/links';
+import { t } from '../../lib/i18n';
+import { GymCardPanel } from './GymCardPanel';
 
 interface Props {
   open: boolean;
@@ -34,11 +36,11 @@ interface Props {
 export function AccountSheet({ open, onClose, user, data, onLogin, onLogout, onDeleteAccount, onImport, health, onDeleteHealthData }: Props) {
   const consent = useHealthConsent();
   const revoke = () => {
-    if (!window.confirm('Revocare il consenso ai dati sulla salute? Ferro scollega Google Health e Health Connect e non salva più misure, pasti e dieta.')) return;
+    if (!window.confirm(t('Revocare il consenso ai dati sulla salute? Ferro scollega Google Health e Health Connect e non salva più misure, pasti e dieta.'))) return;
     consent.revoke();
     health.disconnect();
     health.setSource('none');
-    if (window.confirm('Vuoi eliminare anche i dati sanitari già salvati (misure, pasti e dieta)?\n\nOK: sì, eliminali · Annulla: no, tienili')) onDeleteHealthData(true);
+    if (window.confirm(t('Vuoi eliminare anche i dati sanitari già salvati (misure, pasti e dieta)?\n\nOK: sì, eliminali · Annulla: no, tienili'))) onDeleteHealthData(true);
   };
   const fileRef = useRef<HTMLInputElement>(null);
   const { canInstall, installed, isIOS, install } = useInstallPrompt();
@@ -50,31 +52,33 @@ export function AccountSheet({ open, onClose, user, data, onLogin, onLogout, onD
   };
 
   return (
-    <Sheet open={open} onClose={onClose} title="Account e dati">
+    <Sheet open={open} onClose={onClose} title={t('Account e dati')}>
       <div className="space-y-6 text-[15px]">
         <section className="space-y-3">
           {user ? (
             <>
               <p>
-                Connesso come <strong>{user.displayName || user.email}</strong>
+                {t('Connesso come')} <strong>{user.displayName || user.email}</strong>
                 {user.email && user.displayName && <span className="block text-sm text-muted">{user.email}</span>}
               </p>
-              <p className="text-sm text-muted">I dati sono salvati nel cloud e sincronizzati tra i tuoi dispositivi.</p>
-              <Button icon={<LogOut className="h-4 w-4" />} onClick={onLogout}>Esci</Button>
+              <p className="text-sm text-muted">{t('I dati sono salvati nel cloud e sincronizzati tra i tuoi dispositivi.')}</p>
+              <Button icon={<LogOut className="h-4 w-4" />} onClick={onLogout}>{t('Esci')}</Button>
               <div className="space-y-2 border-t border-line pt-4">
-                <p className="text-sm text-muted">Eliminando l'account cancelli per sempre scheda, allenamenti, misure, pasti e dieta, dal cloud e da questo dispositivo.</p>
-                <Button variant="danger" onClick={onDeleteAccount}>Elimina account e dati</Button>
+                <p className="text-sm text-muted">{t("Eliminando l'account cancelli per sempre scheda, allenamenti, misure, pasti e dieta, dal cloud e da questo dispositivo.")}</p>
+                <Button variant="danger" onClick={onDeleteAccount}>{t('Elimina account e dati')}</Button>
               </div>
             </>
           ) : (
             <>
-              <p className="text-muted">Stai usando l'app senza account: i dati sono solo su questo dispositivo.</p>
-              <Button variant="primary" icon={<LogIn className="h-4 w-4" />} onClick={onLogin}>Accedi con Google</Button>
+              <p className="text-muted">{t("Stai usando l'app senza account: i dati sono solo su questo dispositivo.")}</p>
+              <Button variant="primary" icon={<LogIn className="h-4 w-4" />} onClick={onLogin}>{t('Accedi con Google')}</Button>
             </>
           )}
         </section>
 
         <AppearancePanel />
+
+        <GymCardPanel />
 
         <HealthPanel health={health} />
 
@@ -82,18 +86,18 @@ export function AccountSheet({ open, onClose, user, data, onLogin, onLogout, onD
 
         {consent.valid && consent.consent && (
           <section className="space-y-3 border-t border-line pt-5">
-            <h3 className="font-display text-lg font-semibold">Consenso sui dati sanitari</h3>
-            <p className="text-sm text-muted">Dato il {consentDate(consent.consent)}. Serve per salvare misure, pasti, dieta e dati di Google Health, Health Connect e Apple Salute.</p>
-            <Button variant="danger" onClick={revoke}>Revoca il consenso</Button>
+            <h3 className="font-display text-lg font-semibold">{t('Consenso sui dati sanitari')}</h3>
+            <p className="text-sm text-muted">{t('Dato il {d}. Serve per salvare misure, pasti, dieta e dati di Google Health, Health Connect e Apple Salute.', { d: consentDate(consent.consent) })}</p>
+            <Button variant="danger" onClick={revoke}>{t('Revoca il consenso')}</Button>
           </section>
         )}
 
         <section className="space-y-3 border-t border-line pt-5">
-          <h3 className="font-display text-lg font-semibold">Backup</h3>
-          <p className="text-sm text-muted">Un file con scheda, allenamenti e misure. Puoi reimportarlo su un altro dispositivo.</p>
+          <h3 className="font-display text-lg font-semibold">{t('Backup')}</h3>
+          <p className="text-sm text-muted">{t('Un file con scheda, allenamenti e misure. Puoi reimportarlo su un altro dispositivo.')}</p>
           <div className="flex flex-wrap gap-2">
-            <Button icon={<Download className="h-4 w-4" />} onClick={exportBackup}>Esporta backup</Button>
-            <Button icon={<Upload className="h-4 w-4" />} onClick={() => fileRef.current?.click()}>Importa backup</Button>
+            <Button icon={<Download className="h-4 w-4" />} onClick={exportBackup}>{t('Esporta backup')}</Button>
+            <Button icon={<Upload className="h-4 w-4" />} onClick={() => fileRef.current?.click()}>{t('Importa backup')}</Button>
             <input
               ref={fileRef}
               type="file"
@@ -115,22 +119,23 @@ export function AccountSheet({ open, onClose, user, data, onLogin, onLogout, onD
         </section>
 
         <div className="space-y-2 border-t border-line pt-4 text-sm text-faint">
-          <p>Versione dell'app: {typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : 'sviluppo'}</p>
+          <p>{t("Versione dell'app:")} {typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : t('sviluppo')}</p>
           <p className="flex flex-wrap gap-x-4 gap-y-1">
-            <a href={PRIVACY_URL} target="_blank" rel="noopener" className="underline">Informativa sulla privacy</a>
-            <a href={LICENSES_URL} target="_blank" rel="noopener" className="underline">Licenze e crediti</a>
+            <a href={PRIVACY_URL} target="_blank" rel="noopener" className="underline">{t('Informativa sulla privacy')}</a>
+            <a href={LICENSES_URL} target="_blank" rel="noopener" className="underline">{t('Licenze e crediti')}</a>
+            <a href={NEWS_URL} target="_blank" rel="noopener" className="underline">{t('Novità')}</a>
           </p>
         </div>
 
         {!installed && (
           <section className="space-y-3 border-t border-line pt-5">
-            <h3 className="font-display text-lg font-semibold">Installa l'app</h3>
+            <h3 className="font-display text-lg font-semibold">{t("Installa l'app")}</h3>
             {canInstall ? (
-              <Button icon={<Smartphone className="h-4 w-4" />} onClick={install}>Installa sul dispositivo</Button>
+              <Button icon={<Smartphone className="h-4 w-4" />} onClick={install}>{t('Installa sul dispositivo')}</Button>
             ) : isIOS ? (
-              <p className="text-muted">Su iPhone: in Safari tocca Condividi, poi “Aggiungi alla schermata Home”.</p>
+              <p className="text-muted">{t('Su iPhone: in Safari tocca Condividi, poi “Aggiungi alla schermata Home”.')}</p>
             ) : (
-              <p className="text-muted">Dal menu del browser scegli “Installa app” o “Aggiungi a schermata Home”.</p>
+              <p className="text-muted">{t('Dal menu del browser scegli “Installa app” o “Aggiungi a schermata Home”.')}</p>
             )}
           </section>
         )}

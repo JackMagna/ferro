@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from './icons';
+import { t } from '../../lib/i18n';
 
 interface SheetProps {
   open: boolean;
@@ -48,7 +49,7 @@ export function Sheet({ open, onClose, title, children, footer, size = 'md' }: S
       >
         <div className="flex items-center justify-between gap-3 border-b border-line py-2 pl-5 pr-2">
           <h2 id={titleId} className="font-display text-xl font-semibold">{title}</h2>
-          <button type="button" onClick={onClose} aria-label="Chiudi" className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-muted hover:bg-raised hover:text-chalk">
+          <button type="button" onClick={onClose} aria-label={t('Chiudi')} className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-muted hover:bg-raised hover:text-chalk">
             <X className="h-5 w-5" />
           </button>
         </div>

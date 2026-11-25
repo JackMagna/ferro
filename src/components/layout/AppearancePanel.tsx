@@ -2,6 +2,7 @@ import { useSyncExternalStore } from 'react';
 import { MODES, THEMES, getTheme, resolveMode, setTheme, subscribeTheme, type ThemeName } from '../../lib/theme';
 import { Segmented } from '../ui/Segmented';
 import { canVibrate, getFeedback, setFeedback, subscribeFeedback } from '../../lib/sound';
+import { LANGS, lang, setLang, t, type Lang } from '../../lib/i18n';
 
 /** Colori delle anteprime: fondo, testo e accento di ogni tema in modalità scura e chiara. */
 const PREVIEW: Record<ThemeName, Record<'dark' | 'light', { bg: string; ink: string; accent: string; line: string }>> = {
@@ -19,18 +20,18 @@ export function AppearancePanel() {
 
   return (
     <section className="space-y-3 border-t border-line pt-5">
-      <h3 className="font-display text-lg font-semibold">Aspetto</h3>
-      <div role="radiogroup" aria-label="Tema" className="grid grid-cols-3 gap-2">
-        {THEMES.map((t) => {
-          const c = PREVIEW[t.id][mode];
-          const on = prefs.theme === t.id;
+      <h3 className="font-display text-lg font-semibold">{t('Aspetto')}</h3>
+      <div role="radiogroup" aria-label={t('Tema')} className="grid grid-cols-3 gap-2">
+        {THEMES.map((th) => {
+          const c = PREVIEW[th.id][mode];
+          const on = prefs.theme === th.id;
           return (
             <button
-              key={t.id}
+              key={th.id}
               type="button"
               role="radio"
               aria-checked={on}
-              onClick={() => setTheme({ theme: t.id })}
+              onClick={() => setTheme({ theme: th.id })}
               className={`rounded-xl border p-2 text-left transition ${on ? 'border-plate-text ring-1 ring-plate-text' : 'border-line hover:border-faint'}`}
             >
               <span className="block h-16 rounded-md p-2" style={{ background: c.bg, border: `1px solid ${c.line}` }} aria-hidden="true">
@@ -38,21 +39,27 @@ export function AppearancePanel() {
                 <span className="mt-2 block h-1.5 w-12 rounded-full" style={{ background: c.ink, opacity: 0.8 }} />
                 <span className="mt-1.5 block h-1.5 w-9 rounded-full" style={{ background: c.ink, opacity: 0.35 }} />
               </span>
-              <span className="mt-1.5 block text-sm font-semibold">{t.label}</span>
+              <span className="mt-1.5 block text-sm font-semibold">{t(th.label)}</span>
             </button>
           );
         })}
       </div>
-      <p className="text-sm text-muted">{THEMES.find((t) => t.id === prefs.theme)?.hint}</p>
-      <Segmented label="Modalità" value={prefs.mode} onChange={(m) => setTheme({ mode: m })} options={MODES.map((m) => ({ value: m.id, label: m.label }))} />
+      <p className="text-sm text-muted">{t(THEMES.find((th) => th.id === prefs.theme)?.hint ?? '')}</p>
+      <Segmented label={t('Modalità')} value={prefs.mode} onChange={(m) => setTheme({ mode: m })} options={MODES.map((m) => ({ value: m.id, label: t(m.label) }))} />
+      <label className="block pt-1">
+        <span className="label">{t('Lingua')}</span>
+        <select className="field" value={lang} onChange={(e) => setLang(e.target.value as Lang)}>
+          {LANGS.map((l) => <option key={l.id} value={l.id}>{l.label}</option>)}
+        </select>
+      </label>
       <div className="space-y-2 pt-1">
         <label className="flex min-h-11 items-center justify-between gap-3">
-          <span>Suoni<span className="block text-sm text-muted">Fine recupero e ultimi secondi</span></span>
+          <span>{t('Suoni')}<span className="block text-sm text-muted">{t('Fine recupero e ultimi secondi')}</span></span>
           <input type="checkbox" className="h-5 w-5 accent-plate" checked={feedback.sound} onChange={(e) => setFeedback({ sound: e.target.checked })} />
         </label>
         {canVibrate() && (
           <label className="flex min-h-11 items-center justify-between gap-3">
-            <span>Vibrazione<span className="block text-sm text-muted">Serie registrata, record, fine recupero</span></span>
+            <span>{t('Vibrazione')}<span className="block text-sm text-muted">{t('Serie registrata, record, fine recupero')}</span></span>
             <input type="checkbox" className="h-5 w-5 accent-plate" checked={feedback.vibration} onChange={(e) => setFeedback({ vibration: e.target.checked })} />
           </label>
         )}

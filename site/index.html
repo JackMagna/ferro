@@ -8,7 +8,12 @@
 <meta name="theme-color" content="#141517">
 <meta property="og:title" content="Ferro — la scheda del tuo coach, sul telefono">
 <meta property="og:description" content="La scheda arriva dal foglio del coach e si aggiorna da sola. Carichi, recuperi, misure, pasti e Google Health. Gratis.">
-<meta property="og:image" content="/sito/img/allenamento-classico-dark.webp">
+<meta property="og:image" content="https://palestra-kohl.vercel.app/sito/img/ferro-social.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://palestra-kohl.vercel.app/">
+<meta name="twitter:card" content="summary_large_image">
 <meta property="og:locale" content="it_IT">
 <link rel="icon" type="image/svg+xml" href="/app/icons/ferro-classico.svg">
 <link rel="preload" href="/sito/fonts/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
@@ -203,7 +208,7 @@ footer a { color: var(--muted); }
       <a href="#app">L'app</a>
       <a href="#scheda">La scheda</a>
       <a href="#oltre">Oltre i pesi</a>
-      <a href="#google-health">Google Health</a>
+      <a href="#google-health">Salute</a>
       <a href="#salute">iPhone</a>
       <a href="#coach">Su misura</a>
       <a href="#domande">Domande</a>
@@ -302,34 +307,36 @@ footer a { color: var(--muted); }
   <section id="google-health" aria-labelledby="t-gh">
     <div class="wrap sec">
       <div class="sec-head">
-        <p class="mono">02 · Google Health</p>
+        <p class="mono">02 · Health Connect e Google Health</p>
         <h2 id="t-gh">Collegato a quello che misuri già.</h2>
-        <p class="lead">Con lo stesso account Google, Ferro dialoga con Google Health: quello che registra l'orologio o la bilancia entra nell'app, e i tuoi allenamenti escono verso Google Health.</p>
+        <p class="lead">Sui telefoni Android Ferro usa <b>Health Connect</b>, l'archivio della salute che c'è già nel telefono: quello che registrano orologio e bilancia entra in Ferro, e i tuoi allenamenti escono verso le altre app.</p>
       </div>
       <div class="gh-row">
         <div>
           <div class="flow">
             <div class="box">
-              <p class="mono">Da Google Health a Ferro</p>
+              <p class="mono">Da Health Connect a Ferro</p>
               <ul>
                 <li><span>Peso</span><span>bilancia</span></li>
                 <li><span>Massa grassa</span><span>bilancia</span></li>
                 <li><span>Frequenza cardiaca</span><span>orologio</span></li>
+                <li><span>Corse e uscite</span><span>orologio</span></li>
               </ul>
             </div>
             <div class="mid" aria-hidden="true">
               <svg viewBox="0 0 120 120"><g fill="none" stroke="#f0c33c" stroke-width="3" stroke-linecap="square"><path d="M10 44h92M86 28l16 16-16 16"/><path d="M110 76H18M34 60L18 76l16 16" stroke="#8d8b84"/></g></svg>
             </div>
             <div class="box">
-              <p class="mono">Da Ferro a Google Health</p>
+              <p class="mono">Da Ferro a Health Connect</p>
               <ul>
-                <li><span>Allenamenti</span><span>forza</span></li>
+                <li><span>Allenamenti</span><span>tipo e distanza</span></li>
                 <li><span>Pesate e massa grassa</span><span>misure</span></li>
-                <li><span>Pasti, se vuoi</span><span>calorie e macro</span></li>
+                <li><span>Pasti e acqua, se vuoi</span><span>calorie</span></li>
               </ul>
             </div>
           </div>
-          <p class="note">La frequenza cardiaca dell'allenamento si importa da sola se l'orologio ha già sincronizzato. Nell'app Android (si scarica da questa pagina) c'è anche Health Connect: allenamenti con tipo e distanza, pesate, calorie dei pasti, acqua, e le attività dell'orologio che entrano in Ferro.</p>
+          <p class="note">Health Connect è nell'<a href="#installa">app Android</a>: su Android 14 e successivi è già nel telefono, sulle versioni precedenti si installa gratis da Google Play. Ferro chiede ogni permesso solo quando tocchi la funzione che lo usa, e puoi toglierli quando vuoi dalle impostazioni di Health Connect.</p>
+          <p class="note"><b>Google Health</b>, dal sito e da iPhone, collega lo stesso account Google. Google lo apre a tutti solo dopo una verifica di sicurezza: per ora è attivo per un gruppo di account di prova. Su Android usa Health Connect, che non ha questo limite.</p>
         </div>
         <div class="stage" style="width:min(100%,300px)">
           <div class="phone"><img src="/sito/img/progressi-brace-dark.webp" width="780" height="1688" loading="lazy" alt="Progressi in Ferro: andamento del peso corporeo nelle ultime quattro settimane, da 106,2 a 104,5 chili."></div>
@@ -532,7 +539,8 @@ footer a { color: var(--muted); }
         <details><summary>Va bene anche per corsa, nuoto o functional?</summary><p>Sì. Le righe a tempo o a distanza, le tenute e i blocchi (AMRAP, EMOM, For Time, Tabata) si registrano come sono scritti nella scheda, con il timer per i blocchi. Lezioni e corsi fissi si aggiungono a parte.</p></details>
         <details><summary>E se non ho un coach?</summary><p>Puoi creare e modificare la scheda direttamente nell'app, con una libreria di oltre 800 esercizi con foto e muscoli.</p></details>
         <details><summary>Funziona su iPhone?</summary><p>Sì, dal browser: con Safari la aggiungi alla schermata Home e si comporta come un'app. I dati arrivano in Apple Salute con due Comandi rapidi (vedi <a href="#salute">iPhone e Apple Salute</a>). La vibrazione non c'è, perché Safari non la permette.</p></details>
-        <details><summary>Come funziona il collegamento con Google Health?</summary><p>Usi lo stesso account Google con cui accedi a Ferro e devi avere un profilo nell'app Google Health. Il collegamento è in fase di prova: per ora è disponibile per un numero limitato di account, che aumenterà dopo la verifica di Google.</p></details>
+        <details><summary>Health Connect o Google Health?</summary><p>Su Android usa Health Connect, dall'app Android di Ferro: è nel telefono, funziona per tutti e i dati non passano da server esterni. Google Health serve dal sito e da iPhone, con lo stesso account Google; finché Google non completa la verifica è disponibile solo per un gruppo di account di prova. Su iPhone c'è anche Apple Salute, con i Comandi rapidi.</p></details>
+        <details><summary>Perché Google mostra un avviso quando collego il foglio del coach?</summary><p>Per leggere e scrivere nel Google Sheet del coach Ferro chiede il permesso a Google. Finché la verifica di Google non è completata può comparire la schermata «Google non ha verificato questa app»: tocca «Avanzate», poi «Vai a Ferro». Ferro usa solo il foglio che colleghi tu.</p></details>
         <details><summary>Dove finiscono i miei dati?</summary><p>Senza account restano solo sul telefono. Con l'account Google sono nel tuo spazio privato, leggibile solo da te. Puoi esportare tutto in un file in qualsiasi momento. I dettagli sono nell'<a href="/privacypolicy.html">informativa</a>.</p></details>
         <details><summary>Come aggiorno l'app Android?</summary><p>Quando esce una versione nuova, Ferro te lo dice appena lo apri. Tocchi «Aggiorna», il telefono scarica il file e lo installi sopra quello vecchio: scheda, allenamenti e impostazioni restano.</p></details>
         <details><summary>Posso avere una versione personalizzata?</summary><p>Sì: nome, colori, icona, esercizi e prodotti su misura per coach, palestre e aziende. Vedi <a href="#coach">Su misura</a> o scrivimi dai <a href="#contatti">contatti</a>.</p></details>
@@ -573,6 +581,7 @@ footer a { color: var(--muted); }
     <a href="/privacypolicy.html">Informativa sui dati</a>
     <a href="/licenze.html">Licenze e crediti</a>
     <a href="#contatti">Contatti</a>
+    <a href="/novita.html">Novità</a>
     <a href="https://github.com/JackMagna/ferro">Codice sorgente (GPL-3.0)</a>
   </div>
 </footer>

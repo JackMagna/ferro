@@ -2,6 +2,7 @@ import { Logo } from '../layout/Logo';
 import { Button } from '../ui/Button';
 import { LICENSES_URL, PRIVACY_URL } from '../../lib/links';
 import { authLog, authLogText } from '../../lib/authProbe';
+import { t } from '../../lib/i18n';
 
 interface Props {
   onLogin: () => void;
@@ -16,23 +17,23 @@ export function Welcome({ onLogin, onGuest, busy }: Props) {
         <Logo className="h-14 w-14" />
         <h1 className="mt-6 font-display text-5xl font-bold leading-none">Ferro</h1>
         <p className="mt-3 text-lg text-muted">
-          La tua scheda in palestra: serie, carichi, recuperi e progressi. Funziona anche senza rete.
+          {t('La tua scheda in palestra: serie, carichi, recuperi e progressi. Funziona anche senza rete.')}
         </p>
 
         <div className="mt-8 space-y-3">
           <Button block size="lg" variant="primary" disabled={busy} onClick={onLogin}>
-            {busy ? 'Accesso in corso…' : 'Accedi con Google'}
+            {busy ? t('Accesso in corso…') : t('Accedi con Google')}
           </Button>
-          <Button block size="lg" onClick={onGuest}>Usa senza account</Button>
+          <Button block size="lg" onClick={onGuest}>{t('Usa senza account')}</Button>
         </div>
 
         <p className="mt-5 text-sm leading-relaxed text-faint">
-          Con Google i dati sono salvati nel cloud e li ritrovi su ogni dispositivo. Senza account restano solo su questo telefono; puoi accedere in seguito e verranno caricati.
+          {t('Con Google i dati sono salvati nel cloud e li ritrovi su ogni dispositivo. Senza account restano solo su questo telefono; puoi accedere in seguito e verranno caricati.')}
         </p>
         <p className="mt-4 text-sm text-faint">
-          Ferro è per chi ha almeno 14 anni.{' '}
-          <a href={PRIVACY_URL} target="_blank" rel="noopener" className="underline">Informativa</a> ·{' '}
-          <a href={LICENSES_URL} target="_blank" rel="noopener" className="underline">Licenze</a>
+          {t('Ferro è per chi ha almeno 14 anni.')}{' '}
+          <a href={PRIVACY_URL} target="_blank" rel="noopener" className="underline">{t('Informativa')}</a> ·{' '}
+          <a href={LICENSES_URL} target="_blank" rel="noopener" className="underline">{t('Licenze')}</a>
         </p>
         <AuthLogDetails />
       </div>
@@ -47,9 +48,9 @@ function AuthLogDetails() {
   const text = authLogText(log);
   return (
     <details className="mt-6 text-xs text-faint">
-      <summary className="cursor-pointer">Ti chiede sempre l'accesso? Dettagli tecnici</summary>
+      <summary className="cursor-pointer">{t("Ti chiede sempre l'accesso? Dettagli tecnici")}</summary>
       <pre className="mt-2 whitespace-pre-wrap break-words rounded-lg border border-line p-3 font-mono">{text}</pre>
-      <button type="button" className="mt-2 underline" onClick={() => void navigator.clipboard?.writeText(text)}>Copia</button>
+      <button type="button" className="mt-2 underline" onClick={() => void navigator.clipboard?.writeText(text)}>{t('Copia')}</button>
     </details>
   );
 }

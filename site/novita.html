@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Novità di Ferro</title>
+<meta name="description" content="Cosa cambia in ogni versione di Ferro, l'app per seguire la scheda di palestra del coach.">
+<meta name="theme-color" content="#141517">
+<link rel="icon" type="image/svg+xml" href="/app/icons/ferro-classico.svg">
+<style>
+@font-face { font-family: "Barlow Condensed"; font-weight: 700; font-display: swap; src: url(/sito/fonts/barlow-condensed-latin-700-normal.woff2) format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 400; font-display: swap; src: url(/sito/fonts/barlow-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Space Mono"; font-weight: 400; font-display: swap; src: url(/sito/fonts/space-mono-latin-400-normal.woff2) format("woff2"); }
+:root { --ink: #141517; --panel: #1c1e21; --line: #34383d; --chalk: #eeebe4; --muted: #b3b0a8; --faint: #8d8b84; --plate: #f0c33c; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ink); color: var(--chalk); font: 400 17px/1.55 "Barlow", system-ui, sans-serif; }
+.wrap { max-width: 760px; margin: 0 auto; padding: 48px 16px 72px; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--plate); outline-offset: 3px; }
+.back { color: var(--muted); text-decoration: none; }
+h1, h2 { font-family: "Barlow Condensed", "Arial Narrow", sans-serif; text-transform: uppercase; line-height: .95; margin: 0; }
+h1 { font-size: clamp(2.6rem, 9vw, 4.2rem); margin: 24px 0 12px; }
+.lead { color: var(--muted); margin: 0 0 40px; }
+article { border-top: 1px solid var(--line); padding: 28px 0; }
+h2 { font-size: 1.8rem; }
+.date { font: 400 .8rem "Space Mono", monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); margin: 6px 0 14px; }
+article ul { margin: 0; padding-left: 1.2em; color: var(--muted); display: grid; gap: 6px; }
+article p { margin: 0 0 8px; color: var(--muted); }
+.btn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: 12px; background: var(--plate); color: #2a2104; font-weight: 600; text-decoration: none; margin-top: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="/">← Ferro</a>
+  <h1>Novità</h1>
+  <p class="lead">Cosa cambia in ogni versione. L'app Android ti avvisa da sola quando ne esce una nuova; il sito e l'app dal browser si aggiornano senza fare niente.</p>
+  <div id="list"><p class="lead">Caricamento…</p></div>
+</div>
+<script>
+  // Le novità sono le Release del repository: si scrivono una volta sola, su GitHub.
+  var esc = function (s) { return s.replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  function body(md) {
+    var out = '', list = false;
+    (md || '').split(/\r?\n/).forEach(function (line) {
+      var item = /^\s*[-*]\s+(.*)/.exec(line);
+      var text = esc((item ? item[1] : line).replace(/\*\*(.+?)\*\*/g, '$1').replace(/^#+\s*/, ''));
+      if (item) { if (!list) { out += '<ul>'; list = true; } out += '<li>' + text + '</li>'; return; }
+      if (list) { out += '</ul>'; list = false; }
+      if (text.trim()) out += '<p>' + text + '</p>';
+    });
+    return out + (list ? '</ul>' : '');
+  }
+  fetch('https://api.github.com/repos/JackMagna/ferro/releases?per_page=20', { headers: { Accept: 'application/vnd.github+json' } })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (all) {
+      var html = all.filter(function (r) { return !r.prerelease && !r.draft; }).map(function (r, i) {
+        var date = new Date(r.published_at).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
+        var apk = (r.assets || []).filter(function (a) { return /\.apk$/.test(a.name); })[0];
+        return '<article><h2>' + esc(r.name || r.tag_name) + '</h2><p class="date">' + date + '</p>' + (body(r.body) || '<p>Miglioramenti e correzioni.</p>') +
+          (i === 0 && apk ? '<a class="btn" href="' + esc(apk.browser_download_url) + '">Scarica l\'app Android</a>' : '') + '</article>';
+      }).join('');
+      document.getElementById('list').innerHTML = html || '<p class="lead">Nessuna versione pubblicata.</p>';
+    })
+    .catch(function () {
+      document.getElementById('list').innerHTML = '<p class="lead">Non riesco a caricare le novità. Le trovi anche su <a href="https://github.com/JackMagna/ferro/releases">GitHub</a>.</p>';
+    });
+</script>
+</body>
+</html>

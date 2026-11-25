@@ -2,15 +2,16 @@ import type { ReactNode } from 'react';
 import { BookOpen, ClipboardList, Dumbbell, LineChart, UserRound, Utensils, WifiOff } from '../ui/icons';
 import { Logo } from './Logo';
 import { useOnline } from '../../hooks/usePWA';
+import { t } from '../../lib/i18n';
 
 export type Tab = 'workout' | 'program' | 'nutrition' | 'library' | 'progress';
 
 const TABS: { id: Tab; label: string; icon: typeof Dumbbell }[] = [
-  { id: 'workout', label: 'Allenamento', icon: Dumbbell },
-  { id: 'program', label: 'Scheda', icon: ClipboardList },
-  { id: 'nutrition', label: 'Pasti', icon: Utensils },
-  { id: 'library', label: 'Esercizi', icon: BookOpen },
-  { id: 'progress', label: 'Progressi', icon: LineChart }
+  { id: 'workout', label: t('Allenamento'), icon: Dumbbell },
+  { id: 'program', label: t('Scheda'), icon: ClipboardList },
+  { id: 'nutrition', label: t('Pasti'), icon: Utensils },
+  { id: 'library', label: t('Esercizi'), icon: BookOpen },
+  { id: 'progress', label: t('Progressi'), icon: LineChart }
 ];
 
 interface Props {
@@ -32,7 +33,7 @@ export function AppShell({ tab, onTab, accountLabel, onAccount, children }: Prop
           <Logo />
           <span className="font-display text-2xl font-bold">Ferro</span>
         </div>
-        <nav aria-label="Sezioni" className="flex-1">
+        <nav aria-label={t('Sezioni')} className="flex-1">
           <ul className="space-y-1">
             {TABS.map(({ id, label, icon: Icon }) => (
               <li key={id}>
@@ -62,7 +63,7 @@ export function AppShell({ tab, onTab, accountLabel, onAccount, children }: Prop
             <Logo className="h-7 w-7" />
             <span className="font-display text-xl font-bold">Ferro</span>
           </div>
-          <button type="button" onClick={onAccount} className="inline-flex h-11 max-w-[55%] items-center gap-2 rounded-xl px-3 text-sm text-muted hover:text-chalk" aria-label="Account e impostazioni">
+          <button type="button" onClick={onAccount} className="inline-flex h-11 max-w-[55%] items-center gap-2 rounded-xl px-3 text-sm text-muted hover:text-chalk" aria-label={t('Account e impostazioni')}>
             <span className="truncate">{accountLabel}</span>
             <UserRound className="h-5 w-5 shrink-0" />
           </button>
@@ -71,7 +72,7 @@ export function AppShell({ tab, onTab, accountLabel, onAccount, children }: Prop
 
       {!online && (
         <div role="status" className="flex items-center justify-center gap-2 bg-raised px-4 py-2 text-sm text-muted lg:ml-60">
-          <WifiOff className="h-4 w-4" /> Sei offline: i dati vengono salvati e inviati appena torna la rete.
+          <WifiOff className="h-4 w-4" /> {t('Sei offline: i dati vengono salvati e inviati appena torna la rete.')}
         </div>
       )}
 
@@ -80,7 +81,7 @@ export function AppShell({ tab, onTab, accountLabel, onAccount, children }: Prop
       </div>
 
       {/* Barra in basso da telefono e tablet */}
-      <nav aria-label="Sezioni" className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-line bg-panel lg:hidden">
+      <nav aria-label={t('Sezioni')} className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-line bg-panel lg:hidden">
         <ul className="mx-auto grid h-16 max-w-xl grid-cols-5">
           {TABS.map(({ id, label, icon: Icon }) => (
             <li key={id}>

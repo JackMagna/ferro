@@ -24,7 +24,7 @@
 <script>
   // Lingua: la scelta salvata, altrimenti quella del browser. Solo dalla radice, mai i robot.
   (function () {
-    if (location.pathname !== '/' || /bot|crawl|spider|slurp/i.test(navigator.userAgent)) return;
+    if (location.pathname !== '/' || /bot|crawl|spider|slurp|google|lighthouse/i.test(navigator.userAgent) || navigator.webdriver) return;
     var l;
     try { l = localStorage.getItem('ferro:site-lang'); } catch (e) { return; }
     l = (l || navigator.language || 'it').slice(0, 2).toLowerCase();
@@ -275,6 +275,24 @@ footer a { color: var(--muted); }
       </div>
     </div>
   </div>
+
+  <section id="google" aria-labelledby="t-google">
+    <div class="wrap sec">
+      <div class="sec-head">
+        <p class="mono">Il tuo account Google</p>
+        <h2 id="t-google">Cosa fa Ferro con Google.</h2>
+        <p class="lead">Ferro è un'app per seguire in palestra la scheda di allenamento preparata dal tuo coach. Usa Google solo per queste cose, e solo se le attivi tu:</p>
+      </div>
+      <div class="faq">
+        <ul class="guide">
+          <li><b>Accesso con Google</b>: nome ed email servono a creare il tuo account e a salvare scheda, allenamenti e misure nel tuo spazio privato.</li>
+          <li><b>Google Sheets</b>: Ferro legge la scheda dal foglio del coach che colleghi tu e ci scrive i carichi delle serie e le misure. Non apre altri fogli o file.</li>
+          <li><b>Google Health</b> (facoltativo): importa peso, massa grassa e frequenza cardiaca e registra gli allenamenti.</li>
+        </ul>
+        <p class="note">Ferro non vende i dati, non li usa per pubblicità e non li passa a terzi. Puoi scollegare Google ed eliminare l'account dall'app quando vuoi. Dettagli nell'<a href="/privacypolicy.html">informativa sulla privacy</a>.</p>
+      </div>
+    </div>
+  </section>
 
   <section id="app" aria-labelledby="t-app">
     <div class="wrap sec">

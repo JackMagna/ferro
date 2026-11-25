@@ -58,7 +58,14 @@ jobs:
 
       - name: Chiave di firma
         if: env.HAS_KEYSTORE == 'true'
-        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$GITHUB_WORKSPACE/release.jks"
+        # tr toglie a capo, spazi e BOM che PowerShell può aggiungere al segreto; keytool ferma subito una chiave sbagliata
+        run: |
+          printf '%s' "$KEYSTORE_B64" | tr -cd 'A-Za-z0-9+/=' | base64 -d > "$GITHUB_WORKSPACE/release.jks"
+          keytool -list -keystore "$GITHUB_WORKSPACE/release.jks" -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" -v | grep -E "SHA1:" || { echo "::error::Chiave o password del keystore non valide: ricontrolla i segreti ANDROID_KEYSTORE_*"; exit 1; }
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
 
       - name: Compila (firmato)
         if: env.HAS_KEYSTORE == 'true'

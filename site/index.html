@@ -200,12 +200,14 @@ footer a { color: var(--muted); }
       Ferro
     </a>
     <nav class="nav" aria-label="Sezioni della pagina">
+      <a href="#app">L'app</a>
       <a href="#scheda">La scheda</a>
       <a href="#oltre">Oltre i pesi</a>
       <a href="#google-health">Google Health</a>
       <a href="#salute">iPhone</a>
-      <a href="#coach">Coach e aziende</a>
+      <a href="#coach">Su misura</a>
       <a href="#domande">Domande</a>
+      <a href="#contatti">Contatti</a>
     </nav>
     <a class="btn btn--primary" href="/app/">Apri l'app</a>
   </div>
@@ -238,6 +240,24 @@ footer a { color: var(--muted); }
       </div>
     </div>
   </div>
+
+  <section id="app" aria-labelledby="t-app">
+    <div class="wrap sec">
+      <div class="sec-head">
+        <p class="mono">00 · L'app, sezione per sezione</p>
+        <h2 id="t-app">Sei schermate, un allenamento.</h2>
+        <p class="lead">Ferro ha cinque sezioni in basso e un pannello per account e dati. Ecco cosa trovi in ognuna.</p>
+      </div>
+      <div class="tiles">
+        <article class="card"><span class="tag">Allenamento</span><h3>In palestra</h3><p>Il giorno giusto della scheda, esercizio per esercizio: serie, carico suggerito, recupero automatico, record, foto e muscoli dell'esercizio. Timer per AMRAP ed EMOM, fascia cardio, lezioni di oggi e giorno bonus per quello che hai saltato.</p></article>
+        <article class="card"><span class="tag">Scheda</span><h3>Il programma</h3><p>La scheda importata dal Google Sheet del coach, con l'avviso quando cambia, oppure costruita da te. Giorni, serie per settimana, recuperi, note, lezioni e corsi fissi.</p></article>
+        <article class="card"><span class="tag">Pasti</span><h3>Cosa mangi</h3><p>Diario con calorie e macro, codice a barre, 150 alimenti comuni già pronti, acqua, pasti salvati, la dieta della nutrizionista e il riepilogo della settimana da mandarle.</p></article>
+        <article class="card"><span class="tag">Esercizi</span><h3>La libreria</h3><p>Oltre 800 esercizi con foto, muscoli e istruzioni. Se la foto di un esercizio è sbagliata la correggi con un tocco, e la correzione aiuta anche gli altri.</p></article>
+        <article class="card"><span class="tag">Progressi</span><h3>Come stai andando</h3><p>Storico delle sedute, andamento dei carichi, peso e misure, referti della bioimpedenza. Esporti le sedute per Strava e Garmin.</p></article>
+        <article class="card"><span class="tag">Account e dati</span><h3>Tutto sotto controllo</h3><p>Accesso con Google o senza account, Google Health, Health Connect, Apple Salute, tema e colori, backup in un file ed eliminazione dell'account quando vuoi.</p></article>
+      </div>
+    </div>
+  </section>
 
   <section id="scheda" aria-labelledby="t-scheda">
     <div class="wrap sec">
@@ -437,8 +457,9 @@ footer a { color: var(--muted); }
   <section id="coach" aria-labelledby="t-coach">
     <div class="wrap sec">
       <div class="sec-head">
-        <p class="mono">06 · Coach e aziende</p>
-        <h2 id="t-coach">Lavoriamo insieme.</h2>
+        <p class="mono">06 · Su misura</p>
+        <h2 id="t-coach">Una Ferro tutta vostra.</h2>
+        <p class="lead">Ferro si adatta. Per un coach, una palestra o un'azienda preparo una versione con il vostro nome e le vostre regole.</p>
       </div>
       <div class="two">
         <article class="card">
@@ -453,11 +474,12 @@ footer a { color: var(--muted); }
           <p class="pending" data-contact-pending hidden>Il contatto per i coach arriva a breve.</p>
         </article>
         <article class="card">
-          <h3>Attrezzatura e alimentazione</h3>
-          <p>Una versione di Ferro con il vostro marchio, per chi vende attrezzatura da palestra o prodotti alimentari.</p>
+          <h3>Palestre e aziende</h3>
+          <p>Una versione di Ferro con il vostro marchio: per una palestra, una catena, chi vende attrezzatura o prodotti alimentari.</p>
           <ul>
-            <li>I vostri colori, il vostro nome e la vostra icona</li>
-            <li>Gli esercizi con la vostra attrezzatura</li>
+            <li>Il vostro nome, i vostri colori e la vostra icona</li>
+            <li>Il vostro sito e la vostra app Android, con gli aggiornamenti automatici</li>
+            <li>Gli esercizi con la vostra attrezzatura, le schede dei vostri istruttori</li>
             <li>I vostri prodotti già pronti nel diario dei pasti</li>
           </ul>
           <a class="btn" data-contact="aziende" href="#">Richiedi una presentazione</a>
@@ -512,7 +534,33 @@ footer a { color: var(--muted); }
         <details><summary>Funziona su iPhone?</summary><p>Sì, dal browser: con Safari la aggiungi alla schermata Home e si comporta come un'app. I dati arrivano in Apple Salute con due Comandi rapidi (vedi <a href="#salute">iPhone e Apple Salute</a>). La vibrazione non c'è, perché Safari non la permette.</p></details>
         <details><summary>Come funziona il collegamento con Google Health?</summary><p>Usi lo stesso account Google con cui accedi a Ferro e devi avere un profilo nell'app Google Health. Il collegamento è in fase di prova: per ora è disponibile per un numero limitato di account, che aumenterà dopo la verifica di Google.</p></details>
         <details><summary>Dove finiscono i miei dati?</summary><p>Senza account restano solo sul telefono. Con l'account Google sono nel tuo spazio privato, leggibile solo da te. Puoi esportare tutto in un file in qualsiasi momento. I dettagli sono nell'<a href="/privacypolicy.html">informativa</a>.</p></details>
+        <details><summary>Come aggiorno l'app Android?</summary><p>Quando esce una versione nuova, Ferro te lo dice appena lo apri. Tocchi «Aggiorna», il telefono scarica il file e lo installi sopra quello vecchio: scheda, allenamenti e impostazioni restano.</p></details>
+        <details><summary>Posso avere una versione personalizzata?</summary><p>Sì: nome, colori, icona, esercizi e prodotti su misura per coach, palestre e aziende. Vedi <a href="#coach">Su misura</a> o scrivimi dai <a href="#contatti">contatti</a>.</p></details>
+        <details><summary>Il codice è aperto?</summary><p>Sì, Ferro è open source con licenza GPL-3.0: il codice è <a href="https://github.com/JackMagna/ferro">su GitHub</a>. Puoi controllare cosa fa con i tuoi dati, segnalare un problema o proporre una modifica.</p></details>
         <details><summary>Funziona senza rete?</summary><p>Sì. In palestra puoi registrare le serie anche senza segnale: i dati si sincronizzano appena torna la connessione.</p></details>
+      </div>
+    </div>
+  </section>
+  <section id="contatti" aria-labelledby="t-contatti">
+    <div class="wrap sec">
+      <div class="sec-head">
+        <p class="mono">10 · Contatti</p>
+        <h2 id="t-contatti">Scrivimi.</h2>
+        <p class="lead">Una domanda, un'idea, una versione su misura o un problema con l'app: rispondo io.</p>
+      </div>
+      <div class="two">
+        <article class="card">
+          <h3>Email</h3>
+          <p>Per coach, palestre, aziende e per tutto quello che riguarda i tuoi dati.</p>
+          <a class="btn btn--primary" data-mail href="#">Scrivi un'email</a>
+          <p class="pending" data-mail-text></p>
+        </article>
+        <article class="card">
+          <h3>GitHub</h3>
+          <p>Per segnalare un errore o proporre una funzione. Serve un account GitHub, gratuito.</p>
+          <a class="btn" href="https://github.com/JackMagna/ferro/issues/new" target="_blank" rel="noopener">Segnala un problema</a>
+          <p class="pending"><a href="https://github.com/JackMagna" target="_blank" rel="noopener">github.com/JackMagna</a></p>
+        </article>
       </div>
     </div>
   </section>
@@ -524,6 +572,7 @@ footer a { color: var(--muted); }
     <a href="/app/">Apri l'app</a>
     <a href="/privacypolicy.html">Informativa sui dati</a>
     <a href="/licenze.html">Licenze e crediti</a>
+    <a href="#contatti">Contatti</a>
     <a href="https://github.com/JackMagna/ferro">Codice sorgente (GPL-3.0)</a>
   </div>
 </footer>
@@ -535,9 +584,9 @@ footer a { color: var(--muted); }
 <script>
   // Da compilare quando sono pronti: i pulsanti compaiono da soli.
   var CONFIG = {
-    email: '',      // indirizzo per coach e aziende
+    email: 'ferro.privacy@gmail.com',  // contatti, coach e aziende (scritta dallo script: meno spam dai raccoglitori di indirizzi)
     paypal: '',     // es. https://paypal.me/nome
-    apk: 'https://github.com/JackMagna/ferro/releases/latest/download/ferro-release.apk'  // sempre l'ultima Release (src/lib/appUpdate.ts)
+    apk: ''         // dopo la prima Release: https://github.com/JackMagna/ferro/releases/latest/download/ferro-release.apk (src/lib/appUpdate.ts)
   };
   (function () {
     document.querySelectorAll('[data-contact]').forEach(function (a) {
@@ -546,6 +595,13 @@ footer a { color: var(--muted); }
       var subject = a.getAttribute('data-contact') === 'aziende' ? 'Ferro per la mia azienda' : 'Ferro per i miei atleti';
       a.href = 'mailto:' + CONFIG.email + '?subject=' + encodeURIComponent(subject);
     });
+    if (CONFIG.email) {
+      var m = document.querySelector('[data-mail]');
+      m.href = 'mailto:' + CONFIG.email + '?subject=' + encodeURIComponent('Ferro');
+      document.querySelector('[data-mail-text]').textContent = CONFIG.email;
+    } else {
+      document.querySelector('[data-mail]').hidden = true;
+    }
     if (CONFIG.paypal) {
       var d = document.querySelector('[data-donate]');
       d.href = CONFIG.paypal; d.hidden = false;

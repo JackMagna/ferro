@@ -1,0 +1,73 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // User profile documents
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isValidId(userId);
+      allow delete: if isOwner(userId);
+
+      // User workout session logs
+      match /sessions/{sessionId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(sessionId)
+          && request.resource.data.userId == userId;
+        allow update: if isOwner(userId)
+          && request.resource.data.userId == userId;
+        allow delete: if isOwner(userId);
+      }
+
+      // User body measurements
+      match /measurements/{measurementId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(measurementId)
+          && request.resource.data.userId == userId;
+        allow update: if isOwner(userId)
+          && request.resource.data.userId == userId;
+        allow delete: if isOwner(userId);
+      }
+
+      // User meals (calories) – added with the nutrition feature
+      match /meals/{mealId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(mealId)
+          && request.resource.data.userId == userId;
+        allow update: if isOwner(userId)
+          && request.resource.data.userId == userId;
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    // Shared exercise links: one vote per user and exercise name (name → library exercise).
+    // Readable by signed-in users (votes are counted on the device), writable only by the voter.
+    match /exerciseLinks/{key}/votes/{userId} {
+      allow read: if isSignedIn();
+      allow create, update: if isOwner(userId)
+        && key.size() <= 128 && key.matches('^[a-z0-9\\-]+$')
+        && request.resource.data.keys().hasOnly(['name', 'libraryId', 'previous', 'at'])
+        && request.resource.data.name is string && request.resource.data.name.size() <= 120
+        && request.resource.data.libraryId is string && request.resource.data.libraryId.size() <= 100
+        && request.resource.data.previous is string && request.resource.data.previous.size() <= 100
+        && request.resource.data.at == request.time;
+      allow delete: if isOwner(userId);
+    }
+  }
+}

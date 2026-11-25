@@ -1,0 +1,33 @@
+{
+  "id": "/",
+  "name": "Ferro",
+  "short_name": "Ferro",
+  "description": "Scheda di allenamento in palestra: serie, carichi, recuperi, pasti e progressi.",
+  "lang": "it",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "orientation": "portrait",
+  "start_url": "/app/",
+  "scope": "/app/",
+  "icons": [
+    {
+      "src": "ferro-grafite-light-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "ferro-grafite-light-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "ferro-grafite-light.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

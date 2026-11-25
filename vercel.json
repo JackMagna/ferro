@@ -1,0 +1,11 @@
+{
+  "redirects": [
+    { "source": "/sito", "destination": "/", "permanent": true },
+    { "source": "/sito/", "destination": "/", "permanent": true },
+    { "source": "/app", "destination": "/app/", "permanent": true }
+  ],
+  "headers": [
+    { "source": "/sw.js", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
+    { "source": "/app/sw.js", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
+  ]
+}

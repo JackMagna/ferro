@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#F0C33C</color>
+    <!-- sfondo della schermata di avvio: lo stesso dell'app (tema scuro) -->
+    <color name="ferro_splash_background">#1A1C1F</color>
+</resources>

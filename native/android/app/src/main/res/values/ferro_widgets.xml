@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ferro_widget_workout">Ferro · Scheda</string>
+    <string name="ferro_widget_workout_desc">Il prossimo allenamento con gli esercizi e le serie della settimana.</string>
+    <string name="ferro_widget_meals">Ferro · Pasti</string>
+    <string name="ferro_widget_meals_desc">Calorie e macro di oggi rispetto alla dieta, con il tasto per aggiungere un pasto.</string>
+    <string name="ferro_widget_quote">Ferro · Motivazione</string>
+    <string name="ferro_widget_quote_desc">Una frase di un atleta al giorno e da quanto non ti alleni.</string>
+</resources>

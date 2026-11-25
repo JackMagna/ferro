@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Primo piano dell'icona adattiva (108 dp): il bilanciere di Ferro, ridotto per stare nella zona sicura di 66 dp.
+     Stesse forme di public/icons/ferro-classico.svg (512 × 512). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <group android:translateX="8.048" android:translateY="8.048" android:scaleX="0.1795" android:scaleY="0.1795">
+        <path android:fillColor="#2A2104" android:pathData="M104,245 h304 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-304 a4,4 0 0 1 -4,-4 v-14 a4,4 0 0 1 4,-4 z" />
+        <path android:fillColor="#2A2104" android:pathData="M156,146 h32 a10,10 0 0 1 10,10 v200 a10,10 0 0 1 -10,10 h-32 a10,10 0 0 1 -10,-10 v-200 a10,10 0 0 1 10,-10 z" />
+        <path android:fillColor="#2A2104" android:pathData="M324,146 h32 a10,10 0 0 1 10,10 v200 a10,10 0 0 1 -10,10 h-32 a10,10 0 0 1 -10,-10 v-200 a10,10 0 0 1 10,-10 z" />
+    </group>
+</vector>

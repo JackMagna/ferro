@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pagina che Health Connect mostra quando l'utente chiede perché Ferro vuole i dati sanitari
+         (PermissionsRationaleActivity del plugin @capgo/capacitor-health). -->
+    <string name="health_connect_privacy_policy_url" translatable="false">https://palestra-kohl.vercel.app/privacypolicy.html</string>
+</resources>

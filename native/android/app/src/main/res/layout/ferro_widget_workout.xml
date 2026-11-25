@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ferro_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/ferro_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:src="@drawable/ferro_widget_bg"
+        android:importantForAccessibility="no" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/ferro_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PROSSIMO ALLENAMENTO"
+            android:textColor="#A8A69E"
+            android:textSize="11sp"
+            android:letterSpacing="0.08"
+            android:textStyle="bold"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/ferro_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Giorno 1"
+            android:textColor="#EEEBE4"
+            android:textSize="22sp"
+            android:fontFamily="sans-serif-condensed"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/ferro_sub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp"
+            android:text="Settimana 1 di 6"
+            android:textColor="#A8A69E"
+            android:textSize="13sp"
+            android:maxLines="1" />
+
+        <LinearLayout
+            android:id="@+id/ferro_row1"
+            android:layout_width="match_parent"
+            android:layout_height="22dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/ferro_name1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Chest press"
+                android:textColor="#EEEBE4"
+                android:textSize="14sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+            <TextView
+                android:id="@+id/ferro_sets1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="3×10"
+                android:textColor="#F0C33C"
+                android:textSize="15sp"
+                android:fontFamily="sans-serif-condensed"
+                android:textStyle="bold"
+                android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/ferro_row2"
+            android:layout_width="match_parent"
+            android:layout_height="22dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/ferro_name2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Rematore al pulley"
+                android:textColor="#EEEBE4"
+                android:textSize="14sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+            <TextView
+                android:id="@+id/ferro_sets2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="3×10"
+                android:textColor="#F0C33C"
+                android:textSize="15sp"
+                android:fontFamily="sans-serif-condensed"
+                android:textStyle="bold"
+                android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/ferro_row3"
+            android:layout_width="match_parent"
+            android:layout_height="22dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/ferro_name3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Croci ai cavi"
+                android:textColor="#EEEBE4"
+                android:textSize="14sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+            <TextView
+                android:id="@+id/ferro_sets3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="3×10"
+                android:textColor="#F0C33C"
+                android:textSize="15sp"
+                android:fontFamily="sans-serif-condensed"
+                android:textStyle="bold"
+                android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/ferro_row4"
+            android:layout_width="match_parent"
+            android:layout_height="22dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/ferro_name4"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text=""
+                android:textColor="#EEEBE4"
+                android:textSize="14sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+            <TextView
+                android:id="@+id/ferro_sets4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text=""
+                android:textColor="#F0C33C"
+                android:textSize="15sp"
+                android:fontFamily="sans-serif-condensed"
+                android:textStyle="bold"
+                android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/ferro_row5"
+            android:layout_width="match_parent"
+            android:layout_height="22dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/ferro_name5"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text=""
+                android:textColor="#EEEBE4"
+                android:textSize="14sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+            <TextView
+                android:id="@+id/ferro_sets5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text=""
+                android:textColor="#F0C33C"
+                android:textSize="15sp"
+                android:fontFamily="sans-serif-condensed"
+                android:textStyle="bold"
+                android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/ferro_row6"
+            android:layout_width="match_parent"
+            android:layout_height="22dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/ferro_name6"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text=""
+                android:textColor="#EEEBE4"
+                android:textSize="14sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+            <TextView
+                android:id="@+id/ferro_sets6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text=""
+                android:textColor="#F0C33C"
+                android:textSize="15sp"
+                android:fontFamily="sans-serif-condensed"
+                android:textStyle="bold"
+                android:maxLines="1" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/ferro_more"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="+ 4 esercizi"
+            android:textColor="#A8A69E"
+            android:textSize="12sp" />
+    </LinearLayout>
+</FrameLayout>

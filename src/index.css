@@ -1,0 +1,283 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Barlow", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Barlow Condensed", "Barlow", ui-sans-serif, system-ui, sans-serif;
+
+  /* Pavimento in gomma, gesso, ferro e il giallo dei dischi da 15 kg */
+  --color-ink: #1a1c1f;
+  --color-panel: #222529;
+  --color-raised: #2c3035;
+  --color-line: #3a3f45;
+  --color-chalk: #eeebe4;
+  --color-muted: #a8a69e;
+  --color-faint: #8d8b84;
+  --color-plate: #f0c33c;
+  --color-plate-ink: #2a2104;
+  --color-go: #5bbf8a;
+  --color-stop: #e8705a;
+  /* testo e icone sopra un fondo "go" */
+  --color-go-ink: #0d2418;
+  /* accento usato come colore del testo (nei temi chiari il giallo non si leggerebbe) */
+  --color-plate-text: #f0c33c;
+  /* fondi tenui per avvisi, record e timer finito; hover dei pulsanti secondari */
+  --color-plate-soft: color-mix(in srgb, var(--color-plate) 14%, var(--color-raised));
+  --color-stop-soft: color-mix(in srgb, var(--color-stop) 14%, var(--color-raised));
+  --color-hover: color-mix(in srgb, var(--color-chalk) 6%, var(--color-raised));
+  /* mappa dei muscoli */
+  --color-body: #4a4f56;
+
+  --font-num: "Barlow Condensed", "Barlow", ui-sans-serif, system-ui, sans-serif;
+  /* numeri "dal vivo": timer di recupero e carico della serie */
+  --font-live: var(--font-num);
+  --font-label: var(--font-sans);
+
+  --radius-card: 1.25rem;
+}
+
+/* ---------- Temi: colori, angoli e font. data-theme e data-mode li mette src/lib/theme.ts ---------- */
+
+/* Classico, chiaro: gesso chiaro e lo stesso giallo dei dischi */
+html[data-theme="classico"][data-mode="light"] {
+  --color-ink: #f3f0e8;
+  --color-panel: #fbfaf6;
+  --color-raised: #e9e5db;
+  --color-line: #d3cdbf;
+  --color-chalk: #1d1f22;
+  --color-muted: #55534d;
+  --color-faint: #66635c;
+  --color-plate: #f0c33c;
+  --color-plate-ink: #2a2104;
+  --color-plate-text: #7a5a00;
+  --color-go: #1f7a4d;
+  --color-go-ink: #ffffff;
+  --color-stop: #b8402b;
+  --color-body: #b9b4a8;
+}
+
+/* Grafite: bianco e nero, linee sottili, angoli quasi squadrati, un solo rosso per l'attenzione */
+html[data-theme="grafite"] {
+  /* l'orologio LED della palestra: Plex per il testo, Space Mono per etichette e numeri, Doto solo per i numeri dal vivo */
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-num: "Space Mono", ui-monospace, monospace;
+  --font-live: "Doto", "Space Mono", ui-monospace, monospace;
+  --font-label: "Space Mono", ui-monospace, monospace;
+  --radius-lg: 4px;
+  --radius-xl: 6px;
+  --radius-2xl: 8px;
+  --radius-3xl: 10px;
+  --radius-card: 8px;
+}
+html[data-theme="grafite"][data-mode="dark"] {
+  --color-ink: #000000;
+  --color-panel: #0a0a0a;
+  --color-raised: #171717;
+  --color-line: #2e2e2e;
+  --color-chalk: #ffffff;
+  --color-muted: #a8a8a8;
+  --color-faint: #8f8f8f;
+  --color-plate: #ffffff;
+  --color-plate-ink: #000000;
+  --color-plate-text: #ffffff;
+  --color-go: #ffffff;
+  --color-go-ink: #000000;
+  --color-stop: #ff4b44;
+  --color-body: #3a3a3a;
+}
+html[data-theme="grafite"][data-mode="light"] {
+  --color-ink: #ffffff;
+  --color-panel: #ffffff;
+  --color-raised: #f2f2f2;
+  --color-line: #dcdcdc;
+  --color-chalk: #000000;
+  --color-muted: #585a5a;
+  --color-faint: #666868;
+  --color-plate: #000000;
+  --color-plate-ink: #ffffff;
+  --color-plate-text: #000000;
+  --color-go: #000000;
+  --color-go-ink: #ffffff;
+  --color-stop: #d71921;
+  --color-body: #d4d4d4;
+}
+
+/* Brace: struttura Grafite, superfici piene e angoli morbidi, accento arancione */
+html[data-theme="brace"] {
+  /* fasce e nastro: Bricolage per titoli e numeri, Instrument Sans per il testo, ombre tinte d'arancio */
+  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-num: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-live: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-label: var(--font-sans);
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 14px;
+  --radius-3xl: 20px;
+  --radius-card: 16px;
+}
+html[data-theme="brace"][data-mode="dark"] {
+  --color-ink: #0e0e10;
+  --color-panel: #1a1a1d;
+  --color-raised: #242428;
+  --color-line: #2f2f35;
+  --color-chalk: #f4f3f0;
+  --color-muted: #a8a7a3;
+  --color-faint: #8f8e8a;
+  --color-plate: #ff5a1f;
+  --color-plate-ink: #0e0e10;
+  --color-plate-text: #ff7a45;
+  --color-go: #5bbf8a;
+  --color-go-ink: #0d2418;
+  --color-stop: #ff6b5b;
+  --color-body: #3a3a40;
+}
+html[data-theme="brace"][data-mode="light"] {
+  --color-ink: #f1f0ec;
+  --color-panel: #ffffff;
+  --color-raised: #e8e6e0;
+  --color-line: #d9d6ce;
+  --color-chalk: #111111;
+  --color-muted: #55544f;
+  --color-faint: #65645f;
+  --color-plate: #ff5a1f;
+  --color-plate-ink: #111111;
+  --color-plate-text: #a8380b;
+  --color-go: #1f7a4d;
+  --color-go-ink: #ffffff;
+  --color-stop: #b8402b;
+  --color-body: #cfccc4;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-ink text-chalk font-sans antialiased;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+  }
+  html[data-mode="light"] {
+    color-scheme: light;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-plate-text);
+    outline-offset: 2px;
+  }
+  input, select, textarea, button {
+    font: inherit;
+  }
+  /* niente frecce nei campi numerici: si usano i pulsanti */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+@layer components {
+  .field {
+    @apply w-full rounded-xl border border-line bg-ink px-3 py-2.5 text-[15px] text-chalk placeholder:text-faint focus:border-plate focus:outline-none;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-muted;
+  }
+  .card {
+    @apply rounded-(--radius-card) border border-line bg-panel;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Numeri principali (statistiche, kcal, peso) e numeri dal vivo (timer, carico della serie) */
+@utility num {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+}
+@utility num-live {
+  font-family: var(--font-live);
+  font-variant-numeric: tabular-nums;
+}
+/* più specifici di font-display, che sta sugli stessi elementi */
+html[data-theme] .num { font-family: var(--font-num); }
+html[data-theme] .num-live { font-family: var(--font-live); }
+
+/* Grafite: etichette e pulsanti in monospazio maiuscolo, nessuna ombra, profondità solo con superfici più chiare */
+html[data-theme="grafite"] .label,
+html[data-theme="grafite"] .btn {
+  font-family: var(--font-label);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+html[data-theme="grafite"] .label { font-size: 0.75rem; font-weight: 400; }
+html[data-theme="grafite"] .btn { font-size: 0.8125rem; }
+html[data-theme="grafite"] .font-display { font-weight: 500; }
+html[data-theme="grafite"] .num { font-weight: 700; }
+html[data-theme="grafite"] .num-live { font-weight: 800; letter-spacing: 0.02em; }
+html[data-theme="grafite"] .card,
+html[data-theme="grafite"] [class*="shadow-"] { box-shadow: none; }
+
+/* Brace: titoli in Bricolage, etichette sobrie, ombre a due livelli tinte verso l'accento invece del grigio */
+html[data-theme="brace"] .label { font-weight: 600; letter-spacing: 0.01em; }
+html[data-theme="brace"] .btn { font-weight: 600; }
+html[data-theme="brace"] .font-display { font-weight: 700; letter-spacing: -0.015em; }
+html[data-theme="brace"] .num,
+html[data-theme="brace"] .num-live { font-weight: 700; letter-spacing: -0.02em; }
+html[data-theme="brace"][data-mode="light"] .card {
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-plate) 10%, transparent), 0 10px 24px -14px color-mix(in srgb, var(--color-plate) 28%, transparent);
+}
+html[data-theme="brace"] [class*="shadow-xl"],
+html[data-theme="brace"] [class*="shadow-2xl"] {
+  box-shadow: 0 2px 4px color-mix(in srgb, var(--color-plate) 12%, transparent), 0 18px 40px -16px color-mix(in srgb, var(--color-plate) 35%, transparent);
+}
+
+:root {
+  /* icone (src/components/ui/icons.tsx): tratto e estremità per tema */
+  --icon-stroke: 2;
+  --icon-cap: square;
+  --icon-join: miter;
+}
+/* Icone: Classico tratto pieno e spigoli vivi; Grafite tratto sottile come un display; Brace tratto pieno e arrotondato */
+html[data-theme="grafite"] { --icon-stroke: 1.5; }
+html[data-theme="brace"] { --icon-cap: round; --icon-join: round; }
+.fi,
+.lucide {
+  stroke-width: var(--icon-stroke);
+  stroke-linecap: var(--icon-cap);
+  stroke-linejoin: var(--icon-join);
+}
+
+/* Pressione dei pulsanti: breve e senza rimbalzo */
+.btn { transition-duration: 120ms; }
+.btn:not(:disabled):active { transform: scale(0.98); }
+@media (prefers-reduced-motion: reduce) {
+  .btn:not(:disabled):active { transform: none; }
+}
+
+/* Nei temi chiari l'accento giallo/arancione come testo non si legge: si usa la sua versione scura */
+html[data-mode="light"] .text-plate {
+  color: var(--color-plate-text);
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

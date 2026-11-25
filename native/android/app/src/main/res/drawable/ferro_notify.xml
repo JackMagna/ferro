@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icona piccola delle notifiche: un manubrio, bianco su trasparente (Android la colora da sé). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M2,10.5h1.5v-2a1,1 0,0 1,1 -1h1a1,1 0,0 1,1 1v7a1,1 0,0 1,-1 1h-1a1,1 0,0 1,-1 -1v-2H2a0.5,0.5 0,0 1,-0.5 -0.5v-2a0.5,0.5 0,0 1,0.5 -0.5zM7.5,7h1a1,1 0,0 1,1 1v2.5h5V8a1,1 0,0 1,1 -1h1a1,1 0,0 1,1 1v8a1,1 0,0 1,-1 1h-1a1,1 0,0 1,-1 -1v-2.5h-5V16a1,1 0,0 1,-1 1h-1a1,1 0,0 1,-1 -1V8a1,1 0,0 1,1 -1zM18.5,7.5h1a1,1 0,0 1,1 1v2H22a0.5,0.5 0,0 1,0.5 0.5v2a0.5,0.5 0,0 1,-0.5 0.5h-1.5v2a1,1 0,0 1,-1 1h-1a1,1 0,0 1,-1 -1v-7a1,1 0,0 1,1 -1z" />
+</vector>

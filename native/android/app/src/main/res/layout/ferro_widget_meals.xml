@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ferro_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/ferro_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:src="@drawable/ferro_widget_bg"
+        android:importantForAccessibility="no" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/ferro_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="PASTI DI OGGI"
+                android:textColor="#A8A69E"
+                android:textSize="11sp"
+                android:letterSpacing="0.08"
+                android:textStyle="bold"
+                android:maxLines="1" />
+            <FrameLayout
+                android:id="@+id/ferro_add_box"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp">
+                <ImageView
+                    android:id="@+id/ferro_add_bg"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/ferro_widget_pill"
+                    android:importantForAccessibility="no" />
+                <TextView
+                    android:id="@+id/ferro_add"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:text="+ Pasto"
+                    android:textColor="#2A2104"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/ferro_note"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Apri Ferro: il widget si riempie dopo il primo avvio."
+            android:textColor="#A8A69E"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/ferro_numbers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:gravity="bottom"
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/ferro_kcal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1.450"
+                    android:textColor="#EEEBE4"
+                    android:textSize="30sp"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textStyle="bold"
+                    android:maxLines="1" />
+                <TextView
+                    android:id="@+id/ferro_kcal_target"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="5dp"
+                    android:text=" / 2.200 kcal"
+                    android:textColor="#A8A69E"
+                    android:textSize="14sp"
+                    android:maxLines="1" />
+            </LinearLayout>
+            <ImageView
+                android:id="@+id/ferro_kcal_bar"
+                android:layout_width="match_parent"
+                android:layout_height="6dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="10dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/ferro_widget_pill"
+                android:importantForAccessibility="no" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginEnd="12dp">
+                <TextView
+                    android:id="@+id/ferro_p_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Proteine"
+                    android:textColor="#A8A69E"
+                    android:textSize="11sp"
+                    android:maxLines="1" />
+                <TextView
+                    android:id="@+id/ferro_p"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0 g"
+                    android:textColor="#EEEBE4"
+                    android:textSize="14sp"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textStyle="bold"
+                    android:maxLines="1" />
+                <ImageView
+                    android:id="@+id/ferro_p_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="6dp"
+                    android:layout_marginTop="4dp"
+                    android:scaleType="fitXY"
+                    android:visibility="gone"
+                    android:importantForAccessibility="no" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginEnd="12dp">
+                <TextView
+                    android:id="@+id/ferro_c_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Carboidrati"
+                    android:textColor="#A8A69E"
+                    android:textSize="11sp"
+                    android:maxLines="1" />
+                <TextView
+                    android:id="@+id/ferro_c"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0 g"
+                    android:textColor="#EEEBE4"
+                    android:textSize="14sp"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textStyle="bold"
+                    android:maxLines="1" />
+                <ImageView
+                    android:id="@+id/ferro_c_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="6dp"
+                    android:layout_marginTop="4dp"
+                    android:scaleType="fitXY"
+                    android:visibility="gone"
+                    android:importantForAccessibility="no" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginEnd="0dp">
+                <TextView
+                    android:id="@+id/ferro_f_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Grassi"
+                    android:textColor="#A8A69E"
+                    android:textSize="11sp"
+                    android:maxLines="1" />
+                <TextView
+                    android:id="@+id/ferro_f"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0 g"
+                    android:textColor="#EEEBE4"
+                    android:textSize="14sp"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textStyle="bold"
+                    android:maxLines="1" />
+                <ImageView
+                    android:id="@+id/ferro_f_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="6dp"
+                    android:layout_marginTop="4dp"
+                    android:scaleType="fitXY"
+                    android:visibility="gone"
+                    android:importantForAccessibility="no" />
+            </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

@@ -1,0 +1,106 @@
+# Costruisce l'app Android di Ferro (Capacitor) da questo stesso codice.
+# - A mano: Actions → Android → Run workflow (scarichi l'APK dagli Artifacts).
+# - Con un tag v* (es. v2.3.0): crea la Release con ferro-release.apk. Il sito e l'avviso di aggiornamento nell'app
+#   usano sempre l'ultima Release (releases/latest), quindi la chiave di firma deve restare la stessa.
+# Segreti (Settings → Secrets and variables → Actions), facoltativi: senza, l'APK è firmato con la chiave di debug.
+#   ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
+# Variabile (non segreta): GOOGLE_WEB_CLIENT_ID = ID client OAuth «Applicazione web», per l'accesso Google nell'app.
+name: Android
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+    # un push sul ramo android-build costruisce l'APK senza creare una Release (utile per le prove)
+    branches: ['android-build']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # i segreti non si possono usare direttamente negli "if": si passa da una variabile
+      HAS_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Dipendenze
+        run: bun install --frozen-lockfile
+
+      - name: Build web
+        run: bun run build
+        env:
+          VITE_GOOGLE_WEB_CLIENT_ID: ${{ vars.GOOGLE_WEB_CLIENT_ID }}
+          # solo le versioni vere (tag v*) controllano gli aggiornamenti all'apertura (src/lib/appUpdate.ts)
+          VITE_APP_VERSION: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}
+          # nell'app Android l'app sta alla radice (sul sito è in /app/)
+          APP_BASE: /
+
+      - name: Progetto Android
+        run: |
+          npx cap add android
+          node scripts/patch-android.mjs
+          npx cap sync android
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+          VERSION_NAME: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('build-{0}', github.run_number) }}
+          ANDROID_KEYSTORE_FILE: ${{ env.HAS_KEYSTORE == 'true' && format('{0}/release.jks', github.workspace) || '' }}
+
+      - name: Chiave di firma
+        if: env.HAS_KEYSTORE == 'true'
+        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$GITHUB_WORKSPACE/release.jks"
+
+      - name: Compila (firmato)
+        if: env.HAS_KEYSTORE == 'true'
+        working-directory: android
+        run: ./gradlew --no-daemon assembleRelease bundleRelease
+        env:
+          ANDROID_KEYSTORE_FILE: ${{ github.workspace }}/release.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+      - name: Compila (debug, senza chiave)
+        if: env.HAS_KEYSTORE != 'true'
+        working-directory: android
+        run: ./gradlew --no-daemon assembleDebug
+
+      - name: Raccogli i file
+        run: |
+          mkdir -p out
+          find android/app/build/outputs -name '*.apk' -exec cp {} out/ \;
+          find android/app/build/outputs -name '*.aab' -exec cp {} out/ \; || true
+          cd out && for f in *.apk; do mv "$f" "ferro-${f#app-}"; done; ls -la
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ferro-android
+          path: out/
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/*
+
+      # Il ramo android-build pubblica anche una versione di prova scaricabile con un link diretto
+      - name: Versione di prova
+        if: github.ref == 'refs/heads/android-build'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: prova-${{ github.run_number }}
+          name: Ferro, versione di prova ${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          prerelease: true
+          body: Versione di prova per Android, non firmata con la chiave definitiva se mancano i segreti. Installala solo se sai da dove arriva.
+          files: out/*.apk

@@ -1,0 +1,17 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+.playwright-mcp/
+
+# test nel browser (Playwright)
+e2e-report/
+e2e-results/
+/android/
+e2e-report-android/
+e2e-results-android/
+

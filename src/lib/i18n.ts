@@ -1,8 +1,4 @@
 import { readJSON, writeJSON } from './storage';
-import en from '../i18n/en';
-import es from '../i18n/es';
-import fr from '../i18n/fr';
-import de from '../i18n/de';
 
 /**
  * Traduzioni dell'app. Il testo italiano è la chiave: t('Salva') cerca 'Salva' nel dizionario della lingua scelta
@@ -16,7 +12,11 @@ export const LANGS: { id: Lang; label: string }[] = [
   { id: 'fr', label: 'Français' },
   { id: 'de', label: 'Deutsch' }
 ];
-export const DICTIONARIES: Record<Exclude<Lang, 'it'>, Record<string, string>> = { en, es, fr, de };
+// Ogni area ha i suoi file: src/i18n/en.ts (generale) e src/i18n/<area>/en.ts ecc. Si uniscono da soli.
+const parts = import.meta.glob<{ default: Record<string, string> }>("../i18n/**/*.ts", { eager: true });
+const merged = (code: string) =>
+  Object.entries(parts).filter(([p]) => p.endsWith("/" + code + ".ts")).reduce<Record<string, string>>((all, [, m]) => ({ ...all, ...m.default }), {});
+export const DICTIONARIES: Record<Exclude<Lang, "it">, Record<string, string>> = { en: merged("en"), es: merged("es"), fr: merged("fr"), de: merged("de") };
 
 const KEY = 'irontrack:lang';
 const isLang = (v: unknown): v is Lang => LANGS.some((l) => l.id === v);

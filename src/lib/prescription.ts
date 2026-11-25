@@ -1,3 +1,6 @@
+import { t } from './i18n';
+
+
 export interface Prescription {
   sets: number;
   /** ripetizioni target per ogni serie */
@@ -50,8 +53,8 @@ function clampSets(n: number): number {
 /** Testo leggibile, es. "3 serie × 10" oppure "3 serie: 10, 9, 8" */
 export function describePrescription(raw: string | undefined): string {
   const p = parsePrescription(raw);
-  if (p.isMax) return `${p.sets} serie al massimo`;
+  if (p.isMax) return t('{n} serie al massimo', { n: p.sets });
   const same = p.reps.every((r) => r === p.reps[0]);
-  const base = same ? `${p.sets} × ${p.reps[0]}` : `${p.sets} serie: ${p.reps.join(', ')}`;
-  return p.increaseWeight ? `${base}, aumenta il carico` : base;
+  const base = same ? `${p.sets} × ${p.reps[0]}` : t('{n} serie: {reps}', { n: p.sets, reps: p.reps.join(', ') });
+  return p.increaseWeight ? t('{base}, aumenta il carico', { base }) : base;
 }

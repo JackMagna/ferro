@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core';
+import { t } from './i18n';
 
 /**
  * Salva un file di testo. Nel browser lo scarica; nell'app Android il download dalla pagina non funziona:
@@ -31,7 +32,7 @@ async function shareNative(filename: string, content: string) {
     const { Filesystem, Directory, Encoding } = await import('@capacitor/filesystem');
     const { Share } = await import('@capacitor/share');
     const { uri } = await Filesystem.writeFile({ path: filename, data: content, directory: Directory.Cache, encoding: Encoding.UTF8 });
-    await Share.share({ title: filename, files: [uri], dialogTitle: 'Salva o invia il file' });
+    await Share.share({ title: filename, files: [uri], dialogTitle: t('Salva o invia il file') });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     if (/cancel/i.test(msg)) return;

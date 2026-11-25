@@ -1,17 +1,18 @@
 import type { DietDay, DietPlan, FoodEntry, MealType, PlanMeal, SavedFood, SavedMeal, WaterLog } from '../types';
 import { parseNumber } from './measuresSheet';
 import { normalizeDietPlan } from '../services/normalize';
+import { locale, t } from './i18n';
 
 export const MEAL_TYPES: MealType[] = ['colazione', 'spuntino-mattina', 'pranzo', 'spuntino-pomeriggio', 'cena', 'altro'];
 export const MEAL_LABEL: Record<MealType, string> = {
-  colazione: 'Colazione',
-  'spuntino-mattina': 'Spuntino di metà mattina',
-  pranzo: 'Pranzo',
-  'spuntino-pomeriggio': 'Merenda',
-  cena: 'Cena',
-  altro: 'Altro'
+  colazione: t('Colazione'),
+  'spuntino-mattina': t('Spuntino di metà mattina'),
+  pranzo: t('Pranzo'),
+  'spuntino-pomeriggio': t('Merenda'),
+  cena: t('Cena'),
+  altro: t('Altro')
 };
-export const WEEKDAY_SHORT = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
+export const WEEKDAY_SHORT = [t('Lun'), t('Mar'), t('Mer'), t('Gio'), t('Ven'), t('Sab'), t('Dom')];
 const WEEKDAY_NAMES = ['lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato', 'domenica'];
 
 export interface Totals { kcal: number; proteinG: number; carbsG: number; fatG: number }
@@ -89,7 +90,7 @@ export const planHasTrainingDays = (plan: DietPlan | null | undefined) => !!plan
 export const WATER_DEFAULT_ML = 2000;
 export const WATER_STEPS = [250, 500];
 export const waterTarget = (plan: DietPlan | null | undefined) => plan?.waterMl ?? WATER_DEFAULT_ML;
-export const formatLiters = (ml: number) => `${(ml / 1000).toLocaleString('it-IT', { maximumFractionDigits: 2 })} l`;
+export const formatLiters = (ml: number) => `${(ml / 1000).toLocaleString(locale, { maximumFractionDigits: 2 })} l`;
 
 /* ---------- pasti salvati ---------- */
 const FOOD_KEYS = ['name', 'kcal', 'proteinG', 'carbsG', 'fatG', 'fiberG', 'sugarG', 'saltG'] as const;
@@ -136,8 +137,9 @@ export function reportDays(args: { meals: FoodEntry[]; plan: DietPlan | null; wa
   });
 }
 
-const fmtN = (n: number) => n.toLocaleString('it-IT', { maximumFractionDigits: 0 });
-const DAY_NAMES = ['lun', 'mar', 'mer', 'gio', 'ven', 'sab', 'dom'];
+const fmtN = (n: number) => n.toLocaleString(locale, { maximumFractionDigits: 0 });
+const DAY_NAMES = [t('lun'), t('mar'), t('mer'), t('gio'), t('ven'), t('sab'), t('dom')];
+const macroLine = (x: Totals) => t('P {p} g · C {c} g · G {f} g', { p: fmtN(x.proteinG), c: fmtN(x.carbsG), f: fmtN(x.fatG) });
 
 /** Testo semplice da mandare alla nutrizionista: totali per giorno e medie dei giorni registrati. */
 export function weeklyReportText(days: ReportDay[], plan: DietPlan | null, athlete?: string): string {
@@ -146,33 +148,35 @@ export function weeklyReportText(days: ReportDay[], plan: DietPlan | null, athle
   const [y1, m1, d1] = days[0].date.split('-');
   const [y2, m2, d2] = days.at(-1)!.date.split('-');
   const lines = [
-    `Riepilogo alimentazione${athlete ? ` di ${athlete}` : ''}`,
-    `Dal ${d1}/${m1}/${y1} al ${d2}/${m2}/${y2}`,
-    plan ? `Piano: ${plan.title}${plan.nutritionist ? ` (${plan.nutritionist})` : ''}` : 'Nessun piano inserito',
+    athlete ? t('Riepilogo alimentazione di {name}', { name: athlete }) : t('Riepilogo alimentazione'),
+    t('Dal {from} al {to}', { from: `${d1}/${m1}/${y1}`, to: `${d2}/${m2}/${y2}` }),
+    plan ? t('Piano: {title}', { title: plan.title + (plan.nutritionist ? ` (${plan.nutritionist})` : '') }) : t('Nessun piano inserito'),
     ''
   ];
   for (const d of days) {
     const [, m, dd] = d.date.split('-');
     const parts = [`${DAY_NAMES[weekdayIndex(d.date)]} ${dd}/${m}`];
     if (d.totals.kcal > 0) {
-      parts.push(`${fmtN(d.totals.kcal)} kcal${d.target ? ` (obiettivo ${fmtN(d.target)})` : ''}`);
-      parts.push(`P ${fmtN(d.totals.proteinG)} g · C ${fmtN(d.totals.carbsG)} g · G ${fmtN(d.totals.fatG)} g`);
-    } else parts.push('non registrato');
-    if (d.waterMl) parts.push(`acqua ${formatLiters(d.waterMl)}`);
-    if (d.planTotal) parts.push(`piano ${d.planDone}/${d.planTotal} pasti`);
-    if (d.trained) parts.push('allenamento');
+      parts.push(d.target ? t('{kcal} kcal (obiettivo {target})', { kcal: fmtN(d.totals.kcal), target: fmtN(d.target) }) : `${fmtN(d.totals.kcal)} kcal`);
+      parts.push(macroLine(d.totals));
+    } else parts.push(t('non registrato'));
+    if (d.waterMl) parts.push(t('acqua {l}', { l: formatLiters(d.waterMl) }));
+    if (d.planTotal) parts.push(t('piano {done}/{total} pasti', { done: d.planDone ?? 0, total: d.planTotal }));
+    if (d.trained) parts.push(t('allenamento'));
     lines.push(`- ${parts.join(' · ')}`);
   }
   lines.push('');
   if (logged.length) {
-    lines.push(`${logged.length === 1 ? 'Unico giorno registrato' : `Media dei ${logged.length} giorni registrati`}: ${fmtN(avg((d) => d.totals.kcal))} kcal · P ${fmtN(avg((d) => d.totals.proteinG))} g · C ${fmtN(avg((d) => d.totals.carbsG))} g · G ${fmtN(avg((d) => d.totals.fatG))} g`);
+    const head = logged.length === 1 ? t('Unico giorno registrato') : t('Media dei {n} giorni registrati', { n: logged.length });
+    const mean = { kcal: avg((d) => d.totals.kcal), proteinG: avg((d) => d.totals.proteinG), carbsG: avg((d) => d.totals.carbsG), fatG: avg((d) => d.totals.fatG) };
+    lines.push(`${head}: ${fmtN(mean.kcal)} kcal · ${macroLine(mean)}`);
     const withWater = days.filter((d) => d.waterMl > 0);
-    if (withWater.length) lines.push(`Acqua media: ${formatLiters(withWater.reduce((s, d) => s + d.waterMl, 0) / withWater.length)} al giorno`);
+    if (withWater.length) lines.push(t('Acqua media: {l} al giorno', { l: formatLiters(withWater.reduce((s, d) => s + d.waterMl, 0) / withWater.length) }));
     const planned = days.reduce((s, d) => s + (d.planTotal ?? 0), 0);
-    if (planned) lines.push(`Pasti del piano segnati come mangiati: ${days.reduce((s, d) => s + (d.planDone ?? 0), 0)} su ${planned}`);
-  } else lines.push('Nessun pasto registrato in questi giorni.');
-  lines.push(`Allenamenti: ${days.filter((d) => d.trained).length}`);
-  lines.push('', 'Generato con Ferro. I valori sono quelli inseriti nell\'app.');
+    if (planned) lines.push(t('Pasti del piano segnati come mangiati: {done} su {total}', { done: days.reduce((s, d) => s + (d.planDone ?? 0), 0), total: planned }));
+  } else lines.push(t('Nessun pasto registrato in questi giorni.'));
+  lines.push(t('Allenamenti: {n}', { n: days.filter((d) => d.trained).length }));
+  lines.push('', t("Generato con Ferro. I valori sono quelli inseriti nell'app."));
   return lines.join('\n');
 }
 
@@ -272,7 +276,7 @@ export function parseDietText(text: string): DietDay[] {
     }
     const m = line.match(MEAL_HEAD);
     if (m) {
-      if (!day) startDay('Ogni giorno', []);
+      if (!day) startDay(t('Ogni giorno'), []);
       meal = { type: mealKind(m[1], state), lines: m[2] ? [m[2]] : [] };
       day!.meals.push(meal);
       continue;
@@ -312,25 +316,28 @@ export function mealNameFrom(description: string, fallback: string): string {
 
 export const DIET_FORMAT = 'irontrack-diet-v1';
 
-export const DIET_PROMPT = `Ti allego il piano alimentare scritto dalla mia nutrizionista (PDF, foto o testo). Devi TRASCRIVERLO nel formato JSON qui sotto, senza interpretarlo né modificarlo.
-
-REGOLE
-1. Trascrivi soltanto ciò che è scritto nel documento. Non inventare, non correggere, non calcolare calorie o macro che non sono indicati. Se un dato manca, usa null.
-2. Se il piano ha pasti precisi: crea un elemento in "meals" per ogni pasto. In "description" metti gli alimenti con le quantità esattamente come scritti, una riga per alimento (separa le righe con \\n). Le alternative ("oppure", "a scelta") restano nella descrizione.
-3. Se il piano indica solo obiettivi (calorie e/o macro al giorno o per pasto) senza alimenti: compila kcalTarget, proteinG, carbsG, fatG. Crea un solo giorno "Ogni giorno" con "weekdays": [] e un pasto per ciascun momento citato, con "description": "Libero, secondo i macro" e i macro del pasto se indicati.
-4. Se ci sono sia pasti sia macro, riporta entrambi.
-5. Se il piano cambia da un giorno all'altro, crea un elemento in "days" per ogni giorno o gruppo di giorni uguali. "weekdays" usa 0 = lunedì, 1 = martedì … 6 = domenica; [] significa ogni giorno. Se esistono settimane alternate (A/B), titola i giorni "Settimana A - Lunedì" ecc. e segnalalo in "notes".
-6. "type" di ogni pasto, solo uno di questi valori: colazione, spuntino-mattina, pranzo, spuntino-pomeriggio, cena, altro.
-7. Integratori, consigli generali e avvertenze vanno in "notes". Se il piano indica quanta acqua bere al giorno, mettila in "waterMl" in millilitri (2 litri = 2000), altrimenti null. Tutto ciò che è dubbio o illeggibile: aggiungilo in "notes" iniziando con "DA CONTROLLARE:".
-8. Numeri come numeri, con il punto decimale e senza unità (kcal e grammi). Date nel formato AAAA-MM-GG, oppure null.
-9. Se i giorni sono numerati (Giorno 1, Giorno 2…) e non legati ai giorni della settimana, assegnali in ordine da lunedì (Giorno 1 = [0], Giorno 2 = [1] …) e scrivilo in "notes".
-10. Se il piano distingue i giorni di allenamento da quelli di riposo (es. "giorno ON / OFF", "giorni in cui ti alleni"), crea un giorno per ciascuno con "training": true per l'allenamento e "training": false per il riposo. Se non li distingue, "training": null.
-11. Rispondi SOLO con il JSON, dentro un unico blocco di codice, senza commenti prima o dopo.
-
-FORMATO
+// Una chiave di traduzione per riga; nomi dei campi, valori di "type" e "DA CONTROLLARE:" restano uguali in ogni lingua (li legge parseDietJson).
+export const DIET_PROMPT = [
+  t('Ti allego il piano alimentare scritto dalla mia nutrizionista (PDF, foto o testo). Devi TRASCRIVERLO nel formato JSON qui sotto, senza interpretarlo né modificarlo.'),
+  '',
+  t('REGOLE'),
+  t('1. Trascrivi soltanto ciò che è scritto nel documento. Non inventare, non correggere, non calcolare calorie o macro che non sono indicati. Se un dato manca, usa null.'),
+  t('2. Se il piano ha pasti precisi: crea un elemento in "meals" per ogni pasto. In "description" metti gli alimenti con le quantità esattamente come scritti, una riga per alimento (separa le righe con {nl}). Le alternative ("oppure", "a scelta") restano nella descrizione.', { nl: '\\n' }),
+  t('3. Se il piano indica solo obiettivi (calorie e/o macro al giorno o per pasto) senza alimenti: compila kcalTarget, proteinG, carbsG, fatG. Crea un solo giorno "Ogni giorno" con "weekdays": [] e un pasto per ciascun momento citato, con "description": "Libero, secondo i macro" e i macro del pasto se indicati.'),
+  t('4. Se ci sono sia pasti sia macro, riporta entrambi.'),
+  t('5. Se il piano cambia da un giorno all’altro, crea un elemento in "days" per ogni giorno o gruppo di giorni uguali. "weekdays" usa 0 = lunedì, 1 = martedì … 6 = domenica; [] significa ogni giorno. Se esistono settimane alternate (A/B), titola i giorni "Settimana A - Lunedì" ecc. e segnalalo in "notes".'),
+  t('6. "type" di ogni pasto, solo uno di questi valori: colazione, spuntino-mattina, pranzo, spuntino-pomeriggio, cena, altro.'),
+  t('7. Integratori, consigli generali e avvertenze vanno in "notes". Se il piano indica quanta acqua bere al giorno, mettila in "waterMl" in millilitri (2 litri = 2000), altrimenti null. Tutto ciò che è dubbio o illeggibile: aggiungilo in "notes" iniziando con "DA CONTROLLARE:".'),
+  t('8. Numeri come numeri, con il punto decimale e senza unità (kcal e grammi). Date nel formato AAAA-MM-GG, oppure null.'),
+  t('9. Se i giorni sono numerati (Giorno 1, Giorno 2…) e non legati ai giorni della settimana, assegnali in ordine da lunedì (Giorno 1 = [0], Giorno 2 = [1] …) e scrivilo in "notes".'),
+  t('10. Se il piano distingue i giorni di allenamento da quelli di riposo (es. "giorno ON / OFF", "giorni in cui ti alleni"), crea un giorno per ciascuno con "training": true per l’allenamento e "training": false per il riposo. Se non li distingue, "training": null.'),
+  t('11. Rispondi SOLO con il JSON, dentro un unico blocco di codice, senza commenti prima o dopo.'),
+  '',
+  t('FORMATO')
+].join('\n') + `
 {
   "format": "${DIET_FORMAT}",
-  "title": "Nome del piano",
+  "title": "${t('Nome del piano')}",
   "nutritionist": null,
   "startDate": null,
   "endDate": null,
@@ -342,13 +349,13 @@ FORMATO
   "notes": null,
   "days": [
     {
-      "title": "Lunedì",
+      "title": "${t('Lunedì')}",
       "weekdays": [0],
       "training": null,
       "meals": [
         {
           "type": "colazione",
-          "description": "Latte parzialmente scremato 200 ml\\nFette biscottate 30 g",
+          "description": "${t('Latte parzialmente scremato 200 ml')}\\n${t('Fette biscottate 30 g')}",
           "kcal": null,
           "proteinG": null,
           "carbsG": null,
@@ -386,17 +393,17 @@ export interface DietParseResult { plan: DietPlan | null; warnings: string[]; er
 /** Legge la risposta incollata dall'utente (formato irontrack-diet-v1). */
 export function parseDietJson(text: string): DietParseResult {
   const raw = extractJsonObject(text.replace(/[\u201C\u201D]/g, '"'));
-  if (!raw) return { plan: null, warnings: [], error: 'Non trovo nessun JSON nel testo incollato. Incolla la risposta intera del servizio.' };
+  if (!raw) return { plan: null, warnings: [], error: t('Non trovo nessun JSON nel testo incollato. Incolla la risposta intera del servizio.') };
   let data: Record<string, unknown>;
   try {
     data = JSON.parse(raw) as Record<string, unknown>;
   } catch {
-    return { plan: null, warnings: [], error: 'Il JSON è incompleto o ha errori (virgole, parentesi). Chiedi al servizio di rispondere di nuovo, solo con il JSON.' };
+    return { plan: null, warnings: [], error: t('Il JSON è incompleto o ha errori (virgole, parentesi). Chiedi al servizio di rispondere di nuovo, solo con il JSON.') };
   }
   if (data.format !== DIET_FORMAT) {
-    return { plan: null, warnings: [], error: `Formato non riconosciuto: mi aspetto "format": "${DIET_FORMAT}". Usa il prompt dell'app.` };
+    return { plan: null, warnings: [], error: t('Formato non riconosciuto: mi aspetto "format": "{format}". Usa il prompt dell’app.', { format: DIET_FORMAT }) };
   }
-  if (!Array.isArray(data.days)) return { plan: null, warnings: [], error: 'Nel JSON manca l\'elenco "days".' };
+  if (!Array.isArray(data.days)) return { plan: null, warnings: [], error: t('Nel JSON manca l’elenco "days".') };
 
   const warnings: string[] = [];
   let droppedDays = 0;
@@ -417,16 +424,16 @@ export function parseDietJson(text: string): DietParseResult {
       return m;
     })
   }));
-  if (droppedDays) warnings.push(`${droppedDays} ${droppedDays === 1 ? 'giorno scartato perché senza' : 'giorni scartati perché senza'} pasti validi.`);
-  if (droppedMeals) warnings.push(`${droppedMeals} ${droppedMeals === 1 ? 'pasto scartato' : 'pasti scartati'} perché non validi.`);
-  if (unknownTypes.size) warnings.push(`Tipi di pasto non riconosciuti (${[...unknownTypes].join(', ')}): li ho messi in “Altro”.`);
+  if (droppedDays) warnings.push(droppedDays === 1 ? t('1 giorno scartato perché senza pasti validi.') : t('{n} giorni scartati perché senza pasti validi.', { n: droppedDays }));
+  if (droppedMeals) warnings.push(droppedMeals === 1 ? t('1 pasto scartato perché non valido.') : t('{n} pasti scartati perché non validi.', { n: droppedMeals }));
+  if (unknownTypes.size) warnings.push(t('Tipi di pasto non riconosciuti ({types}): li ho messi in “Altro”.', { types: [...unknownTypes].join(', ') }));
 
   const plan = normalizeDietPlan({ ...data, days, updatedAt: new Date().toISOString() });
-  if (!plan || plan.days.length === 0) return { plan: null, warnings, error: 'Il JSON non contiene giorni con pasti.' };
-  if (typeof data.notes === 'string' && /DA CONTROLLARE/i.test(data.notes)) warnings.push('Il servizio ha segnalato dati da controllare: leggi le indicazioni in “Indicazioni della nutrizionista”.');
+  if (!plan || plan.days.length === 0) return { plan: null, warnings, error: t('Il JSON non contiene giorni con pasti.') };
+  if (typeof data.notes === 'string' && /DA CONTROLLARE/i.test(data.notes)) warnings.push(t('Il servizio ha segnalato dati da controllare: leggi le indicazioni in “Indicazioni della nutrizionista”.'));
   for (const d of plan.days) {
     for (const m of d.meals) {
-      if (mealKcalComputed(m)) { warnings.push('Alcune calorie sono calcolate dai macro (4·P + 4·C + 9·G), non scritte nel piano.'); return { plan, warnings }; }
+      if (mealKcalComputed(m)) { warnings.push(t('Alcune calorie sono calcolate dai macro (4·P + 4·C + 9·G), non scritte nel piano.')); return { plan, warnings }; }
     }
   }
   return { plan, warnings };

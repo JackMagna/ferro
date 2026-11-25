@@ -5,6 +5,7 @@
  * Nessun dato personale: solo sì/no, tempi e modalità di apertura.
  */
 import { readJSON, writeJSON } from './storage';
+import { locale, t } from './i18n';
 
 const LOG_KEY = 'irontrack:auth-log';
 const MAX_ENTRIES = 12;
@@ -127,10 +128,10 @@ export function authLog(): AuthLogEntry[] {
 export function authLogText(log: AuthLogEntry[] = authLog()): string {
   return log
     .map((e) => {
-      const when = new Date(e.at).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-      const stored = e.stored === null ? 'accesso salvato: ?' : e.stored ? 'accesso salvato: sì' : 'accesso salvato: no';
-      const result = e.result ? `${e.result} in ${((e.ms ?? 0) / 1000).toFixed(1)} s` : 'nessuna risposta';
-      return `${when} · ${e.installed ? 'app installata' : 'browser'} · ${stored} · dati locali: ${e.localKeys} · ${result}`;
+      const when = new Date(e.at).toLocaleString(locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      const stored = e.stored === null ? t('accesso salvato: ?') : e.stored ? t('accesso salvato: sì') : t('accesso salvato: no');
+      const result = e.result ? t('{esito} in {s} s', { esito: e.result === 'connesso' ? t('connesso') : t('non connesso'), s: ((e.ms ?? 0) / 1000).toFixed(1) }) : t('nessuna risposta');
+      return `${when} · ${e.installed ? t('app installata') : t('browser')} · ${stored} · ${t('dati locali: {n}', { n: e.localKeys })} · ${result}`;
     })
     .join('\n');
 }

@@ -3,6 +3,7 @@ import type { User } from 'firebase/auth';
 import type { WorkoutProgram } from '../types';
 import { applyCommunityLinks, communityChoice, linkKey } from '../lib/exerciseLinks';
 import { linkVotes } from '../services/exerciseLinks';
+import { t } from '../lib/i18n';
 
 /**
  * Usa le correzioni degli altri utenti: per gli esercizi non collegati a mano legge i voti
@@ -38,7 +39,7 @@ export function useCommunityLinks({ user, ready, program, onSaveProgram, notify 
       const result = applyCommunityLinks(latest.current, choices);
       if (!result) return;
       onSaveProgram(result.program);
-      notify(`Foto aggiornate su ${result.changed} ${result.changed === 1 ? 'esercizio' : 'esercizi'} grazie alle correzioni di altri utenti`);
+      notify(result.changed === 1 ? t('Foto aggiornate su 1 esercizio grazie alle correzioni di altri utenti') : t('Foto aggiornate su {n} esercizi grazie alle correzioni di altri utenti', { n: result.changed }));
     })();
     return () => { alive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { User } from 'firebase/auth';
 import { collection, deleteDoc, deleteField, doc, getDoc, onSnapshot, setDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../services/firebase';
+import { t } from '../lib/i18n';
 import type { DietPlan, FoodEntry, Measurement, SavedMeal, WaterLog, WorkoutProgram, WorkoutSession } from '../types';
 import { normalizeDietPlan, normalizeMeal, normalizeMeasurement, normalizeProgram, normalizeSavedMeals, normalizeSession, normalizeWater } from '../services/normalize';
 import { clearLocalData, hasLocalActivity, loadLocalData, saveLocalData, type LocalData } from '../services/localStore';
@@ -58,7 +59,7 @@ export function useAppData(user: User | null, onError: (msg: string) => void): [
   errorRef.current = onError;
   const fail = useCallback((what: string) => (err: unknown) => {
     console.error(what, err);
-    errorRef.current(`${what}: ${err instanceof Error ? err.message : 'errore sconosciuto'}`);
+    errorRef.current(`${what}: ${err instanceof Error ? err.message : t('errore sconosciuto')}`);
   }, []);
 
   /* ---------- Modalità ospite ---------- */
@@ -108,7 +109,7 @@ export function useAppData(user: User | null, onError: (msg: string) => void): [
         }
         if (localConsent) clearLocalConsent();
       } catch (err) {
-        fail('Sincronizzazione iniziale non riuscita')(err);
+        fail(t('Sincronizzazione iniziale non riuscita'))(err);
       }
     })();
 
@@ -128,7 +129,7 @@ export function useAppData(user: User | null, onError: (msg: string) => void): [
             consent: normalizeConsent(d?.consent?.health)
           }));
         },
-        fail('Lettura del profilo non riuscita')
+        fail(t('Lettura del profilo non riuscita'))
       ),
       onSnapshot(
         collection(db, 'users', uid, 'sessions'),
@@ -136,7 +137,7 @@ export function useAppData(user: User | null, onError: (msg: string) => void): [
           const sessions = snap.docs.map((d) => normalizeSession(d.data(), d.id)).sort(sortSessions);
           setData((prev) => ({ ...prev, sessions }));
         },
-        fail('Lettura degli allenamenti non riuscita')
+        fail(t('Lettura degli allenamenti non riuscita'))
       ),
       onSnapshot(
         collection(db, 'users', uid, 'measurements'),
@@ -144,7 +145,7 @@ export function useAppData(user: User | null, onError: (msg: string) => void): [
           const measurements = snap.docs.map((d) => normalizeMeasurement(d.data(), d.id)).sort(sortMeasurements);
           setData((prev) => ({ ...prev, measurements }));
         },
-        fail('Lettura delle misure non riuscita')
+        fail(t('Lettura delle misure non riuscita'))
       ),
       onSnapshot(
         collection(db, 'users', uid, 'meals'),
@@ -152,7 +153,7 @@ export function useAppData(user: User | null, onError: (msg: string) => void): [
           const meals = snap.docs.map((d) => normalizeMeal(d.data(), d.id)).sort(sortMeals);
           setData((prev) => ({ ...prev, meals }));
         },
-        fail('Lettura dei pasti non riuscita')
+        fail(t('Lettura dei pasti non riuscita'))
       )
     ];
     return () => {
@@ -181,56 +182,56 @@ export function useAppData(user: User | null, onError: (msg: string) => void): [
     saveProgram(p) {
       const program = { ...p, updatedAt: new Date().toISOString() };
       if (uid) {
-        void setDoc(doc(db, 'users', uid), { program, updatedAt: program.updatedAt }, { merge: true }).catch(fail('Salvataggio della scheda non riuscito'));
+        void setDoc(doc(db, 'users', uid), { program, updatedAt: program.updatedAt }, { merge: true }).catch(fail(t('Salvataggio della scheda non riuscito')));
         setData((d) => ({ ...d, program }));
       } else updateLocal((d) => ({ ...d, program }));
     },
     addSession(s) {
-      if (uid) void setDoc(doc(db, 'users', uid, 'sessions', s.id), { ...s, userId: uid }).catch(fail('Salvataggio dell\'allenamento non riuscito'));
+      if (uid) void setDoc(doc(db, 'users', uid, 'sessions', s.id), { ...s, userId: uid }).catch(fail(t("Salvataggio dell'allenamento non riuscito")));
       else updateLocal((d) => ({ ...d, sessions: [s, ...d.sessions].sort(sortSessions) }));
     },
     updateSession(id, patch) {
-      if (uid) void setDoc(doc(db, 'users', uid, 'sessions', id), { ...patch, userId: uid }, { merge: true }).catch(fail('Aggiornamento non riuscito'));
+      if (uid) void setDoc(doc(db, 'users', uid, 'sessions', id), { ...patch, userId: uid }, { merge: true }).catch(fail(t('Aggiornamento non riuscito')));
       else updateLocal((d) => ({ ...d, sessions: d.sessions.map((s) => (s.id === id ? { ...s, ...patch } : s)) }));
     },
     deleteSession(id) {
-      if (uid) void deleteDoc(doc(db, 'users', uid, 'sessions', id)).catch(fail('Eliminazione non riuscita'));
+      if (uid) void deleteDoc(doc(db, 'users', uid, 'sessions', id)).catch(fail(t('Eliminazione non riuscita')));
       else updateLocal((d) => ({ ...d, sessions: d.sessions.filter((s) => s.id !== id) }));
     },
     addMeasurement(m) {
-      if (uid) void setDoc(doc(db, 'users', uid, 'measurements', m.id), { ...m, userId: uid }).catch(fail('Salvataggio della misura non riuscito'));
+      if (uid) void setDoc(doc(db, 'users', uid, 'measurements', m.id), { ...m, userId: uid }).catch(fail(t('Salvataggio della misura non riuscito')));
       else updateLocal((d) => ({ ...d, measurements: [...d.measurements, m].sort(sortMeasurements) }));
     },
     updateMeasurement(id, patch) {
-      if (uid) void setDoc(doc(db, 'users', uid, 'measurements', id), { ...patch, userId: uid }, { merge: true }).catch(fail('Aggiornamento non riuscito'));
+      if (uid) void setDoc(doc(db, 'users', uid, 'measurements', id), { ...patch, userId: uid }, { merge: true }).catch(fail(t('Aggiornamento non riuscito')));
       else updateLocal((d) => ({ ...d, measurements: d.measurements.map((m) => (m.id === id ? { ...m, ...patch } : m)) }));
     },
     deleteMeasurement(id) {
-      if (uid) void deleteDoc(doc(db, 'users', uid, 'measurements', id)).catch(fail('Eliminazione non riuscita'));
+      if (uid) void deleteDoc(doc(db, 'users', uid, 'measurements', id)).catch(fail(t('Eliminazione non riuscita')));
       else updateLocal((d) => ({ ...d, measurements: d.measurements.filter((m) => m.id !== id) }));
     },
     addMeal(m) {
-      if (uid) void setDoc(doc(db, 'users', uid, 'meals', m.id), { ...m, userId: uid }).catch(fail('Salvataggio del pasto non riuscito'));
+      if (uid) void setDoc(doc(db, 'users', uid, 'meals', m.id), { ...m, userId: uid }).catch(fail(t('Salvataggio del pasto non riuscito')));
       else updateLocal((d) => ({ ...d, meals: [...d.meals, m].sort(sortMeals) }));
     },
     updateMeal(id, patch) {
-      if (uid) void setDoc(doc(db, 'users', uid, 'meals', id), { ...patch, userId: uid }, { merge: true }).catch(fail('Aggiornamento del pasto non riuscito'));
+      if (uid) void setDoc(doc(db, 'users', uid, 'meals', id), { ...patch, userId: uid }, { merge: true }).catch(fail(t('Aggiornamento del pasto non riuscito')));
       else updateLocal((d) => ({ ...d, meals: d.meals.map((m) => (m.id === id ? { ...m, ...patch } : m)) }));
     },
     deleteMeal(id) {
-      if (uid) void deleteDoc(doc(db, 'users', uid, 'meals', id)).catch(fail('Eliminazione non riuscita'));
+      if (uid) void deleteDoc(doc(db, 'users', uid, 'meals', id)).catch(fail(t('Eliminazione non riuscita')));
       else updateLocal((d) => ({ ...d, meals: d.meals.filter((m) => m.id !== id) }));
     },
     saveDietPlan(plan) {
       const next = plan ? { ...plan, updatedAt: new Date().toISOString() } : null;
       if (uid) {
-        void setDoc(doc(db, 'users', uid), { dietPlan: next }, { merge: true }).catch(fail('Salvataggio della dieta non riuscito'));
+        void setDoc(doc(db, 'users', uid), { dietPlan: next }, { merge: true }).catch(fail(t('Salvataggio della dieta non riuscito')));
         setData((d) => ({ ...d, dietPlan: next }));
       } else updateLocal((d) => ({ ...d, dietPlan: next }));
     },
     saveSavedMeals(list) {
       if (uid) {
-        void setDoc(doc(db, 'users', uid), { savedMeals: list }, { merge: true }).catch(fail('Salvataggio dei pasti salvati non riuscito'));
+        void setDoc(doc(db, 'users', uid), { savedMeals: list }, { merge: true }).catch(fail(t('Salvataggio dei pasti salvati non riuscito')));
         setData((d) => ({ ...d, savedMeals: list }));
       } else updateLocal((d) => ({ ...d, savedMeals: list }));
     },
@@ -243,17 +244,17 @@ export function useAppData(user: User | null, onError: (msg: string) => void): [
         return next;
       };
       if (uid) {
-        void setDoc(doc(db, 'users', uid), { water: { [date]: value > 0 ? value : deleteField() } }, { merge: true }).catch(fail('Salvataggio dell\'acqua non riuscito'));
+        void setDoc(doc(db, 'users', uid), { water: { [date]: value > 0 ? value : deleteField() } }, { merge: true }).catch(fail(t("Salvataggio dell'acqua non riuscito")));
         setData((d) => ({ ...d, water: apply(d.water) }));
       } else updateLocal((d) => ({ ...d, water: apply(d.water) }));
     },
     setSpreadsheetId(id) {
-      if (uid) void setDoc(doc(db, 'users', uid), { spreadsheetId: id }, { merge: true }).catch(fail('Salvataggio del foglio non riuscito'));
+      if (uid) void setDoc(doc(db, 'users', uid), { spreadsheetId: id }, { merge: true }).catch(fail(t('Salvataggio del foglio non riuscito')));
       else updateLocal((d) => ({ ...d, spreadsheetId: id }));
     },
     saveHealthConsent(c) {
       if (uid) {
-        void setDoc(doc(db, 'users', uid), { consent: { health: c ?? deleteField() } }, { merge: true }).catch(fail('Salvataggio del consenso non riuscito'));
+        void setDoc(doc(db, 'users', uid), { consent: { health: c ?? deleteField() } }, { merge: true }).catch(fail(t('Salvataggio del consenso non riuscito')));
       } else if (c) writeLocalConsent(c);
       else clearLocalConsent();
       setData((d) => ({ ...d, consent: c }));

@@ -3,6 +3,7 @@ import type { BlockResult, ProgramBlock } from '../../types';
 import { formatClock, plannedSec, timerPlan, timerState, type TimerPhase } from '../../lib/blockTimer';
 import { sound, unlockAudio, vibrate } from '../../lib/sound';
 import { Button } from '../ui/Button';
+import { t } from '../../lib/i18n';
 
 interface Props {
   block: ProgramBlock;
@@ -11,7 +12,7 @@ interface Props {
   onClose: () => void;
 }
 
-const LABEL: Record<TimerPhase, string> = { pronti: 'Pronti', lavoro: 'Via', recupero: 'Recupero', fine: 'Fatto' };
+const LABEL: Record<TimerPhase, string> = { pronti: t('Pronti'), lavoro: t('Via'), recupero: t('Recupero'), fine: t('Fatto') };
 
 /** Schermo acceso mentre il timer gira (dove il browser lo permette). */
 function useWakeLock(active: boolean) {
@@ -113,28 +114,28 @@ export function BlockTimer({ block, onResult, onClose }: Props) {
   const tone = state.phase === 'recupero' ? 'border-line bg-ink' : state.phase === 'fine' ? 'border-plate bg-plate-soft' : 'border-plate bg-plate/10';
 
   return (
-    <div role="timer" aria-label={`Timer ${block.title ?? 'blocco'}`} className={`space-y-3 rounded-2xl border p-4 ${tone}`}>
+    <div role="timer" aria-label={t('Timer {name}', { name: block.title ?? t('blocco') })} className={`space-y-3 rounded-2xl border p-4 ${tone}`}>
       <div className="flex items-baseline justify-between gap-2">
-        <p className="font-display text-lg font-bold" aria-live="polite">{ended ? LABEL.fine : pausedAt !== null ? 'In pausa' : LABEL[state.phase]}</p>
-        {showRounds && state.phase !== 'pronti' && <p className="text-sm font-semibold tabular-nums">{plan.roundLabel} {state.round} di {state.rounds}</p>}
+        <p className="font-display text-lg font-bold" aria-live="polite">{ended ? LABEL.fine : pausedAt !== null ? t('In pausa') : LABEL[state.phase]}</p>
+        {showRounds && state.phase !== 'pronti' && <p className="text-sm font-semibold tabular-nums">{t('{label} {n} di {total}', { label: plan.roundLabel, n: state.round, total: state.rounds })}</p>}
       </div>
       <p className={`num-live text-center font-display text-7xl font-bold leading-none ${state.phase === 'lavoro' && (state.left ?? 99) <= 3 ? 'text-plate' : ''}`}>
         {formatClock(big)}
       </p>
       {total !== undefined && state.phase !== 'pronti' && (
-        <p className="text-center text-sm text-muted">{plan.countUp ? `Limite ${formatClock(total)}` : `Passati ${formatClock(state.elapsed)} di ${formatClock(total)}`}</p>
+        <p className="text-center text-sm text-muted">{plan.countUp ? t('Limite {time}', { time: formatClock(total) }) : t('Passati {elapsed} di {total}', { elapsed: formatClock(state.elapsed), total: formatClock(total) })}</p>
       )}
       {block.format === 'amrap' && (
         <div className="flex items-center justify-center gap-3">
-          <Button variant="primary" size="lg" disabled={ended || state.phase === 'pronti'} onClick={() => setLaps((n) => n + 1)}>+1 giro</Button>
-          <span className="text-lg font-semibold tabular-nums" aria-live="polite">{laps} {laps === 1 ? 'giro' : 'giri'}</span>
+          <Button variant="primary" size="lg" disabled={ended || state.phase === 'pronti'} onClick={() => setLaps((n) => n + 1)}>{t('+1 giro')}</Button>
+          <span className="text-lg font-semibold tabular-nums" aria-live="polite">{laps === 1 ? t('{n} giro', { n: laps }) : t('{n} giri', { n: laps })}</span>
           {laps > 0 && !ended && <Button size="sm" variant="ghost" onClick={() => setLaps((n) => Math.max(0, n - 1))}>−1</Button>}
         </div>
       )}
       <div className="flex flex-wrap justify-center gap-2">
-        {!ended && (pausedAt === null ? <Button onClick={pause}>Pausa</Button> : <Button variant="primary" onClick={resume}>Riprendi</Button>)}
-        {!ended && (plan.countUp || block.format === 'amrap') && state.phase !== 'pronti' && <Button variant="primary" onClick={finish}>Fine</Button>}
-        <Button variant="ghost" onClick={onClose}>{ended ? 'Chiudi' : 'Annulla'}</Button>
+        {!ended && (pausedAt === null ? <Button onClick={pause}>{t('Pausa')}</Button> : <Button variant="primary" onClick={resume}>{t('Riprendi')}</Button>)}
+        {!ended && (plan.countUp || block.format === 'amrap') && state.phase !== 'pronti' && <Button variant="primary" onClick={finish}>{t('Fine')}</Button>}
+        <Button variant="ghost" onClick={onClose}>{ended ? t('Chiudi') : t('Annulla')}</Button>
       </div>
     </div>
   );

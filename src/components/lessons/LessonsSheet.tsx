@@ -7,6 +7,7 @@ import { setLessons, useLessons } from '../../hooks/useLessons';
 import { isPast, lessonActivity, normalizeLesson, parseIcs, whenLabel, WEEKDAYS, type Lesson } from '../../lib/lessons';
 import { downloadIcs, insertInPhoneCalendar, nativeCalendarAvailable, openGoogleCalendar } from '../../services/calendar';
 import { newId, todayISO } from '../../lib/ids';
+import { t } from '../../lib/i18n';
 
 interface Props {
   open: boolean;
@@ -28,17 +29,17 @@ export function LessonsSheet({ open, onClose }: Props) {
   const save = (l: Lesson) => {
     setLessons(lessons.some((x) => x.id === l.id) ? lessons.map((x) => (x.id === l.id ? l : x)) : [...lessons, l]);
     setEditing(null);
-    toast('Lezione salvata');
+    toast(t('Lezione salvata'));
   };
   const remove = (l: Lesson) => {
-    if (!window.confirm(`Togliere «${l.title}» dalle lezioni? Dal calendario del telefono va tolta a parte.`)) return;
+    if (!window.confirm(t('Togliere «{title}» dalle lezioni? Dal calendario del telefono va tolta a parte.', { title: l.title }))) return;
     setLessons(lessons.filter((x) => x.id !== l.id));
   };
 
   const readFile = async (file: File | undefined) => {
     if (!file) return;
     const list = parseIcs(await file.text()).filter((l) => !lessons.some((x) => same(x, l)) && !isPast(l));
-    if (!list.length) toast('Nel file non ci sono lezioni nuove da aggiungere.', 'error');
+    if (!list.length) toast(t('Nel file non ci sono lezioni nuove da aggiungere.'), 'error');
     else setFound(list);
     if (fileRef.current) fileRef.current.value = '';
   };
@@ -50,21 +51,20 @@ export function LessonsSheet({ open, onClose }: Props) {
       <Sheet
         open={open && !calendarFor && !found}
         onClose={onClose}
-        title="Lezioni e corsi"
+        title={t('Lezioni e corsi')}
         footer={
           <div className="flex gap-2">
-            <Button className="flex-1" icon={<Upload className="h-4 w-4" />} onClick={() => fileRef.current?.click()}>Importa .ics</Button>
-            <Button className="flex-1" variant="primary" icon={<Plus className="h-4 w-4" />} onClick={() => setEditing('new')}>Aggiungi</Button>
+            <Button className="flex-1" icon={<Upload className="h-4 w-4" />} onClick={() => fileRef.current?.click()}>{t('Importa .ics')}</Button>
+            <Button className="flex-1" variant="primary" icon={<Plus className="h-4 w-4" />} onClick={() => setEditing('new')}>{t('Aggiungi')}</Button>
           </div>
         }
       >
         <p className="text-[15px] text-muted">
-          Pilates, spinning, nuoto: i corsi fissi della settimana, fuori dalla scheda. Li vedi in Allenamento il giorno giusto e li segni come fatti con un tocco.
-          Restano solo su questo telefono: Ferro non legge il tuo calendario.
+          {t('Pilates, spinning, nuoto: i corsi fissi della settimana, fuori dalla scheda. Li vedi in Allenamento il giorno giusto e li segni come fatti con un tocco. Restano solo su questo telefono: Ferro non legge il tuo calendario.')}
         </p>
         {lessons.length === 0 ? (
           <p className="mt-4 rounded-2xl bg-ink p-4 text-[15px] text-muted">
-            Nessuna lezione. Aggiungila a mano, oppure importa il file .ics che trovi nell'email di prenotazione.
+            {t("Nessuna lezione. Aggiungila a mano, oppure importa il file .ics che trovi nell'email di prenotazione.")}
           </p>
         ) : (
           <ul className="mt-4 space-y-2">
@@ -74,39 +74,39 @@ export function LessonsSheet({ open, onClose }: Props) {
                   <p className="truncate font-semibold">{l.title}</p>
                   <p className="truncate text-sm text-muted">{[whenLabel(l), `${l.durationMin} min`, l.place].filter(Boolean).join(' · ')}</p>
                 </div>
-                <Button size="sm" variant="ghost" aria-label={`Metti ${l.title} nel calendario`} onClick={() => setCalendarFor(l)}><Calendar className="h-4 w-4" /></Button>
-                <Button size="sm" variant="ghost" aria-label={`Modifica ${l.title}`} onClick={() => setEditing(l)}><Pencil className="h-4 w-4" /></Button>
-                <Button size="sm" variant="ghost" aria-label={`Togli ${l.title}`} onClick={() => remove(l)}><Trash2 className="h-4 w-4" /></Button>
+                <Button size="sm" variant="ghost" aria-label={t('Metti {title} nel calendario', { title: l.title })} onClick={() => setCalendarFor(l)}><Calendar className="h-4 w-4" /></Button>
+                <Button size="sm" variant="ghost" aria-label={t('Modifica {title}', { title: l.title })} onClick={() => setEditing(l)}><Pencil className="h-4 w-4" /></Button>
+                <Button size="sm" variant="ghost" aria-label={t('Togli {title}', { title: l.title })} onClick={() => remove(l)}><Trash2 className="h-4 w-4" /></Button>
               </li>
             ))}
           </ul>
         )}
         {past.length > 0 && (
           <Button variant="ghost" className="mt-2" onClick={() => setLessons(lessons.filter((l) => !isPast(l)))}>
-            Togli le lezioni passate ({past.length})
+            {t('Togli le lezioni passate ({n})', { n: past.length })}
           </Button>
         )}
         {lessons.length > 1 && (
           <Button variant="ghost" className="mt-2" icon={<Calendar className="h-4 w-4" />} onClick={() => void downloadIcs(lessons.filter((l) => !isPast(l)))}>
-            Tutte nel calendario (file .ics)
+            {t('Tutte nel calendario (file .ics)')}
           </Button>
         )}
-        <input ref={fileRef} type="file" accept=".ics,text/calendar" className="hidden" aria-label="File .ics" onChange={(e) => void readFile(e.target.files?.[0])} />
+        <input ref={fileRef} type="file" accept=".ics,text/calendar" className="hidden" aria-label={t('File .ics')} onChange={(e) => void readFile(e.target.files?.[0])} />
       </Sheet>
 
-      <Sheet open={open && !!calendarFor} onClose={() => setCalendarFor(null)} title="Metti nel calendario">
+      <Sheet open={open && !!calendarFor} onClose={() => setCalendarFor(null)} title={t('Metti nel calendario')}>
         {calendarFor && (
           <div className="space-y-2">
             <p className="text-[15px] text-muted">
-              «{calendarFor.title}», {whenLabel(calendarFor)}{calendarFor.weekday ? ', ogni settimana' : ''}. Si apre il calendario già compilato: controlli e salvi tu.
+              {calendarFor.weekday ? t('«{title}», {when}, ogni settimana. Si apre il calendario già compilato: controlli e salvi tu.', { title: calendarFor.title, when: whenLabel(calendarFor) }) : t('«{title}», {when}. Si apre il calendario già compilato: controlli e salvi tu.', { title: calendarFor.title, when: whenLabel(calendarFor) })}
             </p>
             {nativeCalendarAvailable() && (
               <Button block variant="primary" onClick={() => { void insertInPhoneCalendar(calendarFor).catch((e) => toast(e instanceof Error ? e.message : String(e), 'error')); setCalendarFor(null); }}>
-                Calendario del telefono
+                {t('Calendario del telefono')}
               </Button>
             )}
             <Button block onClick={() => { openGoogleCalendar(calendarFor); setCalendarFor(null); }}>Google Calendar</Button>
-            <Button block onClick={() => { void downloadIcs([calendarFor]); setCalendarFor(null); }}>File .ics (iPhone, Outlook, altri)</Button>
+            <Button block onClick={() => { void downloadIcs([calendarFor]); setCalendarFor(null); }}>{t('File .ics (iPhone, Outlook, altri)')}</Button>
           </div>
         )}
       </Sheet>
@@ -114,11 +114,11 @@ export function LessonsSheet({ open, onClose }: Props) {
       <Sheet
         open={open && !!found}
         onClose={() => setFound(null)}
-        title="Lezioni trovate"
+        title={t('Lezioni trovate')}
         footer={
           <div className="flex gap-2">
-            <Button className="flex-1" onClick={() => setFound(null)}>Annulla</Button>
-            <Button className="flex-1" variant="primary" onClick={() => { setLessons([...lessons, ...(found ?? [])]); const n = found?.length ?? 0; toast(n === 1 ? 'Aggiunta 1 lezione' : `Aggiunte ${n} lezioni`); setFound(null); }}>Aggiungi</Button>
+            <Button className="flex-1" onClick={() => setFound(null)}>{t('Annulla')}</Button>
+            <Button className="flex-1" variant="primary" onClick={() => { setLessons([...lessons, ...(found ?? [])]); const n = found?.length ?? 0; toast(n === 1 ? t('Aggiunta 1 lezione') : t('Aggiunte {n} lezioni', { n })); setFound(null); }}>{t('Aggiungi')}</Button>
           </div>
         }
       >
@@ -126,7 +126,7 @@ export function LessonsSheet({ open, onClose }: Props) {
           {(found ?? []).map((l) => (
             <li key={l.id} className="rounded-2xl bg-ink p-3">
               <p className="font-semibold">{l.title}</p>
-              <p className="text-sm text-muted">{[whenLabel(l) + (l.weekday ? ', ogni settimana' : ''), `${l.durationMin} min`, l.place].filter(Boolean).join(' · ')}</p>
+              <p className="text-sm text-muted">{[l.weekday ? t('{when}, ogni settimana', { when: whenLabel(l) }) : whenLabel(l), `${l.durationMin} min`, l.place].filter(Boolean).join(' · ')}</p>
             </li>
           ))}
         </ul>
@@ -158,35 +158,35 @@ function LessonForm({ open, initial, onCancel, onSave }: { open: boolean; initia
     <Sheet
       open={open}
       onClose={onCancel}
-      title={initial ? 'Modifica lezione' : 'Nuova lezione'}
+      title={initial ? t('Modifica lezione') : t('Nuova lezione')}
       footer={
         <div className="flex gap-2">
-          <Button className="flex-1" onClick={onCancel}>Annulla</Button>
-          <Button className="flex-1" variant="primary" disabled={!lesson} onClick={() => lesson && onSave(lesson)}>Salva</Button>
+          <Button className="flex-1" onClick={onCancel}>{t('Annulla')}</Button>
+          <Button className="flex-1" variant="primary" disabled={!lesson} onClick={() => lesson && onSave(lesson)}>{t('Salva')}</Button>
         </div>
       }
     >
       <div className="space-y-3">
         <div>
-          <label className="label" htmlFor="l-title">Lezione</label>
-          <input id="l-title" className="field" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Es. Pilates reformer" maxLength={80} />
+          <label className="label" htmlFor="l-title">{t('Lezione')}</label>
+          <input id="l-title" className="field" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('Es. Pilates reformer')} maxLength={80} />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="label" htmlFor="l-repeat">Quando</label>
+            <label className="label" htmlFor="l-repeat">{t('Quando')}</label>
             <select id="l-repeat" className="field" value={once ? 'once' : 'weekly'} onChange={(e) => setOnce(e.target.value === 'once')}>
-              <option value="weekly">Ogni settimana</option>
-              <option value="once">Una volta</option>
+              <option value="weekly">{t('Ogni settimana')}</option>
+              <option value="once">{t('Una volta')}</option>
             </select>
           </div>
           {once ? (
             <div>
-              <label className="label" htmlFor="l-date">Data</label>
+              <label className="label" htmlFor="l-date">{t('Data')}</label>
               <input id="l-date" type="date" className="field" value={date} onChange={(e) => setDate(e.target.value)} />
             </div>
           ) : (
             <div>
-              <label className="label" htmlFor="l-day">Giorno</label>
+              <label className="label" htmlFor="l-day">{t('Giorno')}</label>
               <select id="l-day" className="field" value={weekday} onChange={(e) => setWeekday(Number(e.target.value))}>
                 {WEEKDAYS.map((d, i) => <option key={d} value={i + 1}>{d}</option>)}
               </select>
@@ -195,17 +195,17 @@ function LessonForm({ open, initial, onCancel, onSave }: { open: boolean; initia
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="label" htmlFor="l-time">Ora</label>
+            <label className="label" htmlFor="l-time">{t('Ora')}</label>
             <input id="l-time" type="time" className="field" value={time} onChange={(e) => setTime(e.target.value)} />
           </div>
           <div>
-            <label className="label" htmlFor="l-duration">Durata (min)</label>
+            <label className="label" htmlFor="l-duration">{t('Durata (min)')}</label>
             <input id="l-duration" className="field" inputMode="numeric" value={duration} onChange={(e) => setDuration(e.target.value.replace(/\D/g, ''))} />
           </div>
         </div>
         <div>
-          <label className="label" htmlFor="l-place">Dove (facoltativo)</label>
-          <input id="l-place" className="field" value={place} onChange={(e) => setPlace(e.target.value)} placeholder="Es. Studio Pilates, sala 2" maxLength={120} />
+          <label className="label" htmlFor="l-place">{t('Dove (facoltativo)')}</label>
+          <input id="l-place" className="field" value={place} onChange={(e) => setPlace(e.target.value)} placeholder={t('Es. Studio Pilates, sala 2')} maxLength={120} />
         </div>
       </div>
     </Sheet>

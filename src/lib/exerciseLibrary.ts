@@ -3,6 +3,7 @@
  * rilasciata in dominio pubblico (Unlicense). I dati sono copiati in public/data/exercises.json
  * (vedi scripts/update-exercises.mjs); le immagini arrivano da jsDelivr, fissate a un commit.
  */
+import { t } from './i18n';
 export const LIBRARY_COMMIT = 'f00c92c7dcf1216a928a52c3706c7ce8e2f71ed5';
 const IMAGE_BASES = [
   `https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@${LIBRARY_COMMIT}/exercises/`,
@@ -78,55 +79,55 @@ export function filterLibrary(list: LibraryExercise[], f: LibraryFilter): Librar
 /* ---------- Etichette in italiano ---------- */
 
 export const MUSCLE_LABELS: Record<LibraryMuscle, string> = {
-  abdominals: 'Addominali',
-  abductors: 'Abduttori',
-  adductors: 'Adduttori',
-  biceps: 'Bicipiti',
-  calves: 'Polpacci',
-  chest: 'Petto',
-  forearms: 'Avambracci',
-  glutes: 'Glutei',
-  hamstrings: 'Femorali',
-  lats: 'Dorsali',
-  'lower back': 'Lombari',
-  'middle back': 'Dorso centrale',
-  neck: 'Collo',
-  quadriceps: 'Quadricipiti',
-  shoulders: 'Spalle',
-  traps: 'Trapezi',
-  triceps: 'Tricipiti'
+  abdominals: t('Addominali'),
+  abductors: t('Abduttori'),
+  adductors: t('Adduttori'),
+  biceps: t('Bicipiti'),
+  calves: t('Polpacci'),
+  chest: t('Petto'),
+  forearms: t('Avambracci'),
+  glutes: t('Glutei'),
+  hamstrings: t('Femorali'),
+  lats: t('Dorsali'),
+  'lower back': t('Lombari'),
+  'middle back': t('Dorso centrale'),
+  neck: t('Collo'),
+  quadriceps: t('Quadricipiti'),
+  shoulders: t('Spalle'),
+  traps: t('Trapezi'),
+  triceps: t('Tricipiti')
 };
 
 export const EQUIPMENT_LABELS: Record<string, string> = {
-  bands: 'Elastici',
-  barbell: 'Bilanciere',
-  'body only': 'Corpo libero',
-  cable: 'Cavi',
-  dumbbell: 'Manubri',
-  'e-z curl bar': 'Bilanciere EZ',
-  'exercise ball': 'Fitball',
-  'foam roll': 'Foam roller',
-  kettlebells: 'Kettlebell',
-  machine: 'Macchina',
-  'medicine ball': 'Palla medica',
-  other: 'Altro',
-  none: 'Nessuna attrezzatura'
+  bands: t('Elastici'),
+  barbell: t('Bilanciere'),
+  'body only': t('Corpo libero'),
+  cable: t('Cavi'),
+  dumbbell: t('Manubri'),
+  'e-z curl bar': t('Bilanciere EZ'),
+  'exercise ball': t('Fitball'),
+  'foam roll': t('Foam roller'),
+  kettlebells: t('Kettlebell'),
+  machine: t('Macchina'),
+  'medicine ball': t('Palla medica'),
+  other: t('Altro'),
+  none: t('Nessuna attrezzatura')
 };
 
 export const CATEGORY_LABELS: Record<string, string> = {
-  strength: 'Forza',
-  stretching: 'Stretching',
-  cardio: 'Cardio',
-  plyometrics: 'Pliometria',
-  powerlifting: 'Powerlifting',
-  'olympic weightlifting': 'Pesistica olimpica',
-  strongman: 'Strongman'
+  strength: t('Forza'),
+  stretching: t('Stretching'),
+  cardio: t('Cardio'),
+  plyometrics: t('Pliometria'),
+  powerlifting: t('Powerlifting'),
+  'olympic weightlifting': t('Pesistica olimpica'),
+  strongman: t('Strongman')
 };
 
 export const LEVEL_LABELS: Record<LibraryExercise['level'], string> = {
-  beginner: 'Principiante',
-  intermediate: 'Intermedio',
-  expert: 'Esperto'
+  beginner: t('Principiante'),
+  intermediate: t('Intermedio'),
+  expert: t('Esperto')
 };
 
 export function muscleLabel(m: string): string {

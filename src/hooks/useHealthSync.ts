@@ -4,6 +4,7 @@ import type { AppDataActions } from './useAppData';
 import type { BodyEntry } from '../lib/healthMath';
 import { newId } from '../lib/ids';
 import { watchSessions } from '../lib/watchImport';
+import { t } from '../lib/i18n';
 import {
   getHealthPrefs, getHealthSource, isGoogleHealthConnected, SOURCE_LABEL, setGoogleHealthConnected, setHealthPrefs, setHealthSource,
   subscribeHealth
@@ -32,9 +33,9 @@ interface Ops {
 }
 
 const GOOGLE: Ops = {
-  heartRate: (s, i) => withGoogleToken((t) => gh.fetchHeartRate(t, s), i, 'health'),
-  readBody: (i) => withGoogleToken((t) => gh.fetchBody(t, 30), i, 'health'),
-  writeBody: (e, i) => withGoogleToken(async (t) => { await gh.writeBody(t, e); return true as const; }, i, 'health')
+  heartRate: (s, i) => withGoogleToken((tk) => gh.fetchHeartRate(tk, s), i, 'health'),
+  readBody: (i) => withGoogleToken((tk) => gh.fetchBody(tk, 30), i, 'health'),
+  writeBody: (e, i) => withGoogleToken(async (tk) => { await gh.writeBody(tk, e); return true as const; }, i, 'health')
 };
 const CONNECT: Ops = {
   heartRate: (s) => hc.readHeartRate(s),
@@ -62,7 +63,7 @@ export function useHealthSync(args: Args) {
   const [needsAuth, setNeedsAuth] = useState(false);
   const [tick, setTick] = useState(0); // dopo un nuovo collegamento si riprovano gli invii in attesa
   const ops = source === 'googlehealth' ? GOOGLE : source === 'healthconnect' ? CONNECT : null;
-  const fail = (err: unknown) => latest.current.notify(err instanceof Error ? err.message : 'La fonte dati non risponde', 'error');
+  const fail = (err: unknown) => latest.current.notify(err instanceof Error ? err.message : t('La fonte dati non risponde'), 'error');
   const lastWeight = () => [...latest.current.measurements].filter((m) => m.weightKg !== undefined).sort((a, b) => a.date.localeCompare(b.date)).at(-1)?.weightKg;
 
   /* ---- allenamento su Google Health o Health Connect ---- */
@@ -73,7 +74,7 @@ export function useHealthSync(args: Args) {
       try {
         await hc.writeWorkout(s);
         latest.current.actions.updateSession(s.id, { healthSynced: true, healthLogId: 'hc' });
-        if (interactive && !quiet) latest.current.notify('Allenamento salvato in Health Connect');
+        if (interactive && !quiet) latest.current.notify(t('Allenamento salvato in Health Connect'));
         return true;
       } catch (err) {
         failed.current.add(s.id);
@@ -92,13 +93,13 @@ export function useHealthSync(args: Args) {
         const hr = await GOOGLE.heartRate(s, interactive).catch(() => null); // la frequenza è un di più
         if (hr) { patch.avgBpm = hr.avg; patch.maxBpm = hr.max; current = { ...s, ...patch }; }
       }
-      const id = await withGoogleToken((t) => gh.logWorkout(t, current, lastWeight()), interactive, 'health');
+      const id = await withGoogleToken((tk) => gh.logWorkout(tk, current, lastWeight()), interactive, 'health');
       if (id === undefined) { setNeedsAuth(true); return false; }
       patch.healthLogId = id || undefined;
       patch.healthSynced = true;
       latest.current.actions.updateSession(s.id, patch);
       setNeedsAuth(false);
-      if (interactive && !quiet) latest.current.notify('Allenamento registrato su Google Health');
+      if (interactive && !quiet) latest.current.notify(t('Allenamento registrato su Google Health'));
       return true;
     } catch (err) {
       failed.current.add(s.id);
@@ -129,7 +130,7 @@ export function useHealthSync(args: Args) {
       setBusy(false);
     }
     const where = SOURCE_LABEL[getHealthSource()];
-    latest.current.notify(sent === list.length ? `Inviati ${sent} allenamenti a ${where}` : `Inviati ${sent} allenamenti su ${list.length} a ${where}`, sent === list.length ? 'success' : 'error');
+    latest.current.notify(sent === list.length ? t('Inviati {n} allenamenti a {app}', { n: sent, app: where }) : t('Inviati {n} allenamenti su {tot} a {app}', { n: sent, tot: list.length, app: where }), sent === list.length ? 'success' : 'error');
   }, [syncSession]);
 
   /* ---- pasti su Google Health (modificare un pasto già inviato = eliminare e ricreare) ---- */
@@ -138,9 +139,9 @@ export function useHealthSync(args: Args) {
     if (!getValidGoogleToken('health')) { setNeedsAuth(true); return; }
     inFlight.current.add(m.id);
     try {
-      const id = await withGoogleToken(async (t) => {
-        if (m.healthLogId) await gh.deleteMeals(t, [m.healthLogId]);
-        return gh.writeMeal(t, m);
+      const id = await withGoogleToken(async (tk) => {
+        if (m.healthLogId) await gh.deleteMeals(tk, [m.healthLogId]);
+        return gh.writeMeal(tk, m);
       }, false, 'health');
       if (id === undefined) { setNeedsAuth(true); return; }
       latest.current.actions.updateMeal(m.id, { healthSynced: true, healthLogId: id || undefined });
@@ -199,8 +200,8 @@ export function useHealthSync(args: Args) {
   const removeMeal = useCallback(async (m: FoodEntry) => {
     if (!m.healthLogId || source !== 'googlehealth' || !ghConnected) return;
     try {
-      const ok = await withGoogleToken(async (t) => { await gh.deleteMeals(t, [m.healthLogId!]); return true as const; }, false, 'health');
-      if (ok === undefined) latest.current.notify('Il pasto è stato eliminato qui ma resta su Google Health: ricollega Google Health per cancellarlo anche lì.', 'error');
+      const ok = await withGoogleToken(async (tk) => { await gh.deleteMeals(tk, [m.healthLogId!]); return true as const; }, false, 'health');
+      if (ok === undefined) latest.current.notify(t('Il pasto è stato eliminato qui ma resta su Google Health: ricollega Google Health per cancellarlo anche lì.'), 'error');
     } catch (err) {
       fail(err);
     }
@@ -236,11 +237,11 @@ export function useHealthSync(args: Args) {
     try {
       const hr = await ops.heartRate(s, true);
       if (!hr) {
-        latest.current.notify('Non ci sono ancora dati di frequenza per questo allenamento. Sincronizza l\'orologio nell\'app Google Health e riprova tra qualche minuto.', 'error');
+        latest.current.notify(t("Non ci sono ancora dati di frequenza per questo allenamento. Sincronizza l'orologio nell'app Google Health e riprova tra qualche minuto."), 'error');
         return;
       }
       latest.current.actions.updateSession(s.id, { avgBpm: hr.avg, maxBpm: hr.max });
-      latest.current.notify(`Frequenza importata: ${hr.avg} bpm medi, ${hr.max} massimi`);
+      latest.current.notify(t('Frequenza importata: {avg} bpm medi, {max} massimi', { avg: hr.avg, max: hr.max }));
     } catch (err) {
       fail(err);
     } finally {
@@ -263,7 +264,7 @@ export function useHealthSync(args: Args) {
           healthSynced: true, sheetsSynced: latest.current.hasSheet ? false : undefined
         })
       );
-      latest.current.notify(fresh.length ? `Importate ${fresh.length} pesate da ${SOURCE_LABEL[source]}` : entries.length ? 'Nessuna pesata nuova: hai già tutto.' : `${SOURCE_LABEL[source]} non ha pesate negli ultimi 30 giorni.`);
+      latest.current.notify(fresh.length ? t('Importate {n} pesate da {app}', { n: fresh.length, app: SOURCE_LABEL[source] }) : entries.length ? t('Nessuna pesata nuova: hai già tutto.') : t('{app} non ha pesate negli ultimi 30 giorni.', { app: SOURCE_LABEL[source] }));
     } catch (err) {
       fail(err);
     } finally {
@@ -275,7 +276,7 @@ export function useHealthSync(args: Args) {
   /** Attività registrate dall'orologio negli ultimi 14 giorni (Health Connect), con la frequenza se c'è. */
   const importWatch = useCallback(async () => {
     if (source !== 'healthconnect' || !hcConnected) return;
-    if (!latest.current.consented) { latest.current.notify('Prima serve il consenso ai dati sulla salute.', 'error'); return; }
+    if (!latest.current.consented) { latest.current.notify(t('Prima serve il consenso ai dati sulla salute.'), 'error'); return; }
     setBusy(true);
     try {
       const found = watchSessions(await hc.readWatchWorkouts(14), latest.current.sessions);
@@ -283,7 +284,7 @@ export function useHealthSync(args: Args) {
         const hr = await hc.readHeartRate(s).catch(() => null);
         latest.current.actions.addSession(hr ? { ...s, avgBpm: hr.avg, maxBpm: hr.max } : s);
       }
-      latest.current.notify(found.length === 1 ? 'Importata 1 attività dall\'orologio' : found.length ? `Importate ${found.length} attività dall'orologio` : 'Nessuna attività nuova negli ultimi 14 giorni.');
+      latest.current.notify(found.length === 1 ? t("Importata 1 attività dall'orologio") : found.length ? t("Importate {n} attività dall'orologio", { n: found.length }) : t('Nessuna attività nuova negli ultimi 14 giorni.'));
     } catch (err) {
       fail(err);
     } finally {
@@ -300,19 +301,19 @@ export function useHealthSync(args: Args) {
         const token = await ensureGoogleToken('health');
         await gh.checkLinked(token);
         setGoogleHealthConnected(true);
-        latest.current.notify('Google Health collegato');
+        latest.current.notify(t('Google Health collegato'));
       } else if (source === 'healthconnect') {
         await hc.connectHealthConnect();
         // gli allenamenti hanno un permesso a parte, chiesto dal plugin di Ferro
         const workouts = getHealthPrefs().autoLog ? await hc.requestWorkoutPermission().catch(() => false) : true;
-        latest.current.notify(workouts ? 'Health Connect collegato' : 'Health Connect collegato, ma senza il permesso per gli allenamenti: non verranno salvati lì.', workouts ? 'success' : 'error');
+        latest.current.notify(workouts ? t('Health Connect collegato') : t('Health Connect collegato, ma senza il permesso per gli allenamenti: non verranno salvati lì.'), workouts ? 'success' : 'error');
       }
       failed.current.clear();
       setNeedsAuth(false);
       setTick((n) => n + 1);
     } catch (err) {
       const message = err instanceof gh.HealthNotLinkedError || source === 'healthconnect' ? err instanceof Error ? err.message : '' : authErrorMessage(err);
-      if (message && message !== 'Accesso annullato.') latest.current.notify(message, 'error');
+      if (message && message !== t('Accesso annullato.')) latest.current.notify(message, 'error');
     } finally {
       setBusy(false);
     }

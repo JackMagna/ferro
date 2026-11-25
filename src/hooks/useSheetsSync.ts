@@ -9,6 +9,7 @@ import { authErrorMessage, withGoogleToken } from '../services/firebase';
 import {
   cellA1, inferStartDate, reconcileMeasures, type MeasureConflict, type MeasuresLayout
 } from '../lib/measuresSheet';
+import { t } from '../lib/i18n';
 
 interface Args {
   user: User | null;
@@ -68,8 +69,7 @@ export function useSheetsSync(args: Args) {
       if (!done) return;
       sessions.forEach((s) => a.actions.updateSession(s.id, { sheetsSynced: true }));
       lastFailure.current = '';
-      const extra = done.skipped ? ` ${done.skipped} celle della griglia non sono state toccate perché il coach le ha modificate.` : '';
-      a.notify(`Foglio Google aggiornato.${extra}`);
+      a.notify(done.skipped ? t('Foglio Google aggiornato. {n} celle della griglia non sono state toccate perché il coach le ha modificate.', { n: done.skipped }) : t('Foglio Google aggiornato.'));
     } catch (err) {
       const key = `${sessions.map((s) => s.id).join(',')}|${err instanceof Error ? err.message : ''}`;
       if (interactive || key !== lastFailure.current) a.notify(authErrorMessage(err), 'error');
@@ -85,7 +85,7 @@ export function useSheetsSync(args: Args) {
     const a = latest.current;
     if (!a.user || !a.spreadsheetId || busyMeasures.current) return;
     if (!a.healthConsent) {
-      if (interactive) a.notify('Per sincronizzare le misure serve il consenso ai dati sulla salute (Account e dati).', 'error');
+      if (interactive) a.notify(t('Per sincronizzare le misure serve il consenso ai dati sulla salute (Account e dati).'), 'error');
       return;
     }
     busyMeasures.current = true;
@@ -99,12 +99,12 @@ export function useSheetsSync(args: Args) {
           await appendMeasurements(token, a.spreadsheetId, pending);
           return { rec: null, warning };
         };
-        if (!tab) return fallback('Nel foglio non c\'è una scheda MISURE: le misure vanno in una scheda "Misure app".');
+        if (!tab) return fallback(t('Nel foglio non c\'è una scheda MISURE: le misure vanno in una scheda "Misure app".'));
         let parsed: Awaited<ReturnType<typeof readMeasures>>;
         try {
           parsed = await readMeasures(token, a.spreadsheetId, tab);
         } catch (err) {
-          return fallback(err instanceof Error ? `${err.message} Uso la scheda "Misure app".` : undefined);
+          return fallback(err instanceof Error ? t('{error} Uso la scheda "Misure app".', { error: err.message }) : undefined);
         }
         layoutRef.current = { tab, layout: parsed.layout };
         const rec = reconcileMeasures({
@@ -123,7 +123,7 @@ export function useSheetsSync(args: Args) {
       }, interactive);
 
       if (!result) {
-        setMeasures((m) => ({ ...m, status: 'auth', message: 'Serve ricollegare Google.' }));
+        setMeasures((m) => ({ ...m, status: 'auth', message: t('Serve ricollegare Google.') }));
         return;
       }
       const { rec, warning } = result;
@@ -150,7 +150,7 @@ export function useSheetsSync(args: Args) {
       } else {
         const ref = layoutRef.current;
         const a1 = ref && cellA1(ref.layout, c.week, c.field);
-        if (!ref || !a1) throw new Error('Non trovo la cella da aggiornare: riprova a sincronizzare.');
+        if (!ref || !a1) throw new Error(t('Non trovo la cella da aggiornare: riprova a sincronizzare.'));
         const done = await withGoogleToken((t) => writeMeasureCells(t, a.spreadsheetId, ref.tab, [{ a1, value: c.appValue }]).then(() => true), true);
         if (!done) return;
         a.actions.updateMeasurement(c.measurementId, { sheetsSynced: true });

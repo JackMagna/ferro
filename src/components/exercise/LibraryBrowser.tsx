@@ -7,6 +7,7 @@ import {
 } from '../../lib/exerciseLibrary';
 import { Button } from '../ui/Button';
 import { SafeImg } from './SafeImg';
+import { t } from '../../lib/i18n';
 
 const PAGE = 24;
 
@@ -34,8 +35,8 @@ export function LibraryBrowser({ onSelect, selectedId, initialQuery = '', dense 
   if (status === 'error') {
     return (
       <div className="card p-5">
-        <p className="mb-3 text-[15px]">Non riesco a caricare la libreria esercizi. Controlla la connessione.</p>
-        <Button onClick={retry}>Riprova</Button>
+        <p className="mb-3 text-[15px]">{t('Non riesco a caricare la libreria esercizi. Controlla la connessione.')}</p>
+        <Button onClick={retry}>{t('Riprova')}</Button>
       </div>
     );
   }
@@ -44,36 +45,36 @@ export function LibraryBrowser({ onSelect, selectedId, initialQuery = '', dense 
     <div className="space-y-4">
       <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
         <label className="relative block">
-          <span className="sr-only">Cerca esercizio</span>
+          <span className="sr-only">{t('Cerca esercizio')}</span>
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-faint" />
           <input
             type="search"
             value={query}
             onChange={(e) => { setQuery(e.target.value); setLimit(PAGE); }}
-            placeholder="Cerca in inglese, es. leg press, curl, row"
+            placeholder={t('Cerca in inglese, es. leg press, curl, row')}
             className="field pl-9"
           />
         </label>
         <label>
-          <span className="sr-only">Muscolo</span>
+          <span className="sr-only">{t('Muscolo')}</span>
           <select value={muscle} onChange={(e) => { setMuscle(e.target.value as LibraryMuscle | ''); setLimit(PAGE); }} className="field sm:w-44">
-            <option value="">Tutti i muscoli</option>
+            <option value="">{t('Tutti i muscoli')}</option>
             {(Object.keys(MUSCLE_LABELS) as LibraryMuscle[])
               .sort((a, b) => MUSCLE_LABELS[a].localeCompare(MUSCLE_LABELS[b]))
               .map((m) => <option key={m} value={m}>{MUSCLE_LABELS[m]}</option>)}
           </select>
         </label>
         <label>
-          <span className="sr-only">Attrezzatura</span>
+          <span className="sr-only">{t('Attrezzatura')}</span>
           <select value={equipment} onChange={(e) => { setEquipment(e.target.value); setLimit(PAGE); }} className="field sm:w-44">
-            <option value="">Ogni attrezzatura</option>
+            <option value="">{t('Ogni attrezzatura')}</option>
             {Object.entries(EQUIPMENT_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         </label>
       </div>
 
       <p className="text-sm text-faint" aria-live="polite">
-        {status === 'loading' ? 'Carico la libreria…' : `${results.length} esercizi`}
+        {status === 'loading' ? t('Carico la libreria…') : t('{n} esercizi', { n: results.length })}
       </p>
 
       <ul className={`grid gap-3 ${dense ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3'}`}>
@@ -99,7 +100,7 @@ export function LibraryBrowser({ onSelect, selectedId, initialQuery = '', dense 
       </ul>
 
       {results.length > limit && (
-        <Button block onClick={() => setLimit((l) => l + PAGE)}>Mostra altri esercizi</Button>
+        <Button block onClick={() => setLimit((l) => l + PAGE)}>{t('Mostra altri esercizi')}</Button>
       )}
     </div>
   );

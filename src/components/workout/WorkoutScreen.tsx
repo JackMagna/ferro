@@ -23,6 +23,7 @@ import { Button } from '../ui/Button';
 import { Sheet } from '../ui/Sheet';
 import { EmptyState } from '../ui/EmptyState';
 import { useToast } from '../ui/Toast';
+import { t } from '../../lib/i18n';
 
 interface Props {
   program: WorkoutProgram;
@@ -125,15 +126,15 @@ export function WorkoutScreen({ program, sessions, onFinish, onEditProgram, onLi
 
   if (!program.days.length || !day) {
     return (
-      <EmptyState title="La scheda è vuota" action={<Button variant="primary" onClick={onEditProgram}>Apri la scheda</Button>}>
-        Aggiungi almeno un giorno con un esercizio per iniziare ad allenarti.
+      <EmptyState title={t('La scheda è vuota')} action={<Button variant="primary" onClick={onEditProgram}>{t('Apri la scheda')}</Button>}>
+        {t('Aggiungi almeno un giorno con un esercizio per iniziare ad allenarti.')}
       </EmptyState>
     );
   }
   if (!draft) return null;
   if (!day.exercises.length) {
     return (
-      <EmptyState title={`${day.title} non ha esercizi`} action={<Button variant="primary" onClick={onEditProgram}>Aggiungi esercizi</Button>} />
+      <EmptyState title={t('{day} non ha esercizi', { day: day.title })} action={<Button variant="primary" onClick={onEditProgram}>{t('Aggiungi esercizi')}</Button>} />
     );
   }
 
@@ -188,7 +189,7 @@ export function WorkoutScreen({ program, sessions, onFinish, onEditProgram, onLi
     if (!current) return;
     const wasDone = current.completed;
     const record = !wasDone && plan.kind === 'carico' && isPersonalRecord(sessions, exercise.id, exercise.name, current.weightKg, current.reps);
-    if (record) toast(`Record su ${exercise.name}: ${formatLoad(current.weightKg)}\u00a0kg × ${current.reps}`, 'record');
+    if (record) toast(t('Record su {name}: {load} × {reps}', { name: exercise.name, load: `${formatLoad(current.weightKg)}\u00a0kg`, reps: current.reps }), 'record');
     sound.setDone();
     // serie registrata: un tocco breve; record: un colpo doppio, l'unico momento "espressivo"
     vibrate(record ? [30, 60, 30, 60, 90] : 20);
@@ -261,23 +262,23 @@ export function WorkoutScreen({ program, sessions, onFinish, onEditProgram, onLi
       {/* Giorno, settimana, cardio */}
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div className="min-w-0 space-y-2">
-          <h1 className="sr-only">Allenamento</h1>
-          <Segmented label="Giorno" value={draft.dayId} onChange={(id) => select(id, draft.week)} options={days.map((d) => ({ value: d.id, label: d.title }))} />
+          <h1 className="sr-only">{t('Allenamento')}</h1>
+          <Segmented label={t('Giorno')} value={draft.dayId} onChange={(id) => select(id, draft.week)} options={days.map((d) => ({ value: d.id, label: d.title }))} />
           {day.subtitle && <p className={day.id === BONUS_DAY_ID ? 'text-sm text-muted' : 'hidden text-sm text-muted sm:block'}>{day.subtitle}</p>}
         </div>
         <div className="flex items-center gap-2">
           <div className="flex min-w-0 flex-1 items-center gap-2 sm:flex-none">
-            <span className="shrink-0 text-sm text-muted">Sett.</span>
-            <Segmented label="Settimana" value={draft.week} onChange={(w) => select(draft.dayId, w)} options={weekOptions} />
+            <span className="shrink-0 text-sm text-muted">{t('Sett.')}</span>
+            <Segmented label={t('Settimana')} value={draft.week} onChange={(w) => select(draft.dayId, w)} options={weekOptions} />
           </div>
           <button
             type="button"
             onClick={() => setHrOpen(true)}
             className={`inline-flex h-11 shrink-0 items-center gap-1.5 rounded-xl border px-3 text-[15px] font-semibold ${hr ? 'border-stop/50 text-chalk' : 'border-line text-muted hover:text-chalk'}`}
-            aria-label={hr ? `Frequenza cardiaca ${bpm ?? ''} battiti al minuto` : 'Collega sensore cardio'}
+            aria-label={hr ? t('Frequenza cardiaca {bpm} battiti al minuto', { bpm: bpm ?? '' }) : t('Collega sensore cardio')}
           >
             <Heart className={`h-4 w-4 ${hr ? 'text-stop' : ''}`} />
-            {hr ? <span className="tabular-nums">{bpm ?? '–'}</span> : <span className="hidden sm:inline">Cardio</span>}
+            {hr ? <span className="tabular-nums">{bpm ?? '–'}</span> : <span className="hidden sm:inline">{t('Battito')}</span>}
           </button>
         </div>
       </div>
@@ -295,7 +296,7 @@ export function WorkoutScreen({ program, sessions, onFinish, onEditProgram, onLi
           sets={sets}
           setIndex={setIndex}
           lastTime={lastTime}
-          position={`${exIndex + 1} di ${day.exercises.length}`}
+          position={t('{n} di {total}', { n: exIndex + 1, total: day.exercises.length })}
           restSlot={rest ? <RestTimer startKey={rest.key} seconds={rest.seconds} onEnd={setRestEnd} onClose={() => setRest(null)} /> : undefined}
           onSelectSet={(i) => setDraft((d) => (d ? { ...d, setIndex: i } : d))}
           onChange={updateSet}
@@ -311,7 +312,7 @@ export function WorkoutScreen({ program, sessions, onFinish, onEditProgram, onLi
             plan={plan}
             set={sets[0]}
             lastTime={lastTime}
-            position={`${exIndex + 1} di ${day.exercises.length}`}
+            position={t('{n} di {total}', { n: exIndex + 1, total: day.exercises.length })}
             onChange={(patch) => updateSet(0, patch)}
             onComplete={complete}
             onPrev={exIndex > 0 ? () => goTo(exIndex - 1) : undefined}
@@ -332,13 +333,13 @@ export function WorkoutScreen({ program, sessions, onFinish, onEditProgram, onLi
       <div className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+4rem)] z-30 border-t border-line bg-ink/95 backdrop-blur lg:bottom-0 lg:left-60">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2.5 lg:px-8">
           <div className="min-w-0 flex-1">
-            <p className="text-sm text-muted">{totals.done} di {totals.total} serie</p>
+            <p className="text-sm text-muted">{t('{done} di {total} serie', { done: totals.done, total: totals.total })}</p>
             <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-raised" aria-hidden="true">
               <div className="h-full bg-go transition-[width]" style={{ width: `${totals.total ? (totals.done / totals.total) * 100 : 0}%` }} />
             </div>
           </div>
           <Button variant={totals.done ? 'success' : 'secondary'} disabled={!totals.done} onClick={() => setFinishOpen(true)}>
-            Concludi
+            {t('Concludi')}
           </Button>
         </div>
       </div>
@@ -348,7 +349,7 @@ export function WorkoutScreen({ program, sessions, onFinish, onEditProgram, onLi
         onClose={() => setHrOpen(false)}
         bpm={bpm}
         connection={hr}
-        onConnected={(c) => { setHr(c); toast(`Collegato a ${c.deviceName}`); }}
+        onConnected={(c) => { setHr(c); toast(t('Collegato a {name}', { name: c.deviceName })); }}
         onBpm={onBpm}
         onDisconnected={() => { setHr(null); setBpm(null); }}
       />
@@ -356,19 +357,19 @@ export function WorkoutScreen({ program, sessions, onFinish, onEditProgram, onLi
       <Sheet
         open={finishOpen}
         onClose={() => setFinishOpen(false)}
-        title="Concludi allenamento"
+        title={t('Concludi allenamento')}
         footer={
           <div className="flex gap-2">
-            <Button className="flex-1" onClick={() => setFinishOpen(false)}>Continua</Button>
-            <Button className="flex-1" variant="success" onClick={finish}>Salva allenamento</Button>
+            <Button className="flex-1" onClick={() => setFinishOpen(false)}>{t('Continua')}</Button>
+            <Button className="flex-1" variant="success" onClick={finish}>{t('Salva allenamento')}</Button>
           </div>
         }
       >
         <dl className="grid grid-cols-3 gap-3">
           {[
-            ['Serie', `${totals.done}/${totals.total}`],
-            ['Volume', `${formatKg(totals.volume)} kg`],
-            ['Durata', draft.startedAt ? `${Math.max(1, Math.round((Date.now() - draft.startedAt) / 60000))} min` : '—']
+            [t('Serie'), `${totals.done}/${totals.total}`],
+            [t('Volume'), `${formatKg(totals.volume)} kg`],
+            [t('Durata'), draft.startedAt ? `${Math.max(1, Math.round((Date.now() - draft.startedAt) / 60000))} min` : '—']
           ].map(([k, v]) => (
             <div key={k} className="rounded-2xl bg-ink p-3">
               <dt className="text-sm text-muted">{k}</dt>
@@ -377,25 +378,25 @@ export function WorkoutScreen({ program, sessions, onFinish, onEditProgram, onLi
           ))}
         </dl>
         <p className="mt-4 text-[15px] text-muted">
-          {day.title}, settimana {draft.week}. Le serie non completate non vengono salvate.
+          {t('{day}, settimana {week}. Le serie non completate non vengono salvate.', { day: day.title, week: draft.week })}
         </p>
         <Button variant="ghost" className="mt-3 text-stop" onClick={() => { clearDraft(); setFinishOpen(false); switchTo(day.id, draft.week); }}>
-          Annulla allenamento senza salvare
+          {t('Annulla allenamento senza salvare')}
         </Button>
       </Sheet>
 
       <Sheet
         open={!!pendingSwitch}
         onClose={() => setPendingSwitch(null)}
-        title="Cambiare allenamento?"
+        title={t('Cambiare allenamento?')}
         footer={
           <div className="flex gap-2">
-            <Button className="flex-1" onClick={() => setPendingSwitch(null)}>Resta qui</Button>
-            <Button className="flex-1" variant="danger" onClick={() => pendingSwitch && switchTo(pendingSwitch.dayId, pendingSwitch.week)}>Cambia e scarta</Button>
+            <Button className="flex-1" onClick={() => setPendingSwitch(null)}>{t('Resta qui')}</Button>
+            <Button className="flex-1" variant="danger" onClick={() => pendingSwitch && switchTo(pendingSwitch.dayId, pendingSwitch.week)}>{t('Cambia e scarta')}</Button>
           </div>
         }
       >
-        <p className="text-[15px] text-muted">Hai già completato {totals.done} serie. Se cambi giorno o settimana le perdi. Per tenerle, prima tocca Concludi.</p>
+        <p className="text-[15px] text-muted">{t('Hai già completato {n} serie. Se cambi giorno o settimana le perdi. Per tenerle, prima tocca Concludi.', { n: totals.done })}</p>
       </Sheet>
     </div>
   );

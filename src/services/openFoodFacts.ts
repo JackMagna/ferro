@@ -1,5 +1,6 @@
 import { readJSON, writeJSON } from '../lib/storage';
 import { parseOffProduct, type OffProduct } from '../lib/offMap';
+import { t } from '../lib/i18n';
 
 /**
  * Open Food Facts (dati aperti, nessuna chiave). Limiti indicati nella documentazione:
@@ -21,7 +22,7 @@ function remember(product: OffProduct) {
 
 export class OffUnavailableError extends Error {
   constructor(detail = '') {
-    super(`Open Food Facts non risponde${detail ? ` (${detail})` : ''}. Riprova più tardi o inserisci i valori a mano.`);
+    super(t('Open Food Facts non risponde{detail}. Riprova più tardi o inserisci i valori a mano.', { detail: detail ? ` (${detail})` : '' }));
     this.name = 'OffUnavailableError';
   }
 }
@@ -31,10 +32,10 @@ async function getJson(url: string): Promise<unknown> {
   try {
     res = await fetch(url, { headers: { Accept: 'application/json' } });
   } catch {
-    throw new OffUnavailableError('rete o blocco del browser');
+    throw new OffUnavailableError(t('rete o blocco del browser'));
   }
   if (res.status === 404) return null;
-  if (res.status === 429) throw new Error('Open Food Facts ha limitato le richieste: aspetta un minuto e riprova.');
+  if (res.status === 429) throw new Error(t('Open Food Facts ha limitato le richieste: aspetta un minuto e riprova.'));
   if (!res.ok) throw new OffUnavailableError(String(res.status));
   return res.json().catch(() => null);
 }

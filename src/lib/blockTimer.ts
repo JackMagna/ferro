@@ -4,6 +4,7 @@
  * Circuiti e superserie non hanno un tempo: niente timer.
  */
 import type { ProgramBlock } from '../types';
+import { t } from './i18n';
 
 export type TimerPhase = 'pronti' | 'lavoro' | 'recupero' | 'fine';
 
@@ -40,8 +41,8 @@ export function timerPlan(b: ProgramBlock): TimerPlan | null {
   switch (b.format) {
     case 'amrap':
       return b.durationSec
-        ? { leadSec: LEAD_SEC, segments: [{ kind: 'lavoro', sec: b.durationSec, round: 1 }], rounds: 1, countUp: false, roundLabel: 'Giro' }
-        : { leadSec: LEAD_SEC, segments: [], rounds: 1, countUp: true, roundLabel: 'Giro' };
+        ? { leadSec: LEAD_SEC, segments: [{ kind: 'lavoro', sec: b.durationSec, round: 1 }], rounds: 1, countUp: false, roundLabel: t('Giro') }
+        : { leadSec: LEAD_SEC, segments: [], rounds: 1, countUp: true, roundLabel: t('Giro') };
     case 'emom': {
       const every = b.everySec && b.everySec > 0 ? b.everySec : 60;
       const n = b.rounds ?? (b.durationSec ? Math.max(1, Math.round(b.durationSec / every)) : 10);
@@ -50,7 +51,7 @@ export function timerPlan(b: ProgramBlock): TimerPlan | null {
         segments: Array.from({ length: n }, (_, i) => ({ kind: 'lavoro' as const, sec: every, round: i + 1 })),
         rounds: n,
         countUp: false,
-        roundLabel: every === 60 ? 'Minuto' : 'Giro'
+        roundLabel: every === 60 ? t('Minuto') : t('Giro')
       };
     }
     case 'intervalli': {
@@ -62,11 +63,11 @@ export function timerPlan(b: ProgramBlock): TimerPlan | null {
         segments.push({ kind: 'lavoro', sec: work, round: i });
         if (rest > 0 && i < n) segments.push({ kind: 'recupero', sec: rest, round: i });
       }
-      return { leadSec: LEAD_SEC, segments, rounds: n, countUp: false, roundLabel: 'Giro' };
+      return { leadSec: LEAD_SEC, segments, rounds: n, countUp: false, roundLabel: t('Giro') };
     }
     case 'for_time':
     case 'gara':
-      return { leadSec: LEAD_SEC, segments: [], rounds: b.rounds ?? 1, countUp: true, capSec: b.timeCapSec, roundLabel: 'Giro' };
+      return { leadSec: LEAD_SEC, segments: [], rounds: b.rounds ?? 1, countUp: true, capSec: b.timeCapSec, roundLabel: t('Giro') };
     default:
       return null;
   }

@@ -7,6 +7,7 @@ import { isoDay, mergeBody, summarizeHeartRate, type BodyEntry } from '../lib/he
 import { mealInterval } from '../lib/nutrition';
 import { readJSON, writeJSON } from '../lib/storage';
 import { notifyHealth } from './health';
+import { t } from '../lib/i18n';
 
 /**
  * Health Connect (Android): funziona solo dentro l'app Android, non dal sito.
@@ -30,15 +31,15 @@ const plugin = async () => (await import('@capgo/capacitor-health')).Health;
 export const isHealthConnectConnected = () => isAndroidApp() && readJSON<boolean>(KEY, false);
 
 export async function connectHealthConnect(): Promise<void> {
-  if (!isAndroidApp()) throw new Error('Health Connect è disponibile solo nell\'app Android, non dal sito.');
+  if (!isAndroidApp()) throw new Error(t("Health Connect è disponibile solo nell'app Android, non dal sito."));
   const Health = await plugin();
   const availability = await Health.isAvailable();
   if (!availability.available) {
-    throw new Error(availability.reason ?? 'Health Connect non è disponibile. Installalo dal Play Store (“Health Connect by Android”).');
+    throw new Error(availability.reason ?? t('Health Connect non è disponibile. Installalo dal Play Store (“Health Connect by Android”).'));
   }
   const status = await Health.requestAuthorization({ read: [...READ], write: [...WRITE] });
   if (!status.readAuthorized.includes('weight') && !status.readAuthorized.includes('heartRate')) {
-    throw new Error('Non hai concesso nessun permesso di lettura. Riprova e consenti l\'accesso a peso e frequenza cardiaca.');
+    throw new Error(t("Non hai concesso nessun permesso di lettura. Riprova e consenti l'accesso a peso e frequenza cardiaca."));
   }
   writeJSON(KEY, true);
   notifyHealth();
@@ -126,7 +127,7 @@ export async function requestWorkoutPermission(): Promise<boolean> {
 
 /** Salva l'allenamento con il suo tipo (forza, bici, nuoto, pilates…), una volta: Health Connect lo riconosce dall'id di Ferro. */
 export async function writeWorkout(s: WorkoutSession): Promise<void> {
-  if (!Capacitor.isPluginAvailable('FerroWorkout')) throw new Error('Aggiorna l\'app Android di Ferro per salvare gli allenamenti in Health Connect.');
+  if (!Capacitor.isPluginAvailable('FerroWorkout')) throw new Error(t("Aggiorna l'app Android di Ferro per salvare gli allenamenti in Health Connect."));
   await ferro.saveHealthWorkout({
     id: s.id,
     start: s.startedAt,
@@ -154,11 +155,11 @@ export async function writeBody(entry: BodyEntry): Promise<void> {
  * Chiede i permessi di lettura solo adesso, al primo tocco su «Importa dall'orologio».
  */
 export async function readWatchWorkouts(days = 14): Promise<WatchWorkout[]> {
-  if (!isAndroidApp()) throw new Error('L\'import dall\'orologio funziona solo nell\'app Android, con Health Connect.');
+  if (!isAndroidApp()) throw new Error(t("L'import dall'orologio funziona solo nell'app Android, con Health Connect."));
   const Health = await plugin();
   const status = await Health.requestAuthorization({ read: ['workouts', 'distance', 'heartRate'], write: [] });
   if (!status.readAuthorized.includes('workouts')) {
-    throw new Error('Serve il permesso di Health Connect per leggere gli allenamenti. Riprova e consenti «Esercizio».');
+    throw new Error(t('Serve il permesso di Health Connect per leggere gli allenamenti. Riprova e consenti «Esercizio».'));
   }
   const { workouts } = await Health.queryWorkouts({ ...range(Date.now() - days * 86_400_000, Date.now()), limit: 100, ascending: false });
   return workouts;

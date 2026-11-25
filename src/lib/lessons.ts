@@ -9,6 +9,7 @@ import type { WorkoutSession } from '../types';
 import { activityOf, type Activity } from './activity';
 import { newId, todayISO } from './ids';
 import { readJSON, writeJSON } from './storage';
+import { locale, t } from './i18n';
 
 export interface Lesson {
   id: string;
@@ -32,7 +33,7 @@ export const isWatchSession = (s: Pick<WorkoutSession, 'dayId'>) => s.dayId === 
 /** Sedute fuori dalla scheda (lezioni, orologio): non spostano la rotazione dei giorni né il giorno bonus. */
 export const isOffProgramSession = (s: Pick<WorkoutSession, 'dayId'>) => isLessonSession(s) || isWatchSession(s);
 
-export const WEEKDAYS = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
+export const WEEKDAYS = [t('Lunedì'), t('Martedì'), t('Mercoledì'), t('Giovedì'), t('Venerdì'), t('Sabato'), t('Domenica')];
 const ICS_DAYS = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
 
 const KEY = 'irontrack:lessons';
@@ -124,7 +125,7 @@ export const isPast = (l: Lesson, today = todayISO()) => !!l.date && l.date < to
 export function whenLabel(l: Lesson): string {
   if (l.date) {
     const d = new Date(`${l.date}T12:00:00`);
-    return `${d.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' })}, ${l.time}`;
+    return `${d.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' })}, ${l.time}`;
   }
   return `${WEEKDAYS[(l.weekday ?? 1) - 1]} ${l.time}`;
 }

@@ -1,5 +1,6 @@
 import { Check } from '../ui/icons';
 import type { ProgramExercise, SetLog } from '../../types';
+import { t } from '../../lib/i18n';
 
 interface Props {
   exercises: ProgramExercise[];
@@ -11,7 +12,7 @@ interface Props {
 
 export function ExerciseList({ exercises, sets, activeIndex, onSelect, layout }: Props) {
   return (
-    <nav aria-label="Esercizi della giornata">
+    <nav aria-label={t('Esercizi della giornata')}>
       <ol className={layout === 'row' ? 'no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0' : 'space-y-1.5'}>
         {exercises.map((ex, i) => {
           const list = sets[ex.id] ?? [];
@@ -33,7 +34,7 @@ export function ExerciseList({ exercises, sets, activeIndex, onSelect, layout }:
                 </span>
                 <span className="min-w-0">
                   <span className="block truncate text-[15px] font-medium">{ex.name}</span>
-                  {layout === 'column' && <span className="block text-sm text-faint">{doneCount}/{list.length} serie</span>}
+                  {layout === 'column' && <span className="block text-sm text-faint">{t('{done}/{total} serie', { done: doneCount, total: list.length })}</span>}
                 </span>
               </button>
             </li>

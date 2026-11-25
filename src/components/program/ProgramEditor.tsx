@@ -5,6 +5,7 @@ import { SECTION_LABELS } from '../../data/defaultProgram';
 import { newId } from '../../lib/ids';
 import { Button, IconButton } from '../ui/Button';
 import { ExerciseEditor } from './ExerciseEditor';
+import { t } from '../../lib/i18n';
 
 interface Props {
   value: WorkoutProgram;
@@ -30,12 +31,12 @@ export function ProgramEditor({ value, onChange, dayId, onSelectDay }: Props) {
     onChange({ ...value, days: value.days.map((d, i) => (i === dayIndex ? { ...d, ...patch } : d)) });
 
   const addDay = () => {
-    const d: ProgramDay = { id: newId('giorno'), title: `Giorno ${value.days.length + 1}`, exercises: [] };
+    const d: ProgramDay = { id: newId('giorno'), title: t('Giorno {n}', { n: value.days.length + 1 }), exercises: [] };
     onChange({ ...value, days: [...value.days, d] });
     onSelectDay(d.id);
   };
   const removeDay = () => {
-    if (!window.confirm(`Eliminare ${day.title} e i suoi ${day.exercises.length} esercizi?`)) return;
+    if (!window.confirm(t('Eliminare {day} e i suoi {n} esercizi?', { day: day.title, n: day.exercises.length }))) return;
     const days = value.days.filter((_, i) => i !== dayIndex);
     onChange({ ...value, days });
     onSelectDay(days[Math.max(0, dayIndex - 1)]?.id ?? '');
@@ -60,24 +61,24 @@ export function ProgramEditor({ value, onChange, dayId, onSelectDay }: Props) {
       {/* Dati generali */}
       <section className="card grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="sm:col-span-2">
-          <label className="label" htmlFor="p-title">Nome della scheda</label>
+          <label className="label" htmlFor="p-title">{t('Nome della scheda')}</label>
           <input id="p-title" className="field" value={value.title} onChange={(e) => onChange({ ...value, title: e.target.value })} />
         </div>
         <div>
-          <label className="label" htmlFor="p-ath">Atleta</label>
+          <label className="label" htmlFor="p-ath">{t('Atleta')}</label>
           <input id="p-ath" className="field" value={value.athlete} onChange={(e) => onChange({ ...value, athlete: e.target.value })} />
         </div>
         <div>
-          <label className="label" htmlFor="p-tr">Trainer</label>
+          <label className="label" htmlFor="p-tr">{t('Trainer')}</label>
           <input id="p-tr" className="field" value={value.trainer} onChange={(e) => onChange({ ...value, trainer: e.target.value })} />
         </div>
         <div>
-          <label className="label" htmlFor="p-start">Inizio settimana 1</label>
+          <label className="label" htmlFor="p-start">{t('Inizio settimana 1')}</label>
           <input id="p-start" className="field" type="date" value={value.startDate ?? ''} onChange={(e) => onChange({ ...value, startDate: e.target.value || undefined })} />
-          <p className="mt-1 text-xs text-faint">Serve ad abbinare le misure alla settimana del foglio. Vuoto = lo deduco dagli allenamenti.</p>
+          <p className="mt-1 text-xs text-faint">{t('Serve ad abbinare le misure alla settimana del foglio. Vuoto = lo deduco dagli allenamenti.')}</p>
         </div>
         <div>
-          <label className="label" htmlFor="p-weeks">Settimane</label>
+          <label className="label" htmlFor="p-weeks">{t('Settimane')}</label>
           <input
             id="p-weeks" className="field" type="number" inputMode="numeric" min={1} max={16}
             value={value.totalWeeks}
@@ -91,14 +92,14 @@ export function ProgramEditor({ value, onChange, dayId, onSelectDay }: Props) {
         <section className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-[1fr_2fr_auto] sm:items-end">
             <div>
-              <label className="label" htmlFor="d-title">Nome del giorno</label>
+              <label className="label" htmlFor="d-title">{t('Nome del giorno')}</label>
               <input id="d-title" className="field" value={day.title} onChange={(e) => updateDay({ title: e.target.value })} />
             </div>
             <div>
-              <label className="label" htmlFor="d-sub">Descrizione</label>
-              <input id="d-sub" className="field" value={day.subtitle ?? ''} onChange={(e) => updateDay({ subtitle: e.target.value })} placeholder="Es. gambe e braccia" />
+              <label className="label" htmlFor="d-sub">{t('Descrizione')}</label>
+              <input id="d-sub" className="field" value={day.subtitle ?? ''} onChange={(e) => updateDay({ subtitle: e.target.value })} placeholder={t('Es. gambe e braccia')} />
             </div>
-            <Button variant="danger" icon={<Trash2 className="h-4 w-4" />} onClick={removeDay}>Elimina giorno</Button>
+            <Button variant="danger" icon={<Trash2 className="h-4 w-4" />} onClick={removeDay}>{t('Elimina giorno')}</Button>
           </div>
 
           <ol className="space-y-2">
@@ -106,27 +107,27 @@ export function ProgramEditor({ value, onChange, dayId, onSelectDay }: Props) {
               <li key={ex.id} className="card flex items-center gap-2 p-2 pl-4">
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">{ex.name}</p>
-                  <p className="truncate text-sm text-muted">{SECTION_LABELS[ex.sectionType]} · {ex.weeks[1] ?? '—'} · {ex.restTimeSec}s{ex.libraryId ? '' : ' · senza foto'}</p>
+                  <p className="truncate text-sm text-muted">{t(SECTION_LABELS[ex.sectionType])} · {ex.weeks[1] ?? '—'} · {ex.restTimeSec}s{ex.libraryId ? '' : ` · ${t('senza foto')}`}</p>
                 </div>
-                <IconButton label="Sposta su" disabled={i === 0} onClick={() => updateDay({ exercises: move(day.exercises, i, i - 1) })}><ArrowUp className="h-4 w-4" /></IconButton>
-                <IconButton label="Sposta giù" disabled={i === day.exercises.length - 1} onClick={() => updateDay({ exercises: move(day.exercises, i, i + 1) })}><ArrowDown className="h-4 w-4" /></IconButton>
-                <IconButton label={`Modifica ${ex.name}`} onClick={() => setEditing({ exercise: ex, isNew: false })}><Pencil className="h-4 w-4" /></IconButton>
+                <IconButton label={t('Sposta su')} disabled={i === 0} onClick={() => updateDay({ exercises: move(day.exercises, i, i - 1) })}><ArrowUp className="h-4 w-4" /></IconButton>
+                <IconButton label={t('Sposta giù')} disabled={i === day.exercises.length - 1} onClick={() => updateDay({ exercises: move(day.exercises, i, i + 1) })}><ArrowDown className="h-4 w-4" /></IconButton>
+                <IconButton label={t('Modifica {name}', { name: ex.name })} onClick={() => setEditing({ exercise: ex, isNew: false })}><Pencil className="h-4 w-4" /></IconButton>
               </li>
             ))}
           </ol>
-          <Button icon={<Plus className="h-4 w-4" />} onClick={() => setEditing({ exercise: newExercise(), isNew: true })}>Aggiungi esercizio</Button>
+          <Button icon={<Plus className="h-4 w-4" />} onClick={() => setEditing({ exercise: newExercise(), isNew: true })}>{t('Aggiungi esercizio')}</Button>
         </section>
       ) : (
-        <p className="text-muted">Nessun giorno nella scheda.</p>
+        <p className="text-muted">{t('Nessun giorno nella scheda.')}</p>
       )}
 
-      <Button icon={<Plus className="h-4 w-4" />} onClick={addDay}>Aggiungi giorno</Button>
+      <Button icon={<Plus className="h-4 w-4" />} onClick={addDay}>{t('Aggiungi giorno')}</Button>
 
       {/* Linee guida */}
       <section className="card space-y-4 p-4">
-        <h2 className="font-display text-xl font-semibold">Indicazioni del trainer</h2>
+        <h2 className="font-display text-xl font-semibold">{t('Indicazioni del trainer')}</h2>
         <div>
-          <label className="label" htmlFor="g-mod">Modalità d'esecuzione (una per riga)</label>
+          <label className="label" htmlFor="g-mod">{t("Modalità d'esecuzione (una per riga)")}</label>
           <textarea
             id="g-mod" rows={3} className="field"
             value={value.guidelines.modalitaEsecuzione.join('\n')}
@@ -135,11 +136,11 @@ export function ProgramEditor({ value, onChange, dayId, onSelectDay }: Props) {
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="label" htmlFor="g-prog">Progressione</label>
+            <label className="label" htmlFor="g-prog">{t('Progressione')}</label>
             <textarea id="g-prog" rows={2} className="field" value={value.guidelines.progressione} onChange={(e) => onChange({ ...value, guidelines: { ...value.guidelines, progressione: e.target.value } })} />
           </div>
           <div>
-            <label className="label" htmlFor="g-ced">Cedimento</label>
+            <label className="label" htmlFor="g-ced">{t('Cedimento')}</label>
             <textarea id="g-ced" rows={2} className="field" value={value.guidelines.cedimento} onChange={(e) => onChange({ ...value, guidelines: { ...value.guidelines, cedimento: e.target.value } })} />
           </div>
         </div>

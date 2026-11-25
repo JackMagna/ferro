@@ -1,4 +1,5 @@
 import type { ProgramDay, ProgramExercise, WorkoutProgram } from '../types';
+import { t } from './i18n';
 
 /**
  * Confronto tra la scheda in Ferro e quella appena riletta dal foglio del coach.
@@ -48,11 +49,11 @@ function diffExercise(a: ProgramExercise, b: ProgramExercise, totalWeeks: number
   const wb = weeksOf(b);
   const weeks = [...new Set([...Object.keys(wa), ...Object.keys(wb)].map(Number))].filter((w) => w <= totalWeeks).sort((x, y) => x - y);
   const changed = weeks.filter((w) => (wa[w] ?? '') !== (wb[w] ?? ''));
-  if (changed.length > 3) out.push(`${b.name}: serie cambiate in ${changed.length} settimane`);
-  else changed.forEach((w) => out.push(`${b.name}, sett. ${w}: ${wa[w] || '—'} → ${wb[w] || '—'}`));
-  if (txt(a.note) !== txt(b.note)) out.push(txt(b.note) ? `${b.name}: nota «${short(txt(b.note))}»` : `${b.name}: nota tolta`);
-  if (txt(a.warmupNote) !== txt(b.warmupNote)) out.push(`${b.name}: riscaldamento cambiato`);
-  if (a.restTimeSec !== b.restTimeSec) out.push(`${b.name}: recupero ${a.restTimeSec} → ${b.restTimeSec} s`);
+  if (changed.length > 3) out.push(t('{name}: serie cambiate in {n} settimane', { name: b.name, n: changed.length }));
+  else changed.forEach((w) => out.push(t('{name}, sett. {w}: {from} → {to}', { name: b.name, w, from: wa[w] || '—', to: wb[w] || '—' })));
+  if (txt(a.note) !== txt(b.note)) out.push(txt(b.note) ? t('{name}: nota «{note}»', { name: b.name, note: short(txt(b.note)) }) : t('{name}: nota tolta', { name: b.name }));
+  if (txt(a.warmupNote) !== txt(b.warmupNote)) out.push(t('{name}: riscaldamento cambiato', { name: b.name }));
+  if (a.restTimeSec !== b.restTimeSec) out.push(t('{name}: recupero {from} → {to} s', { name: b.name, from: a.restTimeSec, to: b.restTimeSec }));
   return out;
 }
 
@@ -62,14 +63,14 @@ function diffDay(a: ProgramDay, b: ProgramDay, totalWeeks: number): string[] {
   const newKeys = new Set(b.exercises.map((e) => key(e.name)));
   for (const e of b.exercises) {
     const prev = oldBy.get(key(e.name));
-    if (!prev) out.push(`Nuovo: ${e.name}${e.weeks[1] ? ` (${e.weeks[1]})` : ''}`);
+    if (!prev) out.push(t('Nuovo: {name}', { name: `${e.name}${e.weeks[1] ? ` (${e.weeks[1]})` : ''}` }));
     else out.push(...diffExercise(prev, e, totalWeeks));
   }
-  a.exercises.filter((e) => !newKeys.has(key(e.name))).forEach((e) => out.push(`Tolto: ${e.name}`));
+  a.exercises.filter((e) => !newKeys.has(key(e.name))).forEach((e) => out.push(t('Tolto: {name}', { name: e.name })));
   const common = (list: ProgramExercise[], other: Set<string>) => list.map((e) => key(e.name)).filter((k) => other.has(k));
   const orderA = common(a.exercises, newKeys);
   const orderB = common(b.exercises, new Set(oldBy.keys()));
-  if (orderA.join('|') !== orderB.join('|')) out.push('Ordine degli esercizi cambiato');
+  if (orderA.join('|') !== orderB.join('|')) out.push(t('Ordine degli esercizi cambiato'));
   return out;
 }
 
@@ -77,22 +78,22 @@ function diffDay(a: ProgramDay, b: ProgramDay, totalWeeks: number): string[] {
 export function diffPrograms(current: WorkoutProgram, next: WorkoutProgram): ProgramChange[] {
   const changes: ProgramChange[] = [];
   const general = (text: string) => changes.push({ day: '', text });
-  if (txt(current.title) !== txt(next.title)) general(`Titolo: ${next.title}`);
-  if (current.totalWeeks !== next.totalWeeks) general(`Settimane: ${current.totalWeeks} → ${next.totalWeeks}`);
+  if (txt(current.title) !== txt(next.title)) general(t('Titolo: {title}', { title: next.title }));
+  if (current.totalWeeks !== next.totalWeeks) general(t('Settimane: {from} → {to}', { from: current.totalWeeks, to: next.totalWeeks }));
   const g = (p: WorkoutProgram) => JSON.stringify([p.guidelines.modalitaEsecuzione.map(txt), txt(p.guidelines.progressione), txt(p.guidelines.cedimento)]);
-  if (g(current) !== g(next)) general('Indicazioni generali cambiate');
+  if (g(current) !== g(next)) general(t('Indicazioni generali cambiate'));
 
   const used = new Set<ProgramDay>();
   const findOld = (d: ProgramDay) => current.days.find((o) => !used.has(o) && key(o.title) === key(d.title)) ?? current.days.find((o) => !used.has(o) && o.id === d.id);
   for (const d of next.days) {
     const prev = findOld(d);
     if (!prev) {
-      changes.push({ day: d.title, text: `Giorno nuovo con ${d.exercises.length} esercizi` });
+      changes.push({ day: d.title, text: t('Giorno nuovo con {n} esercizi', { n: d.exercises.length }) });
       continue;
     }
     used.add(prev);
     diffDay(prev, d, next.totalWeeks).forEach((text) => changes.push({ day: d.title, text }));
   }
-  current.days.filter((d) => !used.has(d)).forEach((d) => changes.push({ day: d.title, text: 'Giorno tolto' }));
+  current.days.filter((d) => !used.has(d)).forEach((d) => changes.push({ day: d.title, text: t('Giorno tolto') }));
   return changes;
 }

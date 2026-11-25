@@ -4,6 +4,7 @@ import { Sheet } from '../ui/Sheet';
 import { Button } from '../ui/Button';
 import { connectHeartRate, isHeartRateSupported, type HeartRateConnection } from '../../services/heartRate';
 import { useHealthConsent } from '../privacy/HealthConsent';
+import { t } from '../../lib/i18n';
 
 interface Props {
   open: boolean;
@@ -30,14 +31,14 @@ export function HeartRateSheet({ open, onClose, bpm, connection, onConnected, on
       onConnected(await connectHeartRate(onBpm, onDisconnected));
     } catch (err) {
       const name = (err as { name?: string }).name;
-      setError(name === 'NotFoundError' ? 'Nessun sensore selezionato.' : err instanceof Error ? err.message : 'Connessione non riuscita.');
+      setError(name === 'NotFoundError' ? t('Nessun sensore selezionato.') : err instanceof Error ? err.message : t('Connessione non riuscita.'));
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <Sheet open={open} onClose={onClose} title="Frequenza cardiaca">
+    <Sheet open={open} onClose={onClose} title={t('Frequenza cardiaca')}>
       <div className="space-y-4 text-[15px]">
         {connection ? (
           <div className="flex items-center gap-4 rounded-2xl bg-ink p-4">
@@ -49,20 +50,19 @@ export function HeartRateSheet({ open, onClose, bpm, connection, onConnected, on
           </div>
         ) : (
           <p className="text-muted">
-            Collega una fascia cardio o un orologio che trasmette la frequenza via Bluetooth (per esempio Garmin con
-            “Trasmetti frequenza cardiaca”, Polar, Coros). Media e massima vengono salvate con l'allenamento.
+            {t("Collega una fascia cardio o un orologio che trasmette la frequenza via Bluetooth (per esempio Garmin con “Trasmetti frequenza cardiaca”, Polar, Coros). Media e massima vengono salvate con l'allenamento.")}
           </p>
         )}
         {!supported && (
           <p className="rounded-xl border border-line p-3 text-muted">
-            Questo browser non supporta il Bluetooth. Funziona con Chrome su Android e su computer; non su iPhone. L'Apple Watch non trasmette la frequenza in Bluetooth.
+            {t("Questo browser non supporta il Bluetooth. Funziona con Chrome su Android e su computer; non su iPhone. L'Apple Watch non trasmette la frequenza in Bluetooth.")}
           </p>
         )}
         {error && <p className="text-stop">{error}</p>}
         {connection ? (
-          <Button block variant="danger" onClick={() => { connection.disconnect(); onDisconnected(); }}>Scollega sensore</Button>
+          <Button block variant="danger" onClick={() => { connection.disconnect(); onDisconnected(); }}>{t('Scollega sensore')}</Button>
         ) : (
-          <Button block variant="primary" disabled={!supported || busy} onClick={connect}>{busy ? 'Ricerca in corso…' : 'Cerca sensore'}</Button>
+          <Button block variant="primary" disabled={!supported || busy} onClick={connect}>{busy ? t('Ricerca in corso…') : t('Cerca sensore')}</Button>
         )}
       </div>
     </Sheet>

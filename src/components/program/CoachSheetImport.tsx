@@ -7,6 +7,7 @@ import { prepareImported } from '../../lib/coachImport';
 import { loadLibrary } from '../../lib/exerciseLibrary';
 import { Sheet } from '../ui/Sheet';
 import { Button } from '../ui/Button';
+import { t } from '../../lib/i18n';
 
 interface Props {
   open: boolean;
@@ -72,14 +73,14 @@ export function CoachSheetImport({ open, onClose, currentProgram, currentSpreads
     <Sheet
       open={open}
       onClose={onClose}
-      title="Scheda del coach da Google Sheets"
+      title={t('Scheda del coach da Google Sheets')}
       size="lg"
       footer={
         parsed && (
           <div className="flex gap-2">
-            <Button className="flex-1" onClick={onClose}>Annulla</Button>
+            <Button className="flex-1" onClick={onClose}>{t('Annulla')}</Button>
             <Button className="flex-1" variant="primary" onClick={() => { onImport(parsed.program, spreadsheetId); onClose(); reset(); }}>
-              Usa questa scheda
+              {t('Usa questa scheda')}
             </Button>
           </div>
         )
@@ -87,27 +88,27 @@ export function CoachSheetImport({ open, onClose, currentProgram, currentSpreads
     >
       <div className="space-y-5 text-[15px]">
         <p className="text-muted">
-          Incolla il link del foglio che ti ha condiviso il coach. L'app legge giorni, esercizi e settimane e poi scrive lì i tuoi carichi e le misure.
-          Il foglio deve essere condiviso con te come <strong className="text-chalk">Editor</strong>.
+          {t("Incolla il link del foglio che ti ha condiviso il coach. L'app legge giorni, esercizi e settimane e poi scrive lì i tuoi carichi e le misure.")}{' '}
+          {(() => { const [pre, post] = t('Il foglio deve essere condiviso con te come {role}.').split('{role}'); return <>{pre}<strong className="text-chalk">{t('Editor')}</strong>{post}</>; })()}
         </p>
 
         <form className="flex flex-col gap-2 sm:flex-row" onSubmit={(e) => { e.preventDefault(); void loadTabs(); }}>
           <label className="flex-1">
-            <span className="sr-only">Link del foglio</span>
-            <input className="field" value={link} onChange={(e) => { setLink(e.target.value); reset(); }} placeholder={currentSpreadsheetId ? 'Foglio già collegato: lascia vuoto per usarlo' : 'https://docs.google.com/spreadsheets/d/…'} />
+            <span className="sr-only">{t('Link del foglio')}</span>
+            <input className="field" value={link} onChange={(e) => { setLink(e.target.value); reset(); }} placeholder={currentSpreadsheetId ? t('Foglio già collegato: lascia vuoto per usarlo') : 'https://docs.google.com/spreadsheets/d/…'} />
           </label>
-          <Button type="submit" variant="primary" disabled={busy || !id}>{busy && !tabs ? 'Apro il foglio…' : 'Apri foglio'}</Button>
+          <Button type="submit" variant="primary" disabled={busy || !id}>{busy && !tabs ? t('Apro il foglio…') : t('Apri foglio')}</Button>
         </form>
 
         {tabs && (
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
             <label className="flex-1">
-              <span className="label">Quale scheda contiene l'allenamento?</span>
+              <span className="label">{t("Quale scheda contiene l'allenamento?")}</span>
               <select className="field" value={tab} onChange={(e) => { setTab(e.target.value); setParsed(null); }}>
                 {tabs.map((t) => <option key={t}>{t}</option>)}
               </select>
             </label>
-            <Button variant="primary" disabled={busy} onClick={readSheet}>{busy ? 'Leggo…' : 'Leggi la scheda'}</Button>
+            <Button variant="primary" disabled={busy} onClick={readSheet}>{busy ? t('Leggo…') : t('Leggi la scheda')}</Button>
           </div>
         )}
 
@@ -118,12 +119,12 @@ export function CoachSheetImport({ open, onClose, currentProgram, currentSpreads
             <div className="rounded-2xl bg-ink p-4">
               <p className="font-display text-xl font-semibold">{parsed.program.title}</p>
               <p className="text-muted">
-                {[[parsed.program.athlete, parsed.program.trainer && `con ${parsed.program.trainer}`].filter(Boolean).join(' '), `${parsed.program.days.length} giorni`].filter(Boolean).join(' · ')} · {parsed.exerciseCount} esercizi · {parsed.program.totalWeeks} settimane
+                {[[parsed.program.athlete, parsed.program.trainer && t('con {name}', { name: parsed.program.trainer })].filter(Boolean).join(' '), t('{n} giorni', { n: parsed.program.days.length }), t('{n} esercizi', { n: parsed.exerciseCount }), t('{n} settimane', { n: parsed.program.totalWeeks })].filter(Boolean).join(' · ')}
               </p>
               <p className="mt-1 text-sm text-faint">
-                {parsed.program.source?.measuresTab ? `Scheda delle misure trovata: “${parsed.program.source.measuresTab}”. ` : 'Non trovo una scheda delle misure nel foglio. '}
+                {parsed.program.source?.measuresTab ? t('Scheda delle misure trovata: “{tab}”.', { tab: parsed.program.source.measuresTab }) : t('Non trovo una scheda delle misure nel foglio.')}
               </p>
-              <p className="mt-1 text-sm text-faint">{matched} esercizi su {parsed.exerciseCount} collegati alla libreria (foto e muscoli). Gli altri li colleghi dopo: apri l'esercizio e scegli tra le proposte.</p>
+              <p className="mt-1 text-sm text-faint">{t("{n} esercizi su {total} collegati alla libreria (foto e muscoli). Gli altri li colleghi dopo: apri l'esercizio e scegli tra le proposte.", { n: matched, total: parsed.exerciseCount })}</p>
             </div>
             {parsed.warnings.length > 0 && (
               <ul className="space-y-1 rounded-xl border border-plate/40 bg-plate/10 p-3 text-sm">{parsed.warnings.map((w) => <li key={w}>{w}</li>)}</ul>
@@ -135,13 +136,13 @@ export function CoachSheetImport({ open, onClose, currentProgram, currentSpreads
                   {d.exercises.map((e) => (
                     <li key={e.id} className="flex flex-wrap justify-between gap-x-3 rounded-lg bg-panel px-3 py-1.5">
                       <span>{e.name}</span>
-                      <span className="tabular-nums text-muted">{e.weeks[1] || '—'}{e.libraryId ? '' : ' · da collegare'}</span>
+                      <span className="tabular-nums text-muted">{e.weeks[1] || '—'}{e.libraryId ? '' : ` · ${t('da collegare')}`}</span>
                     </li>
                   ))}
                 </ol>
               </div>
             ))}
-            <p className="text-sm text-muted">Gli allenamenti già salvati restano. La scheda attuale viene sostituita, ma puoi sempre rileggerla dal foglio.</p>
+            <p className="text-sm text-muted">{t('Gli allenamenti già salvati restano. La scheda attuale viene sostituita, ma puoi sempre rileggerla dal foglio.')}</p>
           </div>
         )}
       </div>

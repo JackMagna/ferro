@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ImageOff, Pause, Play } from '../ui/icons';
 import type { LibraryExercise } from '../../lib/exerciseLibrary';
 import { SafeImg } from './SafeImg';
+import { t } from '../../lib/i18n';
 
 const prefersReducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -32,7 +33,7 @@ export function ExerciseMedia({ exercise, className = '' }: { exercise?: Library
       <div className={`flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 rounded-2xl bg-ink text-faint ${className}`}>
         <ImageOff className="h-6 w-6" />
         <span className="px-6 text-center text-sm">
-          {failed ? 'Foto non disponibili: controlla la connessione' : 'Nessuna foto collegata a questo esercizio'}
+          {failed ? t('Foto non disponibili: controlla la connessione') : t('Nessuna foto collegata a questo esercizio')}
         </span>
       </div>
     );
@@ -44,7 +45,7 @@ export function ExerciseMedia({ exercise, className = '' }: { exercise?: Library
         <SafeImg
           key={path}
           path={path}
-          alt={i === 0 ? `${exercise.name}: posizione iniziale` : `${exercise.name}: posizione finale`}
+          alt={i === 0 ? t('{name}: posizione iniziale', { name: exercise.name }) : t('{name}: posizione finale', { name: exercise.name })}
           onFail={() => setFailed(true)}
           eager={i === 0}
           className={`aspect-[4/3] w-full object-contain ${i === frame ? 'relative' : 'absolute inset-0 opacity-0'}`}
@@ -54,11 +55,11 @@ export function ExerciseMedia({ exercise, className = '' }: { exercise?: Library
         <button
           type="button"
           onClick={() => setPlaying((p) => !p)}
-          aria-label={playing ? 'Ferma animazione' : 'Avvia animazione'}
+          aria-label={playing ? t('Ferma animazione') : t('Avvia animazione')}
           className="absolute bottom-2 right-2 inline-flex h-10 items-center gap-1.5 rounded-full bg-ink/85 px-3 text-sm font-medium text-chalk"
         >
           {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-          {frame === 0 ? 'Inizio' : 'Fine'}
+          {frame === 0 ? t('Partenza') : t('Arrivo')}
         </button>
       )}
     </div>

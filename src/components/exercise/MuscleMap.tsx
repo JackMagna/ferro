@@ -1,5 +1,6 @@
 import Model from 'react-body-highlighter';
 import { muscleLabel, toBodyMuscles, type LibraryMuscle } from '../../lib/exerciseLibrary';
+import { t } from '../../lib/i18n';
 
 interface MuscleMapProps {
   primary: LibraryMuscle[];
@@ -28,7 +29,7 @@ export function MuscleMap({ primary, secondary = [], weighted, compact }: Muscle
         {(['anterior', 'posterior'] as const).map((type) => (
           <div key={type} className={size}>
             <Model type={type} data={data as never} bodyColor="var(--color-body)" highlightedColors={COLORS} style={{ width: '100%' }} svgStyle={{ width: '100%', height: 'auto' }} />
-            <p className="mt-1 text-center text-xs text-faint">{type === 'anterior' ? 'Fronte' : 'Retro'}</p>
+            <p className="mt-1 text-center text-xs text-faint">{type === 'anterior' ? t('Fronte') : t('Retro')}</p>
           </div>
         ))}
       </div>

@@ -8,6 +8,7 @@ import { Sheet } from '../ui/Sheet';
 import { Button } from '../ui/Button';
 import { entryFromProduct, type OffProduct } from '../../lib/offMap';
 import { ProductLookup } from './ProductLookup';
+import { t } from '../../lib/i18n';
 
 export interface MealDraft {
   mealType: MealType;
@@ -44,7 +45,7 @@ const stored = (v: string) => amount(v) || undefined;
 /** Modulo per aggiungere o modificare un cibo/pasto. */
 export function MealSheet({ open, ...rest }: Props) {
   return (
-    <Sheet open={open} onClose={rest.onClose} title={rest.editing ? 'Modifica pasto' : 'Aggiungi cibo'}>
+    <Sheet open={open} onClose={rest.onClose} title={rest.editing ? t('Modifica pasto') : t('Aggiungi cibo')}>
       <MealForm {...rest} />
     </Sheet>
   );
@@ -118,7 +119,7 @@ function MealForm({ date, editing, defaults, recent, savedMeals, onSave, onAddMa
     <div className="space-y-4">
       {!editing && savedMeals.length > 0 && (
         <div>
-          <p className="label">Pasti salvati</p>
+          <p className="label">{t('Pasti salvati')}</p>
           <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
             {savedMeals.map((s) => (
               <button
@@ -131,7 +132,7 @@ function MealForm({ date, editing, defaults, recent, savedMeals, onSave, onAddMa
               </button>
             ))}
           </div>
-          <p className="mt-1 text-xs text-faint">Un tocco aggiunge tutti i cibi del pasto a “{MEAL_LABEL[mealType]}”.</p>
+          <p className="mt-1 text-xs text-faint">{t('Un tocco aggiunge tutti i cibi del pasto a “{meal}”.', { meal: MEAL_LABEL[mealType] })}</p>
         </div>
       )}
 
@@ -139,7 +140,7 @@ function MealForm({ date, editing, defaults, recent, savedMeals, onSave, onAddMa
 
       {!editing && recent.length > 0 && (
         <div>
-          <p className="label">Usati di recente</p>
+          <p className="label">{t('Usati di recente')}</p>
           <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
             {recent.map((r) => (
               <button
@@ -155,62 +156,62 @@ function MealForm({ date, editing, defaults, recent, savedMeals, onSave, onAddMa
       )}
 
       <div>
-        <label className="label" htmlFor="f-type">Pasto</label>
+        <label className="label" htmlFor="f-type">{t('Pasto')}</label>
         <select id="f-type" className="field" value={mealType} onChange={(e) => setMealType(e.target.value as MealType)}>
-          {MEAL_TYPES.map((t) => <option key={t} value={t}>{MEAL_LABEL[t]}</option>)}
+          {MEAL_TYPES.map((mt) => <option key={mt} value={mt}>{MEAL_LABEL[mt]}</option>)}
         </select>
       </div>
       <div>
-        <label className="label" htmlFor="f-name">Cosa hai mangiato</label>
-        <input id="f-name" className="field" value={name} onChange={(e) => setName(e.target.value)} placeholder="Es. Pasta al pomodoro 80 g" />
+        <label className="label" htmlFor="f-name">{t('Cosa hai mangiato')}</label>
+        <input id="f-name" className="field" value={name} onChange={(e) => setName(e.target.value)} placeholder={t('Es. Pasta al pomodoro 80 g')} />
       </div>
       <div>
-        <label className="label" htmlFor="f-kcal">Calorie (kcal)</label>
-        <input id="f-kcal" className="field" inputMode="decimal" value={kcal} onChange={(e) => setKcal(e.target.value)} placeholder="Es. 350" />
+        <label className="label" htmlFor="f-kcal">{t('Calorie (kcal)')}</label>
+        <input id="f-kcal" className="field" inputMode="decimal" value={kcal} onChange={(e) => setKcal(e.target.value)} placeholder={t('Es. 350')} />
       </div>
 
       {macros ? (
         <div className="grid grid-cols-3 gap-3">
-          {([['Proteine (g)', protein, setProtein], ['Carboidrati (g)', carbs, setCarbs], ['Grassi (g)', fat, setFat]] as const).map(([label, value, set]) => (
-            <div key={label}>
-              <label className="label" htmlFor={`f-${label}`}>{label}</label>
-              <input id={`f-${label}`} className="field" inputMode="decimal" value={value} onChange={(e) => set(e.target.value)} />
+          {([['p', t('Proteine (g)'), protein, setProtein], ['c', t('Carboidrati (g)'), carbs, setCarbs], ['f', t('Grassi (g)'), fat, setFat]] as const).map(([id, label, value, set]) => (
+            <div key={id}>
+              <label className="label" htmlFor={`f-${id}`}>{label}</label>
+              <input id={`f-${id}`} className="field" inputMode="decimal" value={value} onChange={(e) => set(e.target.value)} />
             </div>
           ))}
         </div>
       ) : (
-        <button type="button" className="text-[15px] font-medium text-plate hover:underline" onClick={() => setMacros(true)}>Aggiungi proteine, carboidrati, grassi</button>
+        <button type="button" className="text-[15px] font-medium text-plate hover:underline" onClick={() => setMacros(true)}>{t('Aggiungi proteine, carboidrati, grassi')}</button>
       )}
-      {bad && <p role="alert" className="text-sm text-stop">Scrivi solo numeri nei campi dei macronutrienti.</p>}
+      {bad && <p role="alert" className="text-sm text-stop">{t('Scrivi solo numeri nei campi dei macronutrienti.')}</p>}
 
       <div>
-        <label className="label" htmlFor="f-time">Ora (facoltativa)</label>
+        <label className="label" htmlFor="f-time">{t('Ora (facoltativa)')}</label>
         <input id="f-time" type="time" className="field" value={time} onChange={(e) => setTime(e.target.value)} />
-        <p className="mt-1 text-xs text-faint">Se la lasci vuota uso un orario tipico per questo pasto.</p>
+        <p className="mt-1 text-xs text-faint">{t('Se la lasci vuota uso un orario tipico per questo pasto.')}</p>
       </div>
 
       {details ? (
         <div className="grid grid-cols-3 gap-3">
-          {([['Fibre (g)', fiber, setFiber], ['Zuccheri (g)', sugar, setSugar], ['Sale (g)', salt, setSalt]] as const).map(([label, value, set]) => (
-            <div key={label}>
-              <label className="label" htmlFor={`f-${label}`}>{label}</label>
-              <input id={`f-${label}`} className="field" inputMode="decimal" value={value} onChange={(e) => set(e.target.value)} />
+          {([['fib', t('Fibre (g)'), fiber, setFiber], ['sug', t('Zuccheri (g)'), sugar, setSugar], ['salt', t('Sale (g)'), salt, setSalt]] as const).map(([id, label, value, set]) => (
+            <div key={id}>
+              <label className="label" htmlFor={`f-${id}`}>{label}</label>
+              <input id={`f-${id}`} className="field" inputMode="decimal" value={value} onChange={(e) => set(e.target.value)} />
             </div>
           ))}
         </div>
       ) : (
-        <button type="button" className="text-[15px] font-medium text-plate hover:underline" onClick={() => setDetails(true)}>Aggiungi fibre, zuccheri, sale</button>
+        <button type="button" className="text-[15px] font-medium text-plate hover:underline" onClick={() => setDetails(true)}>{t('Aggiungi fibre, zuccheri, sale')}</button>
       )}
 
       <div>
-        <label className="label" htmlFor="f-notes">Note</label>
+        <label className="label" htmlFor="f-notes">{t('Note')}</label>
         <input id="f-notes" className="field" value={notes} onChange={(e) => setNotes(e.target.value)} />
       </div>
 
       <div className="flex flex-wrap justify-end gap-2">
-        {editing && <Button variant="danger" className="mr-auto" onClick={() => { onDelete(editing.id); onClose(); }}>Elimina</Button>}
-        <Button onClick={onClose}>Annulla</Button>
-        <Button variant="primary" disabled={!valid} onClick={save}>Salva</Button>
+        {editing && <Button variant="danger" className="mr-auto" onClick={() => { onDelete(editing.id); onClose(); }}>{t('Elimina')}</Button>}
+        <Button onClick={onClose}>{t('Annulla')}</Button>
+        <Button variant="primary" disabled={!valid} onClick={save}>{t('Salva')}</Button>
       </div>
     </div>
   );

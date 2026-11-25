@@ -33,7 +33,10 @@ export function detectLang(saved: unknown, browser: readonly string[]): Lang {
 
 export const lang: Lang = detectLang(
   readJSON<unknown>(KEY, null),
-  typeof navigator === 'undefined' ? ['it'] : navigator.languages?.length ? navigator.languages : [navigator.language ?? 'it']
+  // test automatici (vitest, e2e con gli emulatori): italiano, salvo lingua salvata
+  typeof navigator === 'undefined' || import.meta.env.MODE === 'test' || import.meta.env.VITE_FIREBASE_EMULATOR === '1'
+    ? ['it']
+    : navigator.languages?.length ? navigator.languages : [navigator.language ?? 'it']
 );
 if (typeof document !== 'undefined') document.documentElement.lang = lang;
 const dict: Record<string, string> = lang === 'it' ? {} : DICTIONARIES[lang];

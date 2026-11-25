@@ -8,26 +8,27 @@
 import type { Workout } from '@capgo/capacitor-health';
 import type { WorkoutSession } from '../types';
 import { isOffProgramSession, WATCH_DAY_ID } from './lessons';
+import { t } from './i18n';
 
 export type WatchWorkout = Pick<Workout, 'workoutType' | 'duration' | 'startDate' | 'endDate' | 'totalDistance' | 'totalEnergyBurned' | 'sourceId' | 'sourceName' | 'platformId'>;
 
 const LABELS: Record<string, string> = {
-  running: 'Corsa', runningTreadmill: 'Tapis roulant', walking: 'Camminata', hiking: 'Escursione',
-  cycling: 'Bici', bikingStationary: 'Cyclette', handCycling: 'Handbike',
-  swimming: 'Nuoto', swimmingPool: 'Nuoto in piscina', swimmingOpenWater: 'Nuoto in acque libere',
-  rowing: 'Canottaggio', rowingMachine: 'Vogatore', elliptical: 'Ellittica',
-  stairClimbing: 'Scale', stairClimbingMachine: 'Stair climber',
-  strengthTraining: 'Forza', traditionalStrengthTraining: 'Forza', functionalStrengthTraining: 'Forza funzionale', weightlifting: 'Pesi', calisthenics: 'Corpo libero',
+  running: t('Corsa'), runningTreadmill: t('Tapis roulant'), walking: t('Camminata'), hiking: t('Escursione'),
+  cycling: t('Bici'), bikingStationary: t('Cyclette'), handCycling: 'Handbike',
+  swimming: t('Nuoto'), swimmingPool: t('Nuoto in piscina'), swimmingOpenWater: t('Nuoto in acque libere'),
+  rowing: t('Canottaggio'), rowingMachine: t('Vogatore'), elliptical: t('Ellittica'),
+  stairClimbing: t('Scale'), stairClimbingMachine: 'Stair climber',
+  strengthTraining: t('Forza'), traditionalStrengthTraining: t('Forza'), functionalStrengthTraining: t('Forza funzionale'), weightlifting: t('Pesi'), calisthenics: t('Corpo libero'),
   highIntensityIntervalTraining: 'HIIT', crossTraining: 'Cross training', bootCamp: 'Bootcamp', mixedCardio: 'Cardio',
-  pilates: 'Pilates', yoga: 'Yoga', stretching: 'Stretching', flexibility: 'Mobilità', exerciseClass: 'Lezione',
-  dance: 'Danza', dancing: 'Danza', boxing: 'Boxe', kickboxing: 'Kickboxing', martialArts: 'Arti marziali',
-  soccer: 'Calcio', basketball: 'Basket', volleyball: 'Pallavolo', tennis: 'Tennis', padel: 'Padel', paddleSports: 'Pagaia',
-  rockClimbing: 'Arrampicata', climbing: 'Arrampicata', skiing: 'Sci', snowboarding: 'Snowboard', other: 'Allenamento'
+  pilates: 'Pilates', yoga: 'Yoga', stretching: 'Stretching', flexibility: t('Mobilità'), exerciseClass: t('Lezione'),
+  dance: t('Danza'), dancing: t('Danza'), boxing: t('Boxe'), kickboxing: 'Kickboxing', martialArts: t('Arti marziali'),
+  soccer: t('Calcio'), basketball: t('Basket'), volleyball: t('Pallavolo'), tennis: 'Tennis', padel: 'Padel', paddleSports: t('Pagaia'),
+  rockClimbing: t('Arrampicata'), climbing: t('Arrampicata'), skiing: t('Sci'), snowboarding: 'Snowboard', other: t('Allenamento')
 };
 
 /** Nome italiano del tipo di attività di Health Connect. */
 export function watchLabel(type: string): string {
-  return LABELS[type] ?? 'Allenamento';
+  return LABELS[type] ?? t('Allenamento');
 }
 
 /** Pacchetti di Ferro (app vera e app di prova): le loro attività sono già in Ferro. */

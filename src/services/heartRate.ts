@@ -7,6 +7,7 @@
  * L'Apple Watch non trasmette la frequenza in Bluetooth.
  */
 import { Capacitor } from '@capacitor/core';
+import { t } from '../lib/i18n';
 
 const HR_SERVICE = '0000180d-0000-1000-8000-00805f9b34fb';
 const HR_MEASUREMENT = '00002a37-0000-1000-8000-00805f9b34fb';
@@ -74,18 +75,18 @@ async function connectNative(onBpm: (bpm: number) => void, onDisconnect: () => v
   try {
     await bleReady;
   } catch (err) {
-    throw new Error(/permission|denied/i.test(String(err)) ? 'Serve il permesso «Dispositivi nelle vicinanze» per trovare la fascia.' : `Bluetooth non disponibile (${err instanceof Error ? err.message : err}).`);
+    throw new Error(/permission|denied/i.test(String(err)) ? t('Serve il permesso «Dispositivi nelle vicinanze» per trovare la fascia.') : t('Bluetooth non disponibile ({motivo}).', { motivo: err instanceof Error ? err.message : String(err) }));
   }
   if (!(await BleClient.isEnabled())) {
     await BleClient.requestEnable().catch(() => undefined);
-    if (!(await BleClient.isEnabled())) throw new Error('Accendi il Bluetooth e riprova.');
+    if (!(await BleClient.isEnabled())) throw new Error(t('Accendi il Bluetooth e riprova.'));
   }
 
   let device;
   try {
     device = await BleClient.requestDevice({ services: [HR_SERVICE] });
   } catch (err) {
-    throw /cancel/i.test(String(err)) ? named('NotFoundError', 'Nessun sensore selezionato.') : err;
+    throw /cancel/i.test(String(err)) ? named('NotFoundError', t('Nessun sensore selezionato.')) : err;
   }
   const id = device.deviceId;
   let closedByUser = false;
@@ -96,10 +97,10 @@ async function connectNative(onBpm: (bpm: number) => void, onDisconnect: () => v
     await BleClient.startNotifications(id, HR_SERVICE, HR_MEASUREMENT, (value) => onBpm(parseHeartRate(value)));
   } catch {
     await BleClient.disconnect(id).catch(() => undefined);
-    throw new Error('Il dispositivo non espone il servizio frequenza cardiaca.');
+    throw new Error(t('Il dispositivo non espone il servizio frequenza cardiaca.'));
   }
   return {
-    deviceName: device.name || 'Sensore cardio',
+    deviceName: device.name || t('Sensore cardio'),
     disconnect() {
       closedByUser = true;
       void BleClient.stopNotifications(id, HR_SERVICE, HR_MEASUREMENT)
@@ -113,10 +114,10 @@ async function connectNative(onBpm: (bpm: number) => void, onDisconnect: () => v
 /* ---------- browser: Web Bluetooth ---------- */
 async function connectWeb(onBpm: (bpm: number) => void, onDisconnect: () => void): Promise<HeartRateConnection> {
   const bt = (navigator as unknown as BluetoothNavigator).bluetooth;
-  if (!bt) throw new Error('Questo browser non supporta il Bluetooth. Usa Chrome su Android o su computer.');
+  if (!bt) throw new Error(t('Questo browser non supporta il Bluetooth. Usa Chrome su Android o su computer.'));
 
   const device = await bt.requestDevice({ filters: [{ services: ['heart_rate'] }] });
-  if (!device.gatt) throw new Error('Il dispositivo non espone il servizio frequenza cardiaca.');
+  if (!device.gatt) throw new Error(t('Il dispositivo non espone il servizio frequenza cardiaca.'));
 
   device.addEventListener('gattserverdisconnected', onDisconnect);
   const server = await device.gatt.connect();
@@ -128,7 +129,7 @@ async function connectWeb(onBpm: (bpm: number) => void, onDisconnect: () => void
   });
 
   return {
-    deviceName: device.name || 'Sensore cardio',
+    deviceName: device.name || t('Sensore cardio'),
     disconnect() {
       device.removeEventListener('gattserverdisconnected', onDisconnect);
       if (device.gatt?.connected) device.gatt.disconnect();

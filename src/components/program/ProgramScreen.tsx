@@ -73,11 +73,11 @@ export function ProgramScreen(props: Props) {
     };
     props.onSaveProgram(cleaned);
     setDraft(null);
-    toast('Scheda salvata');
+    toast(t('Scheda salvata'));
   };
 
   const reset = () => {
-    if (window.confirm('Sostituire la scheda con quella di esempio? Gli allenamenti già salvati restano.')) {
+    if (window.confirm(t('Sostituire la scheda con quella di esempio? Gli allenamenti già salvati restano.'))) {
       setDraft(structuredClone(DEFAULT_PROGRAM));
       setDayId(DEFAULT_PROGRAM.days[0].id);
     }
@@ -87,9 +87,9 @@ export function ProgramScreen(props: Props) {
     <div className={`space-y-6 ${draft ? 'pb-40 lg:pb-24' : ''}`}>
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-bold">{shown.title || 'Scheda'}</h1>
+          <h1 className="font-display text-3xl font-bold">{shown.title || t('Scheda')}</h1>
           <p className="text-[15px] text-muted">
-            {[[shown.athlete, shown.trainer && `con ${shown.trainer}`].filter(Boolean).join(' '), `${shown.totalWeeks} settimane`].filter(Boolean).join(' · ')}
+            {[[shown.athlete, shown.trainer && t('con {name}', { name: shown.trainer })].filter(Boolean).join(' '), t('{n} settimane', { n: shown.totalWeeks })].filter(Boolean).join(' · ')}
           </p>
         </div>
         {!draft && (
@@ -111,7 +111,7 @@ export function ProgramScreen(props: Props) {
       </header>
 
       {shown.days.length > 0 && (
-        <Segmented label="Giorno" value={day?.id ?? ''} onChange={setDayId} options={shown.days.map((d) => ({ value: d.id, label: d.title || 'Senza nome' }))} />
+        <Segmented label={t('Giorno')} value={day?.id ?? ''} onChange={setDayId} options={shown.days.map((d) => ({ value: d.id, label: d.title || t('Senza nome') }))} />
       )}
 
       {draft ? (
@@ -123,15 +123,15 @@ export function ProgramScreen(props: Props) {
           {(program.guidelines.modalitaEsecuzione.length > 0 || program.guidelines.progressione || program.guidelines.cedimento) && (
             <section className="card grid gap-4 p-4 sm:p-5 md:grid-cols-3">
               <div>
-                <h2 className="font-display text-lg font-semibold">Esecuzione</h2>
+                <h2 className="font-display text-lg font-semibold">{t('Esecuzione')}</h2>
                 <ul className="mt-1 space-y-1 text-[15px] text-chalk/85">{program.guidelines.modalitaEsecuzione.map((m) => <li key={m}>{m}</li>)}</ul>
               </div>
               <div>
-                <h2 className="font-display text-lg font-semibold">Progressione</h2>
+                <h2 className="font-display text-lg font-semibold">{t('Progressione')}</h2>
                 <p className="mt-1 text-[15px] text-chalk/85">{program.guidelines.progressione}</p>
               </div>
               <div>
-                <h2 className="font-display text-lg font-semibold">Cedimento</h2>
+                <h2 className="font-display text-lg font-semibold">{t('Cedimento')}</h2>
                 <p className="mt-1 text-[15px] text-chalk/85">{program.guidelines.cedimento}</p>
               </div>
             </section>
@@ -164,17 +164,17 @@ export function ProgramScreen(props: Props) {
           props.onSetSpreadsheetId(id);
           props.onSaveProgram(next);
           setDayId(next.days[0]?.id ?? '');
-          toast('Scheda del coach importata');
+          toast(t('Scheda del coach importata'));
         }}
       />
 
       {draft && (
         <div className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+4rem)] z-30 border-t border-line bg-ink/95 backdrop-blur lg:bottom-0 lg:left-60">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2 px-4 py-2.5 lg:px-8">
-            <Button variant="ghost" onClick={reset}>Ripristina scheda iniziale</Button>
+            <Button variant="ghost" onClick={reset}>{t('Ripristina scheda iniziale')}</Button>
             <span className="flex-1" />
-            <Button onClick={() => setDraft(null)}>Annulla</Button>
-            <Button variant="primary" onClick={save}>Salva modifiche</Button>
+            <Button onClick={() => setDraft(null)}>{t('Annulla')}</Button>
+            <Button variant="primary" onClick={save}>{t('Salva modifiche')}</Button>
           </div>
         </div>
       )}

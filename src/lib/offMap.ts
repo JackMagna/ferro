@@ -1,4 +1,5 @@
 import type { FoodEntry } from '../types';
+import { t } from './i18n';
 
 /** Prodotto Open Food Facts ridotto ai valori per 100 g che servono all'app. */
 export interface OffProduct {
@@ -42,7 +43,7 @@ export function parseOffProduct(raw: unknown): OffProduct | null {
   const brand = String(p.brands ?? '').split(',')[0].trim();
   const out: OffProduct = {
     code,
-    name: name || 'Prodotto senza nome',
+    name: name || t('Prodotto senza nome'),
     brand: brand || undefined,
     kcal100: kcal,
     protein100: nonNeg(n.proteins_100g),

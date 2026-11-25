@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '../ui/Button';
+import { t } from '../../lib/i18n';
 
 interface DetectorLike { detect(source: CanvasImageSource): Promise<{ rawValue: string }[]> }
 type DetectorCtor = new (opts?: { formats?: string[] }) => DetectorLike;
@@ -25,14 +26,14 @@ export function BarcodeScanner({ onCode, onClose }: Props) {
     let stopped = false;
     const Ctor = detectorCtor();
     if (!Ctor) {
-      setError('Questo browser non legge i codici a barre: scrivi il codice a mano.');
+      setError(t('Questo browser non legge i codici a barre: scrivi il codice a mano.'));
       return;
     }
     const detector = new Ctor({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'] });
     (async () => {
       try {
         stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
-        if (stopped) { stream.getTracks().forEach((t) => t.stop()); return; }
+        if (stopped) { stream.getTracks().forEach((tr) => tr.stop()); return; }
         const video = videoRef.current;
         if (!video) return;
         video.srcObject = stream;
@@ -47,13 +48,13 @@ export function BarcodeScanner({ onCode, onClose }: Props) {
           }
         }, 400);
       } catch {
-        setError('Non riesco ad aprire la fotocamera. Controlla il permesso del browser oppure scrivi il codice a mano.');
+        setError(t('Non riesco ad aprire la fotocamera. Controlla il permesso del browser oppure scrivi il codice a mano.'));
       }
     })();
     return () => {
       stopped = true;
       window.clearInterval(timer);
-      stream?.getTracks().forEach((t) => t.stop());
+      stream?.getTracks().forEach((tr) => tr.stop());
     };
     // onCode cambia a ogni rendering del genitore: la lettura deve partire una volta sola
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -62,10 +63,10 @@ export function BarcodeScanner({ onCode, onClose }: Props) {
   return (
     <div className="space-y-2 rounded-2xl border border-line p-3">
       {error ? <p role="alert" className="text-sm text-stop">{error}</p> : (
-        <video ref={videoRef} muted playsInline aria-label="Anteprima della fotocamera" className="aspect-video w-full rounded-xl bg-ink object-cover" />
+        <video ref={videoRef} muted playsInline aria-label={t('Anteprima della fotocamera')} className="aspect-video w-full rounded-xl bg-ink object-cover" />
       )}
-      <p className="text-sm text-muted">Inquadra il codice a barre del prodotto.</p>
-      <Button onClick={onClose}>Chiudi la fotocamera</Button>
+      <p className="text-sm text-muted">{t('Inquadra il codice a barre del prodotto.')}</p>
+      <Button onClick={onClose}>{t('Chiudi la fotocamera')}</Button>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { canOverwrite, planAnnotations } from '../lib/sheetWrite';
 import { parseMeasuresTab, type MeasuresLayout, type SheetValues } from '../lib/measuresSheet';
 import { programRows } from '../lib/csv';
 import { GoogleTokenExpiredError } from './firebase';
+import { t } from '../lib/i18n';
 
 const API = 'https://sheets.googleapis.com/v4/spreadsheets';
 const LOG_SHEET = 'Log carichi';
@@ -17,9 +18,9 @@ async function call<T>(token: string, url: string, init: RequestInit = {}): Prom
   if (!res.ok) {
     const body = await res.json().catch(() => null);
     const msg = body?.error?.message ?? res.statusText;
-    if (res.status === 403) throw new Error("Non hai il permesso di modificare questo foglio. Chiedi al coach di condividerlo con te come “Editor”.");
-    if (res.status === 404) throw new Error('Foglio non trovato. Controlla il link o l\'ID del foglio.');
-    throw new Error(`Errore Google Sheets (${res.status}): ${msg}`);
+    if (res.status === 403) throw new Error(t('Non hai il permesso di modificare questo foglio. Chiedi al coach di condividerlo con te come “Editor”.'));
+    if (res.status === 404) throw new Error(t("Foglio non trovato. Controlla il link o l'ID del foglio."));
+    throw new Error(t('Errore Google Sheets ({stato}): {motivo}', { stato: res.status, motivo: msg }));
   }
   return res.json() as Promise<T>;
 }

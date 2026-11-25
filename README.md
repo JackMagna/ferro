@@ -1,123 +1,125 @@
 # Ferro
 
-App web (PWA) per seguire la scheda in palestra: serie, carichi, recuperi, record, misure e pasti.
-Funziona offline e si installa sul telefono. Prima si chiamava **IronTrack**: le chiavi di salvataggio e il formato
-del backup restano `irontrack`, così i dati esistenti continuano a funzionare.
+**English** · [Italiano](README.it.md)
 
-Online: https://palestra-kohl.vercel.app (pagina di presentazione) · app in https://palestra-kohl.vercel.app/app/
+Web app (PWA) to follow your training program at the gym: sets, loads, rest times, records, body measurements and meals.
+It works offline and installs on your phone. It used to be called **IronTrack**: the storage keys and the backup
+format are still `irontrack`, so existing data keeps working.
 
-## Cosa fa
+Online: https://palestra-kohl.vercel.app (landing page, also in English, Spanish, French and German under `/en/`, `/es/`, `/fr/`, `/de/`) · app at https://palestra-kohl.vercel.app/app/
 
-- **Scheda modificabile** dall'app: giorni, esercizi, serie e ripetizioni per settimana, recuperi e note.
-- **Libreria esercizi pubblica**: [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (dominio pubblico), 800+ esercizi con foto e muscoli.
-- **Mappa muscolare**: [react-body-highlighter](https://github.com/giavinh79/react-body-highlighter) (MIT).
-- **Dati**: Firestore con cache offline (con account Google) oppure solo sul dispositivo (senza account). Backup e ripristino da file.
-- **Google Sheets**: legge la scheda del coach dal foglio condiviso e ci scrive i carichi (accanto a "3X10" nella cella della settimana) e le misure. Le celle che il coach modifica non vengono toccate.
-- **Misure**: la scheda MISURE del coach (colonne = settimane, righe PESO, VITA, ADDOME, FIANCHI, BRACCIO, COSCIA) si legge e si scrive nei due sensi. Se una cella ha un valore diverso dall'app, l'app chiede quale tenere.
-- **Pasti**: diario con calorie, macro, fibre, zuccheri, sale e ora del pasto; obiettivo del giorno e andamento degli ultimi 7 giorni.
-- **Codice a barre**: cerca un prodotto su [Open Food Facts](https://world.openfoodfacts.org) con la fotocamera (se il browser supporta `BarcodeDetector`), scrivendo il codice o per nome; i valori per 100 g diventano quelli della porzione mangiata.
-- **Dieta della nutrizionista, senza IA nell'app**: l'app fornisce un prompt; lo usi con il servizio che preferisci allegando il file della dieta e incolli nell'app la risposta (formato `irontrack-diet-v1`). Vale per diete con pasti precisi, con soli macro (le kcal vengono calcolate: 4·P + 4·C + 9·G) o con entrambi. Resta anche la lettura del testo incollato.
-- **Dati salute** (facoltativo, una fonte per volta): **Google Health** (anche dal sito) oppure **Health Connect** (solo app Android). Importano peso, massa grassa e frequenza cardiaca; le pesate inserite nell'app vengono inviate alla fonte scelta. Con Google Health si registrano anche gli allenamenti e, se attivato, i pasti.
-- **Apple Salute (iPhone)**: due Comandi rapidi («Ferro Salute» e «Salute Ferro») portano pesate, massa grassa, calorie e macro in Salute e le pesate di Salute in Ferro (`src/lib/appleHealthBridge.ts`, guida nella pagina di presentazione).
-- **Frequenza cardiaca** via Bluetooth (Chrome su Android e computer) ed esportazione TCX per Strava/Garmin.
-- **Aspetto**: tre temi (Classico, Grafite, Brace), ognuno scuro, chiaro o come il sistema. Logo e icona seguono il tema scelto.
+## What it does
 
-## Sviluppo
+- **Editable program** in the app: days, exercises, sets and reps per week, rest times and notes.
+- **Public exercise library**: [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (public domain), 800+ exercises with photos and muscles.
+- **Muscle map**: [react-body-highlighter](https://github.com/giavinh79/react-body-highlighter) (MIT).
+- **Data**: Firestore with offline cache (with a Google account) or only on the device (without an account). Backup and restore from a file.
+- **Google Sheets**: reads the coach's program from the shared sheet and writes the loads into it (next to "3X10" in that week's cell) along with the measurements. Cells the coach edits are never touched.
+- **Measurements**: the coach's MISURE tab (columns = weeks, rows PESO, VITA, ADDOME, FIANCHI, BRACCIO, COSCIA) is read and written both ways. If a cell has a different value from the app, the app asks which one to keep.
+- **Meals**: diary with calories, macros, fiber, sugars, salt and meal time; daily goal and trend over the last 7 days.
+- **Barcode**: looks up a product on [Open Food Facts](https://world.openfoodfacts.org) with the camera (if the browser supports `BarcodeDetector`), by typing the code or by name; the per-100 g values become those of the portion eaten.
+- **Nutritionist's diet plan, with no AI in the app**: the app provides a prompt; you use it with the service you prefer, attaching the diet file, and paste the answer into the app (format `irontrack-diet-v1`). It works for diets with exact meals, with macros only (kcal are calculated: 4·P + 4·C + 9·F) or with both. Reading pasted text is still supported.
+- **Health data** (optional, one source at a time): **Google Health** (from the website too) or **Health Connect** (Android app only). They import weight, body fat and heart rate; weigh-ins entered in the app are sent to the chosen source. With Google Health, workouts and, if enabled, meals are recorded too.
+- **Apple Health (iPhone)**: two Shortcuts («Ferro Salute» and «Salute Ferro») bring weigh-ins, body fat, calories and macros into Health and Health weigh-ins into Ferro (`src/lib/appleHealthBridge.ts`, guide on the landing page).
+- **Heart rate** over Bluetooth (Chrome on Android and desktop) and TCX export for Strava/Garmin.
+- **Look**: three themes (Classico, Grafite, Brace), each dark, light or following the system. Logo and icon follow the chosen theme.
+
+## Development
 
 ```bash
-bun install        # oppure npm install
+bun install        # or npm install
 bun run dev        # http://localhost:3000
-bun run test       # test (vitest)
-bun run build      # controllo dei tipi + build di produzione
-node scripts/check-contrast.mjs   # contrasto dei colori di tutti i temi (WCAG 4,5:1)
+bun run test       # tests (vitest)
+bun run build      # type check + production build
+node scripts/check-contrast.mjs   # color contrast of all themes (WCAG 4.5:1)
 ```
 
-Il deploy è automatico su Vercel a ogni push su `main`. L'app è in `/app/` (Vite `base`); la cartella `site/` (pagina di presentazione, informativa, `sw.js` che disattiva il vecchio service worker della radice) viene copiata alla radice di `dist/`. Per l'app Android si compila con `APP_BASE=/`.
+Deployment to Vercel is automatic on every push to `main`. The app lives in `/app/` (Vite `base`); the `site/` folder (landing page and its translations in `site/en`, `site/es`, `site/fr`, `site/de`, privacy policy, `sw.js` that disables the old root service worker) is copied to the root of `dist/`. The Android app is built with `APP_BASE=/`.
 
-## Temi, logo e icone
+## Themes, logo and icons
 
-Colori, angoli e font di ogni tema sono variabili CSS in `src/index.css` (`html[data-theme][data-mode]`);
-la scelta è in `src/lib/theme.ts` e uno script in `index.html` la applica prima del primo disegno.
-Le icone dell'app (SVG, PNG e un manifest per tema) sono in `public/icons/` e si rigenerano con:
+Colors, corner radii and fonts of each theme are CSS variables in `src/index.css` (`html[data-theme][data-mode]`);
+the choice is in `src/lib/theme.ts` and a script in `index.html` applies it before the first paint.
+The app icons (SVG, PNG and one manifest per theme) are in `public/icons/` and are regenerated with:
 
 ```bash
-node scripts/make-icons.mjs   # serve sharp (npm i -g sharp)
+node scripts/make-icons.mjs   # needs sharp (npm i -g sharp)
 ```
 
-Un'app già installata tiene l'icona che aveva al momento dell'installazione: è un limite di Android e iOS.
+An already installed app keeps the icon it had when it was installed: this is an Android and iOS limitation.
 
-## Aggiornare la libreria esercizi
+## Updating the exercise library
 
 ```bash
 bun run update-exercises
 ```
 
-Poi aggiorna `LIBRARY_COMMIT` in `src/lib/exerciseLibrary.ts` con l'ultimo commit di free-exercise-db,
-così le foto corrispondono ai dati.
+Then update `LIBRARY_COMMIT` in `src/lib/exerciseLibrary.ts` with the latest free-exercise-db commit,
+so the photos match the data.
 
-## Google Health (peso, massa grassa, frequenza cardiaca, allenamenti, pasti)
+## Google Health (weight, body fat, heart rate, workouts, meals)
 
-Le vecchie API Fitbit vengono spente a fine ottobre 2026 (e non si possono più registrare nuove app): il collegamento usa la **Google Health API** (v4),
-con lo stesso login Google dell'app. Non serve registrare nessuna app esterna.
+The old Fitbit APIs are shut down at the end of October 2026 (and new apps can no longer be registered): the connection uses the **Google Health API** (v4),
+with the same Google sign-in as the app. No external app needs to be registered.
 
-Nel progetto Google Cloud (una volta sola):
-1. abilitare **Google Health API** (`health.googleapis.com`);
-2. in *Google Auth Platform → Accesso ai dati* aggiungere gli ambiti
+In the Google Cloud project (once):
+1. enable the **Google Health API** (`health.googleapis.com`);
+2. in *Google Auth Platform → Data access* add the scopes
    `googlehealth.health_metrics_and_measurements.readonly`, `googlehealth.health_metrics_and_measurements.writeonly`,
-   `googlehealth.activity_and_fitness.writeonly` e `googlehealth.nutrition.writeonly` (pasti);
-3. aggiungere gli account tra gli *utenti di prova* (fino a 100; oltre serve la verifica di Google).
+   `googlehealth.activity_and_fitness.writeonly` and `googlehealth.nutrition.writeonly` (meals);
+3. add the accounts as *test users* (up to 100; beyond that Google verification is required).
 
-Nell'app: icona account → *Dati salute* → *Google Health* → *Collega Google Health*. L'account Google deve avere un profilo
-Google Health (app Google Health sul telefono, "Accedi con Google", oppure migrazione dell'account Fitbit).
-Il permesso dura circa un'ora: poi compare "Ricollega Google Health". L'invio dei pasti si attiva con «Invia i pasti a Google Health»
-(dopo averlo attivato serve ricollegare per accettare il nuovo permesso). Tutto il codice sta in `src/services/googleHealth.ts`
-e `src/lib/healthNutrition.ts`.
+In the app: account icon → *Health data* → *Google Health* → *Connect Google Health*. The Google account must have a
+Google Health profile (Google Health app on the phone, "Sign in with Google", or migration of the Fitbit account).
+The permission lasts about an hour: then "Reconnect Google Health" appears. Sending meals is enabled with «Send meals to Google Health»
+(after enabling it you need to reconnect to accept the new permission). All the code is in `src/services/googleHealth.ts`
+and `src/lib/healthNutrition.ts`.
 
-## Google Sheets e scheda del coach
+## Google Sheets and the coach's program
 
-Il foglio deve essere condiviso con il tuo account come **Editor**. Nell'app: *Scheda → Collega la scheda del coach*.
-L'app riconosce righe `GIORNO 1`, colonne `1 SETT.`…`6 SETT.`, intestazioni di sezione (`PROGRESSIONE SERIE X REP RIP. 2'`) e gli esercizi.
+The sheet must be shared with your account as **Editor**. In the app: *Program → Connect the coach's program*.
+The app recognizes `GIORNO 1` rows, `1 SETT.`…`6 SETT.` columns, section headers (`PROGRESSIONE SERIE X REP RIP. 2'`) and the exercises.
 
 ## Firebase
 
-La configurazione è in `firebase-applet-config.json`. La chiave API di Firebase per il web non è un segreto
-(identifica il progetto, non dà accessi): la protezione è nelle regole di `firestore.rules`.
-Dopo il deploy su Vercel, aggiungi il dominio in *Authentication → Impostazioni → Domini autorizzati*.
+The configuration is in `firebase-applet-config.json`. The Firebase web API key is not a secret
+(it identifies the project, it grants no access): protection comes from the rules in `firestore.rules`.
+After deploying to Vercel, add the domain under *Authentication → Settings → Authorized domains*.
 
-Le regole di `firestore.rules` (che includono `users/{uid}/meals`) vanno **ripubblicate a mano** dopo ogni modifica:
-console Firebase → *Firestore → Regole* → incolla il file → *Pubblica*. Nel repository non ci sono `firebase.json`
-e `.firebaserc`, quindi `firebase deploy` non funziona senza prima configurarli.
+The rules in `firestore.rules` (which include `users/{uid}/meals`) must be **republished by hand** after every change:
+Firebase console → *Firestore → Rules* → paste the file → *Publish*. The repository has no `firebase.json`
+or `.firebaserc`, so `firebase deploy` does not work without configuring them first.
 
-## App Android
+## Android app
 
-Lo stesso codice del sito, impacchettato con Capacitor (`capacitor.config.json`, `scripts/patch-android.mjs`, codice
-nativo in `native/android`). Non è su Google Play: l'APK si scarica dal sito, che punta sempre all'ultima Release
+The same code as the website, packaged with Capacitor (`capacitor.config.json`, `scripts/patch-android.mjs`, native
+code in `native/android`). It is not on Google Play: the APK is downloaded from the website, which always points to the latest Release
 (`releases/latest/download/ferro-release.apk`).
 
-- **Nuova versione**: aggiorna `version` in `package.json`, poi `git tag v2.3.0 && git push origin v2.3.0`. Il workflow
-  `.github/workflows/android.yml` crea la Release con l'APK firmato.
-- **Avviso nell'app**: all'apertura l'app Android chiede a GitHub l'ultima Release e, se è più nuova, mostra «Aggiorna»
-  (`src/lib/appUpdate.ts`, `src/components/layout/UpdateBanner.tsx`). Le build di prova (ramo `android-build`) non controllano.
-- **Firma**: senza i segreti `ANDROID_KEYSTORE_*` l'APK è firmato con una chiave di debug e non si installa sopra la
-  versione ufficiale. Chi pubblica una sua versione deve cambiare `appId` e nome.
+- **New version**: update `version` in `package.json`, then `git tag v2.3.0 && git push origin v2.3.0`. The workflow
+  `.github/workflows/android.yml` creates the Release with the signed APK.
+- **In-app notice**: on startup the Android app asks GitHub for the latest Release and, if it is newer, shows «Update»
+  (`src/lib/appUpdate.ts`, `src/components/layout/UpdateBanner.tsx`). Test builds (`android-build` branch) do not check.
+- **Signing**: without the `ANDROID_KEYSTORE_*` secrets the APK is signed with a debug key and does not install over the
+  official version. Anyone publishing their own version must change `appId` and the name.
 
-## Licenza
+## License
 
-[GPL-3.0-or-later](LICENSE): puoi usare, modificare e ridistribuire Ferro; chi distribuisce una versione modificata
-deve pubblicarne il codice con la stessa licenza. Librerie e dati di terzi hanno le loro licenze (`site/licenze.html`).
+[GPL-3.0-or-later](LICENSE): you can use, modify and redistribute Ferro; anyone distributing a modified version
+must publish its source code under the same license. Third-party libraries and data have their own licenses (`site/licenze.html`).
 
-## Struttura
+## Structure
 
 ```
 src/
   components/   workout, program, nutrition, exercise, progress, layout, onboarding, ui
-  hooks/        useAppData (dati), useHealthSync, useSheetsSync, useLibrary, usePWA, useMediaQuery
+  hooks/        useAppData (data), useHealthSync, useSheetsSync, useLibrary, usePWA, useMediaQuery
   services/     firebase, googleSheets, googleHealth, healthConnect, openFoodFacts, normalize, localStore
   lib/          prescription, stats, csv, tcx, coachSheet, sheetWrite, measuresSheet, healthMath,
-                nutrition, healthNutrition, offMap, theme (con test in __tests__)
-  data/         scheda di partenza
+                nutrition, healthNutrition, offMap, theme (with tests in __tests__)
+  data/         starter program
 scripts/        update-exercises, patch-android, make-icons, check-contrast
-site/           pagina di presentazione (radice del sito), informativa, immagini e font
-.github/        workflow Android (APK/AAB)
-public/icons/   icone e manifest per tema
+site/           landing page (site root) and its translations, privacy policy, images and fonts
+.github/        Android workflow (APK/AAB)
+public/icons/   icons and manifest per theme
 ```

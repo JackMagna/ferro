@@ -27,6 +27,7 @@ import {
 import { Capacitor } from '@capacitor/core';
 import firebaseConfig from '../../firebase-applet-config.json';
 import { readJSON, removeKey, writeJSON } from '../lib/storage';
+import { t } from '../lib/i18n';
 // prima di getAuth: guarda se c'è un accesso salvato, per la diagnostica e per non mostrare l'accesso troppo presto
 import '../lib/authProbe';
 
@@ -102,7 +103,7 @@ function storeToken(service: GoogleService, user: User, token: string | undefine
 
 export class GoogleTokenExpiredError extends Error {
   constructor() {
-    super('Il collegamento con Google è scaduto. Tocca "Ricollega Google" e riprova.');
+    super(t('Il collegamento con Google è scaduto. Tocca "Ricollega Google" e riprova.'));
     this.name = 'GoogleTokenExpiredError';
   }
 }
@@ -134,7 +135,7 @@ async function nativeGoogle(scopes: string[]): Promise<{ idToken: string | null;
   // ID client OAuth «Applicazione web» del progetto: è già nella configurazione Firebase (non è un segreto);
   // la variabile d'ambiente serve solo per usarne un altro.
   const webClientId = (import.meta.env.VITE_GOOGLE_WEB_CLIENT_ID as string | undefined) || (firebaseConfig as { oAuthClientId?: string }).oAuthClientId;
-  if (!webClientId) throw new Error("L'accesso con Google nell'app Android non è ancora configurato.");
+  if (!webClientId) throw new Error(t("L'accesso con Google nell'app Android non è ancora configurato."));
   const { SocialLogin } = await import('@capgo/capacitor-social-login');
   nativeReady ??= SocialLogin.initialize({ google: { webClientId } });
   await nativeReady;
@@ -143,9 +144,9 @@ async function nativeGoogle(scopes: string[]): Promise<{ idToken: string | null;
     res = await SocialLogin.login({ provider: 'google', options: { scopes: ['email', 'profile', ...scopes] } });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    if (/cancel/i.test(msg)) throw Object.assign(new Error('Accesso annullato.'), { code: 'auth/popup-closed-by-user' });
+    if (/cancel/i.test(msg)) throw Object.assign(new Error(t('Accesso annullato.')), { code: 'auth/popup-closed-by-user' });
     // di solito: firma dell'app (SHA-1) non registrata nel client OAuth Android del progetto
-    throw new Error(`Accesso con Google non riuscito nell'app Android (${msg}). Se persiste, usa Ferro dal browser.`);
+    throw new Error(t("Accesso con Google non riuscito nell'app Android ({motivo}). Se persiste, usa Ferro dal browser.", { motivo: msg }));
   }
   const r = res.result as { idToken?: string | null; accessToken?: { token?: string } | null };
   return { idToken: r.idToken ?? null, accessToken: r.accessToken?.token };
@@ -154,7 +155,7 @@ async function nativeGoogle(scopes: string[]): Promise<{ idToken: string | null;
 async function nativeSignIn(scopes: string[]): Promise<{ user: User; accessToken?: string }> {
   const { idToken, accessToken } = await nativeGoogle(scopes);
   if (auth.currentUser) return { user: auth.currentUser, accessToken };
-  if (!idToken && !accessToken) throw new Error('Google non ha restituito le credenziali.');
+  if (!idToken && !accessToken) throw new Error(t('Google non ha restituito le credenziali.'));
   const result = await signInWithCredential(auth, GoogleAuthProvider.credential(idToken, accessToken));
   return { user: result.user, accessToken };
 }
@@ -175,7 +176,7 @@ async function checkGrantedScopes(token: string, wanted: string[]) {
   const missing = wanted.filter((s) => !granted.includes(s));
   if (missing.length) {
     const names = missing.map((s) => s.replace(/^https:\/\/www\.googleapis\.com\/auth\//, '')).join(', ');
-    throw new Error(`Google non ha concesso tutti i permessi (mancano: ${names}). Riprova e spunta tutte le caselle; se non compaiono, revoca Ferro in myaccount.google.com → Sicurezza → App di terze parti e ricollega.`);
+    throw new Error(t('Google non ha concesso tutti i permessi (mancano: {nomi}). Riprova e spunta tutte le caselle; se non compaiono, revoca Ferro in myaccount.google.com → Sicurezza → App di terze parti e ricollega.', { nomi: names }));
   }
 }
 
@@ -198,7 +199,7 @@ export async function ensureGoogleToken(service: GoogleService = 'sheets'): Prom
   if (existing) return existing;
   if (isNativeApp()) {
     const { user, accessToken } = await nativeSignIn(SCOPES[service]);
-    if (!accessToken) throw new Error('Google non ha restituito il permesso richiesto.');
+    if (!accessToken) throw new Error(t('Google non ha restituito il permesso richiesto.'));
     await checkGrantedScopes(accessToken, SCOPES[service]);
     storeToken(service, user, accessToken);
     return accessToken;
@@ -208,7 +209,7 @@ export async function ensureGoogleToken(service: GoogleService = 'sheets'): Prom
     ? await reauthenticateWithPopup(user, provider(service))
     : await signInWithPopup(auth, provider(service));
   const token = GoogleAuthProvider.credentialFromResult(result)?.accessToken;
-  if (!token) throw new Error('Google non ha restituito il permesso richiesto.');
+  if (!token) throw new Error(t('Google non ha restituito il permesso richiesto.'));
   storeToken(service, result.user, token);
   return token;
 }
@@ -251,10 +252,10 @@ export async function logout() {
  */
 export async function deleteAccount(): Promise<void> {
   const user = auth.currentUser;
-  if (!user) throw new Error('Nessun account connesso.');
+  if (!user) throw new Error(t('Nessun account connesso.'));
   if (isNativeApp()) {
     const { idToken, accessToken } = await nativeGoogle([]);
-    if (!idToken && !accessToken) throw new Error('Google non ha restituito le credenziali.');
+    if (!idToken && !accessToken) throw new Error(t('Google non ha restituito le credenziali.'));
     await reauthenticateWithCredential(user, GoogleAuthProvider.credential(idToken, accessToken));
   } else {
     await reauthenticateWithPopup(user, provider());
@@ -299,9 +300,9 @@ export function watchAuth(cb: (user: User | null) => void) {
 /** Messaggio leggibile per gli errori di accesso più comuni */
 export function authErrorMessage(err: unknown): string {
   const code = (err as { code?: string })?.code ?? '';
-  if (code.includes('popup-closed') || code.includes('cancelled-popup')) return 'Accesso annullato.';
-  if (code.includes('popup-blocked')) return 'Il browser ha bloccato il popup di Google. Consenti i popup per questo sito e riprova.';
-  if (code.includes('unauthorized-domain')) return 'Questo dominio non è autorizzato in Firebase. Aggiungilo in Authentication > Impostazioni > Domini autorizzati.';
-  if (code.includes('network')) return 'Nessuna connessione. Riprova quando sei online.';
-  return err instanceof Error ? err.message : 'Accesso non riuscito.';
+  if (code.includes('popup-closed') || code.includes('cancelled-popup')) return t('Accesso annullato.');
+  if (code.includes('popup-blocked')) return t('Il browser ha bloccato il popup di Google. Consenti i popup per questo sito e riprova.');
+  if (code.includes('unauthorized-domain')) return t('Questo dominio non è autorizzato in Firebase. Aggiungilo in Authentication > Impostazioni > Domini autorizzati.');
+  if (code.includes('network')) return t('Nessuna connessione. Riprova quando sei online.');
+  return err instanceof Error ? err.message : t('Accesso non riuscito.');
 }

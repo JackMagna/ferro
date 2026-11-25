@@ -1,4 +1,5 @@
 import { readJSON, removeKey, writeJSON } from './storage';
+import { locale } from './i18n';
 
 /**
  * Consenso esplicito al trattamento dei dati sulla salute (art. 9.2.a GDPR).
@@ -31,5 +32,5 @@ export const readLocalConsent = () => normalizeConsent(readJSON<unknown>(CONSENT
 export const writeLocalConsent = (c: HealthConsent) => writeJSON(CONSENT_KEY, c);
 export const clearLocalConsent = () => removeKey(CONSENT_KEY);
 
-/** Data del consenso in italiano, es. «28/10/2026». */
-export const consentDate = (c: HealthConsent) => new Date(c.at).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+/** Data del consenso nella lingua dell'app, es. «28/10/2026». */
+export const consentDate = (c: HealthConsent) => new Date(c.at).toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' });

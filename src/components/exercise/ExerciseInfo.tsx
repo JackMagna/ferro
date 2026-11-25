@@ -4,6 +4,7 @@ import {
 } from '../../lib/exerciseLibrary';
 import { ExerciseMedia } from './ExerciseMedia';
 import { MuscleMap } from './MuscleMap';
+import { t } from '../../lib/i18n';
 
 /** Dettaglio di un esercizio della libreria: foto, muscoli, istruzioni. */
 export function ExerciseInfo({ exercise, displayName, showMedia = true }: { exercise: LibraryExercise; displayName?: string; showMedia?: boolean }) {
@@ -11,7 +12,7 @@ export function ExerciseInfo({ exercise, displayName, showMedia = true }: { exer
     equipmentLabel(exercise.equipment),
     CATEGORY_LABELS[exercise.category] ?? exercise.category,
     LEVEL_LABELS[exercise.level],
-    exercise.mechanic === 'compound' ? 'Multiarticolare' : exercise.mechanic === 'isolation' ? 'Monoarticolare' : null
+    exercise.mechanic === 'compound' ? t('Multiarticolare') : exercise.mechanic === 'isolation' ? t('Monoarticolare') : null
   ].filter(Boolean);
 
   return (
@@ -25,8 +26,8 @@ export function ExerciseInfo({ exercise, displayName, showMedia = true }: { exer
       <MuscleMap primary={exercise.primaryMuscles} secondary={exercise.secondaryMuscles} />
       {exercise.instructions.length > 0 && (
         <section>
-          <h3 className="font-display text-lg font-semibold">Come si esegue</h3>
-          <p className="mb-2 text-sm text-faint">Istruzioni originali della libreria, in inglese.</p>
+          <h3 className="font-display text-lg font-semibold">{t('Come si esegue')}</h3>
+          <p className="mb-2 text-sm text-faint">{t('Istruzioni originali della libreria, in inglese.')}</p>
           <ol lang="en" className="list-decimal space-y-2 pl-5 text-[15px] leading-relaxed text-chalk/90">
             {exercise.instructions.map((step, i) => <li key={i}>{step}</li>)}
           </ol>
@@ -38,7 +39,7 @@ export function ExerciseInfo({ exercise, displayName, showMedia = true }: { exer
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1.5 text-[15px] font-medium text-plate hover:underline"
       >
-        Cerca un video su YouTube <ExternalLink className="h-4 w-4" />
+        {t('Cerca un video su YouTube')} <ExternalLink className="h-4 w-4" />
       </a>
     </div>
   );

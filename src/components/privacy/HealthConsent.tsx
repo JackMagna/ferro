@@ -4,8 +4,12 @@ import { readJSON, writeJSON } from '../../lib/storage';
 import { PRIVACY_URL } from '../../lib/links';
 import { Sheet } from '../ui/Sheet';
 import { Button } from '../ui/Button';
+import { t } from '../../lib/i18n';
 
-export const NO_CONSENT_MESSAGE = 'Senza consenso non posso salvare questi dati. Scheda e allenamenti funzionano lo stesso.';
+/** Testo tradotto con le parti tra ** in grassetto. */
+const bold = (s: string) => s.split('**').map((p, i) => (i % 2 ? <strong key={i}>{p}</strong> : p));
+
+export const NO_CONSENT_MESSAGE = t('Senza consenso non posso salvare questi dati. Scheda e allenamenti funzionano lo stesso.');
 
 interface Api {
   /** true se c'è un consenso valido per la versione attuale del testo */
@@ -40,11 +44,11 @@ interface Options {
 export function ConsentText() {
   return (
     <div className="space-y-3 text-[15px]">
-      <p>Peso, massa grassa, misure, frequenza cardiaca, pasti e dieta sono dati relativi alla salute. Per salvarli, Ferro ha bisogno del tuo consenso esplicito.</p>
+      <p>{t('Peso, massa grassa, misure, frequenza cardiaca, pasti e dieta sono dati relativi alla salute. Per salvarli, Ferro ha bisogno del tuo consenso esplicito.')}</p>
       <ul className="space-y-2 pl-5 [list-style:disc]">
-        <li><strong>Dove vanno.</strong> Sul tuo dispositivo. Con l'account Google, nel tuo spazio privato su Firebase (Europa), leggibile solo da te. Con i collegamenti che attivi tu, anche su Google Health, Health Connect o nel foglio del tuo coach.</li>
-        <li><strong>A cosa servono.</strong> Solo a mostrarti i tuoi progressi nell'app. Niente pubblicità, niente cessione a terzi.</li>
-        <li><strong>Sei libero.</strong> Puoi revocare il consenso quando vuoi da «Account e dati» e cancellare i tuoi dati.</li>
+        <li>{bold(t("**Dove vanno.** Sul tuo dispositivo. Con l'account Google, nel tuo spazio privato su Firebase (Europa), leggibile solo da te. Con i collegamenti che attivi tu, anche su Google Health, Health Connect o nel foglio del tuo coach."))}</li>
+        <li>{bold(t("**A cosa servono.** Solo a mostrarti i tuoi progressi nell'app. Niente pubblicità, niente cessione a terzi."))}</li>
+        <li>{bold(t('**Sei libero.** Puoi revocare il consenso quando vuoi da «Account e dati» e cancellare i tuoi dati.'))}</li>
       </ul>
     </div>
   );
@@ -56,8 +60,8 @@ export function ConsentCheckbox({ checked, onChange, label }: { checked: boolean
     <label className="flex items-start gap-3 rounded-xl bg-ink p-3 text-[15px]">
       <input type="checkbox" className="mt-1 h-5 w-5 shrink-0 accent-plate" checked={checked} onChange={(e) => onChange(e.target.checked)} />
       <span>
-        {label ?? 'Acconsento al trattamento dei miei dati sulla salute come descritto nell\''}
-        <a href={PRIVACY_URL} target="_blank" rel="noopener" className="text-plate underline">informativa</a>.
+        {label ?? t("Acconsento al trattamento dei miei dati sulla salute come descritto nell'")}
+        <a href={PRIVACY_URL} target="_blank" rel="noopener" className="text-plate underline">{t('informativa')}</a>.
       </span>
     </label>
   );
@@ -112,21 +116,21 @@ export function useHealthConsentGate({ consent, onSave, onDeclined, onDeleteHeal
   const api: Api = { valid, consent, ensure, grant, revoke: () => onSave(null), askExistingOnce };
 
   const sheet = (
-      <Sheet open={mode !== 'closed'} onClose={decline} title="I tuoi dati sulla salute">
+      <Sheet open={mode !== 'closed'} onClose={decline} title={t('I tuoi dati sulla salute')}>
         <div className="space-y-4">
           {mode === 'existing' && (
             <p className="rounded-xl border border-plate/50 bg-plate/10 p-3 text-sm">
-              Hai già misure, pasti o una dieta salvati. Da ora Ferro chiede il consenso per i dati sulla salute: senza, quelli che hai restano visibili ma non se ne aggiungono altri e le sincronizzazioni si fermano.
+              {t('Hai già misure, pasti o una dieta salvati. Da ora Ferro chiede il consenso per i dati sulla salute: senza, quelli che hai restano visibili ma non se ne aggiungono altri e le sincronizzazioni si fermano.')}
             </p>
           )}
           <ConsentText />
           <ConsentCheckbox checked={checked} onChange={setChecked} />
           <div className="flex flex-wrap justify-end gap-2">
             {mode === 'existing' && (
-              <Button variant="danger" className="mr-auto" onClick={() => { finish(false); onDeleteHealthData(); }}>Elimina i dati sanitari</Button>
+              <Button variant="danger" className="mr-auto" onClick={() => { finish(false); onDeleteHealthData(); }}>{t('Elimina i dati sanitari')}</Button>
             )}
-            <Button onClick={decline}>Non ora</Button>
-            <Button variant="primary" disabled={!checked} onClick={accept}>Acconsento</Button>
+            <Button onClick={decline}>{t('Non ora')}</Button>
+            <Button variant="primary" disabled={!checked} onClick={accept}>{t('Acconsento')}</Button>
           </div>
         </div>
       </Sheet>

@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ferro — your coach's program, on your phone</title>
+<meta name="description" content="Ferro reads the program from your coach's Google Sheet, guides you through every set at the gym and writes your loads back into the sheet. Weights, running, swimming, AMRAP and EMOM with a timer, classes and courses. Connected to Google Health and Health Connect. Free, no ads.">
+<meta name="theme-color" content="#141517">
+<meta property="og:title" content="Ferro — your coach's program, on your phone">
+<meta property="og:description" content="Your program comes from your coach's sheet and updates itself. Loads, rest times, measurements, meals and Google Health. Free.">
+<meta property="og:image" content="https://palestra-kohl.vercel.app/sito/img/ferro-social.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://palestra-kohl.vercel.app/en/">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="og:locale" content="en_US">
+<link rel="alternate" hreflang="it" href="https://palestra-kohl.vercel.app/">
+<link rel="alternate" hreflang="en" href="https://palestra-kohl.vercel.app/en/">
+<link rel="alternate" hreflang="es" href="https://palestra-kohl.vercel.app/es/">
+<link rel="alternate" hreflang="fr" href="https://palestra-kohl.vercel.app/fr/">
+<link rel="alternate" hreflang="de" href="https://palestra-kohl.vercel.app/de/">
+<link rel="alternate" hreflang="x-default" href="https://palestra-kohl.vercel.app/en/">
+<link rel="icon" type="image/svg+xml" href="/app/icons/ferro-classico.svg">
+<link rel="preload" href="/sito/fonts/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face { font-family: "Barlow Condensed"; font-weight: 600; font-display: swap; src: url(/sito/fonts/barlow-condensed-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 700; font-display: swap; src: url(/sito/fonts/barlow-condensed-latin-700-normal.woff2) format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 400; font-display: swap; src: url(/sito/fonts/barlow-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 500; font-display: swap; src: url(/sito/fonts/barlow-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 600; font-display: swap; src: url(/sito/fonts/barlow-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "Space Mono"; font-weight: 400; font-display: swap; src: url(/sito/fonts/space-mono-latin-400-normal.woff2) format("woff2"); }
+
+:root {
+  /* gomma, gesso e il giallo del disco da 15 kg: gli stessi colori del tema Classico dell'app */
+  --ink: #141517;
+  --panel: #1c1e21;
+  --raised: #25282c;
+  --line: #34383d;
+  --chalk: #eeebe4;
+  --muted: #b3b0a8;
+  --faint: #8d8b84;
+  --plate: #f0c33c;
+  --plate-ink: #2a2104;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --sans: "Barlow", ui-sans-serif, system-ui, sans-serif;
+  --mono: "Space Mono", ui-monospace, monospace;
+  --wrap: 1120px;
+  --gutter: clamp(16px, 4vw, 40px);
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--ink); color: var(--chalk); font: 400 17px/1.55 var(--sans); font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; }
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--plate); outline-offset: 3px; border-radius: 4px; }
+.wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 var(--gutter); }
+.mono { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
+h1, h2, h3 { font-family: var(--display); font-weight: 700; line-height: 0.95; letter-spacing: -0.005em; margin: 0; text-transform: uppercase; }
+h2 { font-size: clamp(2.4rem, 6vw, 4.2rem); }
+h3 { font-size: 1.6rem; line-height: 1.05; }
+p { margin: 0; }
+.lead { font-size: 1.15rem; color: var(--muted); max-width: 34em; }
+
+/* pulsanti */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 0 22px; border-radius: 12px; font: 600 1.05rem var(--sans); text-decoration: none; border: 1px solid var(--line); background: var(--raised); color: var(--chalk); transition: background-color 120ms, transform 120ms; cursor: pointer; }
+.btn:hover { background: #2d3136; }
+.btn:active { transform: scale(0.98); }
+.btn--primary { background: var(--plate); color: var(--plate-ink); border-color: var(--plate); }
+.btn--primary:hover { background: #f4cc52; }
+@media (prefers-reduced-motion: reduce) { .btn:active { transform: none; } }
+.btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: square; }
+
+/* testata */
+.top { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--ink) 92%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; align-items: center; gap: 24px; min-height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 700 1.6rem var(--display); }
+.brand svg { width: 32px; height: 32px; }
+.nav { display: flex; gap: 22px; margin-left: auto; }
+.nav a { text-decoration: none; color: var(--muted); font-weight: 500; }
+.nav a:hover { color: var(--chalk); }
+.top .btn { min-height: 42px; padding: 0 16px; font-size: 0.95rem; }
+@media (max-width: 820px) { .nav { display: none; } .top .btn { margin-left: auto; } }
+/* lingue */
+.langs { display: flex; font: 400 0.72rem var(--mono); letter-spacing: .06em; }
+.langs a { text-decoration: none; color: var(--faint); padding: 6px 4px; }
+.langs a:hover { color: var(--chalk); }
+.langs a[aria-current] { color: var(--plate); }
+@media (max-width: 480px) { .top .wrap { gap: 10px; } .top .btn { padding: 0 12px; } }
+
+/* apertura */
+.hero { padding: clamp(48px, 9vw, 112px) 0 clamp(56px, 8vw, 96px); overflow: clip; }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: clamp(32px, 6vw, 72px); align-items: center; }
+.hero h1 { font-size: clamp(3.4rem, 10.5vw, 7.4rem); }
+.hero h1 span { color: var(--faint); display: block; }
+.hero .lead { margin-top: 28px; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 36px; }
+.fineprint { margin-top: 18px; color: var(--faint); font-size: 0.95rem; }
+.stage { position: relative; justify-self: center; width: min(100%, 360px); }
+.stage .disc { position: absolute; width: 150%; left: 24%; top: 50%; transform: translateY(-50%); z-index: 0; }
+.phone { position: relative; z-index: 1; border-radius: 34px; padding: 10px; background: #0b0c0d; border: 1px solid #2c2f33; box-shadow: 0 2px 4px rgba(0,0,0,.35), 0 40px 80px -30px rgba(0,0,0,.8); }
+.phone img { border-radius: 25px; }
+@media (max-width: 820px) {
+  .hero .wrap { grid-template-columns: minmax(0, 1fr); }
+  .stage { width: min(78%, 320px); }
+}
+
+/* sezioni */
+section { border-top: 1px solid var(--line); }
+.sec { padding-top: clamp(64px, 9vw, 120px); padding-bottom: clamp(64px, 9vw, 120px); }
+.sec-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: end; margin-bottom: clamp(36px, 5vw, 64px); }
+.sec-head .mono { grid-column: 1 / -1; }
+@media (max-width: 820px) { .sec-head { grid-template-columns: minmax(0, 1fr); } }
+
+/* foglio del coach */
+.sheet-row { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); gap: clamp(28px, 5vw, 64px); align-items: center; }
+@media (max-width: 900px) { .sheet-row { grid-template-columns: minmax(0, 1fr); } }
+.sheet { border: 1px solid #c9ccd1; border-radius: 8px; overflow: hidden; background: #fff; color: #202124; font: 400 13px/1.2 Arial, sans-serif; box-shadow: 0 30px 60px -30px rgba(0,0,0,.7); }
+.sheet-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f1f3f4; border-bottom: 1px solid #dadce0; font-size: 12px; color: #444; }
+.sheet-bar b { color: #188038; font-weight: 700; }
+.sheet-scroll { overflow-x: auto; }
+.sheet table { border-collapse: collapse; width: 100%; min-width: 520px; }
+.sheet th, .sheet td { border: 1px solid #e2e3e5; padding: 8px 10px; text-align: left; white-space: nowrap; }
+.sheet th { background: #f8f9fa; font-weight: 700; color: #3c4043; font-size: 12px; }
+.sheet .day td { background: #202124; color: #fff; font-weight: 700; letter-spacing: .04em; }
+.sheet .sec-r td { background: #fef7e0; color: #5f4b00; font-weight: 700; font-size: 12px; }
+.sheet .w { color: #5f6368; }
+.sheet .new { background: #fff3c4; color: #3d2f00; font-weight: 700; position: relative; }
+.sheet .new::after { content: ""; position: absolute; inset: -1px; border: 2px solid #f0c33c; pointer-events: none; }
+.sheet-note { margin-top: 14px; color: var(--faint); font-size: 0.95rem; }
+.sheet-note span { display: inline-block; width: 12px; height: 12px; background: #fff3c4; border: 2px solid #f0c33c; vertical-align: -1px; margin-right: 6px; }
+.steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 3vw, 40px); margin-top: clamp(40px, 6vw, 72px); padding-top: 32px; border-top: 1px solid var(--line); }
+.steps li { list-style: none; }
+.steps .n { font: 400 0.85rem var(--mono); color: var(--plate); letter-spacing: .08em; }
+.steps h3 { margin: 10px 0 10px; }
+.steps p { color: var(--muted); }
+.steps ol, ol.steps { padding: 0; margin-left: 0; margin-right: 0; margin-bottom: 0; }
+@media (max-width: 820px) { .steps { grid-template-columns: minmax(0, 1fr); } }
+
+/* google health */
+.flow { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 20px; align-items: stretch; }
+.flow .box { border: 1px solid var(--line); border-radius: 14px; padding: 24px; background: var(--panel); }
+.flow .box ul { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 12px; }
+.flow .box li { display: flex; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); padding-bottom: 12px; }
+.flow .box li:last-child { border-bottom: 0; padding-bottom: 0; }
+.flow .box li span:last-child { color: var(--faint); font: 400 0.8rem var(--mono); text-transform: uppercase; letter-spacing: .06em; padding-top: 3px; }
+.flow .mid { display: grid; place-items: center; }
+.flow .mid svg { width: 120px; height: 120px; }
+@media (max-width: 900px) { .flow { grid-template-columns: minmax(0, 1fr); } .flow .mid svg { transform: rotate(90deg); width: 84px; height: 84px; } }
+.gh-row { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr); gap: clamp(28px, 5vw, 64px); align-items: center; }
+@media (max-width: 900px) { .gh-row { grid-template-columns: minmax(0, 1fr); } }
+.note { margin-top: 20px; color: var(--faint); font-size: 0.95rem; max-width: 40em; }
+
+/* resto */
+.feat { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(28px, 5vw, 72px); align-items: start; }
+@media (max-width: 900px) { .feat { grid-template-columns: minmax(0, 1fr); } }
+.feat dl { margin: 0; display: grid; }
+.feat dt { font: 700 1.5rem/1.1 var(--display); text-transform: uppercase; padding-top: 22px; }
+.feat dd { margin: 6px 0 0; padding-bottom: 22px; border-bottom: 1px solid var(--line); color: var(--muted); }
+.feat dl > div:first-child dt { padding-top: 0; }
+.shot-sm { width: min(100%, 300px); }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 3vw, 28px); }
+@media (max-width: 900px) { .tiles { grid-template-columns: minmax(0, 1fr); } }
+.tiles .card p { color: var(--muted); }
+.tag { align-self: flex-start; font: 400 0.75rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--plate); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; }
+
+/* temi */
+.themes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(14px, 3vw, 32px); }
+.themes figure { margin: 0; }
+.themes figcaption { margin-top: 14px; display: flex; justify-content: space-between; gap: 12px; }
+.themes figcaption b { font: 700 1.3rem var(--display); text-transform: uppercase; }
+.themes figcaption span { color: var(--faint); font-size: 0.95rem; text-align: right; }
+@media (max-width: 720px) { .themes { grid-template-columns: minmax(0, 1fr); max-width: 340px; margin: 0 auto; } }
+
+/* manifesto */
+.manifesto { background: var(--plate); color: var(--plate-ink); border-top: 0; }
+.manifesto .wrap { padding-top: clamp(56px, 8vw, 100px); padding-bottom: clamp(56px, 8vw, 100px); }
+.manifesto p.big { font: 700 clamp(2.2rem, 6.2vw, 4.6rem)/0.98 var(--display); text-transform: uppercase; max-width: 15em; }
+.manifesto p.small { margin-top: 28px; font-size: 1.1rem; max-width: 36em; }
+
+/* coach e aziende */
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(20px, 3vw, 32px); }
+@media (max-width: 820px) { .two { grid-template-columns: minmax(0, 1fr); } }
+.card { border: 1px solid var(--line); border-radius: 16px; padding: clamp(24px, 3vw, 36px); background: var(--panel); display: flex; flex-direction: column; gap: 16px; }
+.card ul { margin: 0; padding-left: 1.1em; color: var(--muted); display: grid; gap: 8px; }
+.card .btn { align-self: flex-start; margin-top: auto; }
+.pending { color: var(--faint); font-size: 0.95rem; }
+
+/* installazione e FAQ */
+.install { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 3vw, 28px); }
+@media (max-width: 900px) { .install { grid-template-columns: minmax(0, 1fr); } }
+.install ol { margin: 12px 0 0; padding-left: 1.2em; color: var(--muted); display: grid; gap: 6px; }
+.faq { max-width: 820px; }
+.faq details { border-bottom: 1px solid var(--line); }
+.faq summary { cursor: pointer; list-style: none; padding: 22px 40px 22px 0; position: relative; font: 600 1.15rem var(--sans); min-height: 44px; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: ""; position: absolute; right: 6px; top: 50%; width: 14px; height: 14px; margin-top: -7px; background: linear-gradient(var(--chalk), var(--chalk)) center/14px 2px no-repeat, linear-gradient(var(--chalk), var(--chalk)) center/2px 14px no-repeat; transition: transform 150ms; }
+.faq details[open] summary::after { transform: rotate(45deg); }
+.faq details p { color: var(--muted); padding: 0 0 22px; max-width: 42em; }
+.guide { margin: 0 0 22px; padding-left: 1.3em; color: var(--muted); display: grid; gap: 8px; max-width: 46em; }
+.guide b { color: var(--chalk); }
+code { font-family: var(--mono); font-size: 0.85em; color: var(--chalk); background: var(--raised); padding: 1px 5px; border-radius: 4px; }
+
+footer { border-top: 1px solid var(--line); padding: 40px 0 56px; color: var(--faint); font-size: 0.95rem; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: center; }
+footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="/en/" aria-label="Ferro, home page">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#f0c33c"/><rect x="12.5" y="30.6" width="39" height="2.8" rx=".5" fill="#2a2104"/><rect x="18.25" y="18.25" width="6.5" height="27.5" rx="1.25" fill="#2a2104"/><rect x="39.25" y="18.25" width="6.5" height="27.5" rx="1.25" fill="#2a2104"/></svg>
+      Ferro
+    </a>
+    <nav class="langs" aria-label="Language">
+      <a href="/" hreflang="it" lang="it" data-lang="it">IT</a>
+      <a href="/en/" hreflang="en" lang="en" data-lang="en" aria-current="page">EN</a>
+      <a href="/es/" hreflang="es" lang="es" data-lang="es">ES</a>
+      <a href="/fr/" hreflang="fr" lang="fr" data-lang="fr">FR</a>
+      <a href="/de/" hreflang="de" lang="de" data-lang="de">DE</a>
+    </nav>
+    <nav class="nav" aria-label="Page sections">
+      <a href="#app">The app</a>
+      <a href="#scheda">The program</a>
+      <a href="#oltre">Beyond weights</a>
+      <a href="#google-health">Health</a>
+      <a href="#salute">iPhone</a>
+      <a href="#coach">Custom</a>
+      <a href="#domande">FAQ</a>
+      <a href="#contatti">Contact</a>
+    </nav>
+    <a class="btn btn--primary" href="/app/">Open the app</a>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="wrap">
+      <div>
+        <p class="mono">Gym app · free</p>
+        <h1 style="margin-top:18px">Your coach's program.<span>On your phone, up to date.</span></h1>
+        <p class="lead">Ferro reads the program from your coach's Google Sheet, guides you set by set and writes your loads back into the sheet. If your coach changes something, it's already on your phone.</p>
+        <div class="cta">
+          <a class="btn btn--primary" href="/app/">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12h20M6 6h3v12H6zM15 6h3v12h-3z"/></svg>
+            Open Ferro
+          </a>
+          <a class="btn" href="#installa">Install it on your phone</a>
+        </div>
+        <p class="fineprint">Free, no ads, works offline too. Android app to download below. Open source.</p>
+      </div>
+      <div class="stage">
+        <svg class="disc" viewBox="0 0 400 400" aria-hidden="true">
+          <circle cx="200" cy="200" r="196" fill="#f0c33c" opacity=".12"/>
+          <circle cx="200" cy="200" r="196" fill="none" stroke="#f0c33c" stroke-opacity=".35" stroke-width="2"/>
+          <circle cx="200" cy="200" r="150" fill="none" stroke="#f0c33c" stroke-opacity=".22" stroke-width="2"/>
+          <circle cx="200" cy="200" r="26" fill="#141517" stroke="#f0c33c" stroke-opacity=".4" stroke-width="2"/>
+        </svg>
+        <div class="phone"><img src="/sito/img/allenamento-classico-dark.webp" width="780" height="1688" alt="Ferro during a workout: 45-degree leg press, week four, set 2 with rest running at 1:58." fetchpriority="high"></div>
+      </div>
+    </div>
+  </div>
+
+  <section id="app" aria-labelledby="t-app">
+    <div class="wrap sec">
+      <div class="sec-head">
+        <p class="mono">00 · The app, section by section</p>
+        <h2 id="t-app">Six screens, one workout.</h2>
+        <p class="lead">Ferro has five sections at the bottom and a panel for account and data. Here's what you'll find in each one.</p>
+      </div>
+      <div class="tiles">
+        <article class="card"><span class="tag">Workout</span><h3>At the gym</h3><p>The right day of your program, exercise by exercise: sets, suggested load, automatic rest, records, photos and muscles for each exercise. Timer for AMRAP and EMOM, heart rate strap, today's classes and a bonus day for what you skipped.</p></article>
+        <article class="card"><span class="tag">Program</span><h3>The plan</h3><p>The program imported from your coach's Google Sheet, with an alert when it changes, or one you build yourself. Days, sets per week, rest times, notes, regular classes and courses.</p></article>
+        <article class="card"><span class="tag">Meals</span><h3>What you eat</h3><p>Food diary with calories and macros, barcode scanner, 150 common foods ready to use, water, saved meals, your nutritionist's diet plan and a weekly summary to send her.</p></article>
+        <article class="card"><span class="tag">Exercises</span><h3>The library</h3><p>More than 800 exercises with photos, muscles and instructions. If an exercise has the wrong photo, you fix it with one tap, and the fix helps everyone else too.</p></article>
+        <article class="card"><span class="tag">Progress</span><h3>How you're doing</h3><p>Session history, load trends, weight and body measurements, body composition reports. Export your sessions for Strava and Garmin.</p></article>
+        <article class="card"><span class="tag">Account and data</span><h3>Everything under control</h3><p>Sign in with Google or without an account, Google Health, Health Connect, Apple Health, theme and colors, backup to a file and account deletion whenever you want.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="scheda" aria-labelledby="t-scheda">
+    <div class="wrap sec">
+      <div class="sec-head">
+        <p class="mono">01 · The imported program</p>
+        <h2 id="t-scheda">The sheet stays the sheet.</h2>
+        <p class="lead">Your coach keeps working in their Google Sheet, just as always. Ferro reads it, turns it into a workout to follow at the gym and writes your loads into it.</p>
+      </div>
+      <div class="sheet-row">
+        <div>
+          <div class="sheet" role="img" aria-label="Example of a coach's program in Google Sheets: day 1, exercises in rows, weeks in columns, with the loads written by Ferro highlighted.">
+            <div class="sheet-bar"><b>▦</b> Program – Marco R. · Google Sheets</div>
+            <div class="sheet-scroll">
+              <table>
+                <thead><tr><th></th><th>WEEK 1</th><th>WEEK 2</th><th>WEEK 3</th><th>WEEK 4</th></tr></thead>
+                <tbody>
+                  <tr class="day"><td colspan="5">DAY 1</td></tr>
+                  <tr class="sec-r"><td colspan="5">SETS X REPS PROGRESSION · REST 2'</td></tr>
+                  <tr><td>Bench press</td><td class="w">3X10 · 60 kg</td><td class="w">4X8 · 62.5 kg</td><td class="w">3X8 · 65 kg</td><td class="new">4X8 · 65 kg</td></tr>
+                  <tr><td>Seated cable row</td><td class="w">3X10 · 50 kg</td><td class="w">4X10 · 52.5 kg</td><td class="w">3X8 · 55 kg</td><td class="new">4X8 · 57.5 kg</td></tr>
+                  <tr><td>Leg press 45°</td><td class="w">3X10 · 120 kg</td><td class="w">4X10 · 130 kg</td><td class="w">3X8 · 140 kg</td><td class="new">4X8 · 150 kg</td></tr>
+                  <tr class="sec-r"><td colspan="5">TO FAILURE · REST 1'30"</td></tr>
+                  <tr><td>Cable flyes</td><td class="w">3X12</td><td class="w">3X12</td><td class="w">3X15</td><td>3X15</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p class="sheet-note"><span aria-hidden="true"></span>Ferro wrote the week 4 loads, next to the coach's sets. The coach's cells are never touched.</p>
+        </div>
+        <div class="stage" style="width:min(100%,300px)">
+          <div class="phone"><img src="/sito/img/scheda-classico-dark.webp" width="780" height="1688" loading="lazy" alt="The same program inside Ferro: days, exercises and sets for each week."></div>
+        </div>
+      </div>
+      <ol class="steps">
+        <li><p class="n">01</p><h3>The coach shares the sheet</h3><p>All you need is the link to their Google Sheet, with edit permission. No new software for them, no subscription.</p></li>
+        <li><p class="n">02</p><h3>Ferro reads it</h3><p>It recognizes days, exercises, sets per week, rest times and notes. If the coach updates the program, you reload it with one tap.</p></li>
+        <li><p class="n">03</p><h3>Loads go back to the coach</h3><p>Every set you log ends up in the sheet, in that week's column. Weight and measurements too, in the MISURE (measurements) tab.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="google-health" aria-labelledby="t-gh">
+    <div class="wrap sec">
+      <div class="sec-head">
+        <p class="mono">02 · Health Connect and Google Health</p>
+        <h2 id="t-gh">Connected to what you already track.</h2>
+        <p class="lead">On Android phones Ferro uses <b>Health Connect</b>, the health store already on your phone: what your watch and scale record comes into Ferro, and your workouts go out to your other apps.</p>
+      </div>
+      <div class="gh-row">
+        <div>
+          <div class="flow">
+            <div class="box">
+              <p class="mono">From Health Connect to Ferro</p>
+              <ul>
+                <li><span>Weight</span><span>scale</span></li>
+                <li><span>Body fat</span><span>scale</span></li>
+                <li><span>Heart rate</span><span>watch</span></li>
+                <li><span>Runs and rides</span><span>watch</span></li>
+              </ul>
+            </div>
+            <div class="mid" aria-hidden="true">
+              <svg viewBox="0 0 120 120"><g fill="none" stroke="#f0c33c" stroke-width="3" stroke-linecap="square"><path d="M10 44h92M86 28l16 16-16 16"/><path d="M110 76H18M34 60L18 76l16 16" stroke="#8d8b84"/></g></svg>
+            </div>
+            <div class="box">
+              <p class="mono">From Ferro to Health Connect</p>
+              <ul>
+                <li><span>Workouts</span><span>type and distance</span></li>
+                <li><span>Weigh-ins and body fat</span><span>measurements</span></li>
+                <li><span>Meals and water, if you want</span><span>calories</span></li>
+              </ul>
+            </div>
+          </div>
+          <p class="note">Health Connect is in the <a href="#installa">Android app</a>: on Android 14 and later it's already on your phone, on earlier versions you install it for free from Google Play. Ferro asks for each permission only when you tap the feature that uses it, and you can revoke them anytime in the Health Connect settings.</p>
+          <p class="note"><b>Google Health</b>, from the website and from iPhone, connects the same Google account. Google opens it to everyone only after a security review: for now it's active for a group of test accounts. On Android, use Health Connect, which has no such limit.</p>
+        </div>
+        <div class="stage" style="width:min(100%,300px)">
+          <div class="phone"><img src="/sito/img/progressi-brace-dark.webp" width="780" height="1688" loading="lazy" alt="Progress in Ferro: body weight trend over the last four weeks, from 106.2 to 104.5 kilograms."></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="salute" aria-labelledby="t-salute">
+    <div class="wrap sec">
+      <div class="sec-head">
+        <p class="mono">02b · iPhone and Apple Health</p>
+        <h2 id="t-salute">On iPhone too, into Health.</h2>
+        <p class="lead">Apple doesn't let websites write to Health. Ferro gets there with two Shortcuts: you add them once, then a single tap in Ferro is enough.</p>
+      </div>
+      <div class="flow">
+        <div class="box">
+          <p class="mono">From Ferro to Health</p>
+          <ul>
+            <li><span>Weight and body fat</span><span>measurements</span></li>
+            <li><span>Calories</span><span>meals</span></li>
+            <li><span>Protein, carbs, fat</span><span>meals</span></li>
+          </ul>
+        </div>
+        <div class="mid" aria-hidden="true">
+          <svg viewBox="0 0 120 120"><g fill="none" stroke="#f0c33c" stroke-width="3" stroke-linecap="square"><path d="M10 44h92M86 28l16 16-16 16"/><path d="M110 76H18M34 60L18 76l16 16" stroke="#8d8b84"/></g></svg>
+        </div>
+        <div class="box">
+          <p class="mono">From Health to Ferro</p>
+          <ul>
+            <li><span>Weigh-ins from the last 30 days</span><span>scale</span></li>
+            <li><span>Body fat</span><span>scale</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="faq" style="margin-top:32px">
+        <details>
+          <summary>How to create the “Ferro Salute” shortcut</summary>
+          <ol class="guide">
+            <li>Open the Shortcuts app and create a new shortcut named exactly <b>Ferro Salute</b>.</li>
+            <li>Add “Get Dictionary from Input” with the Shortcut Input.</li>
+            <li>Add “Get Dictionary Value” for the key <code>peso</code>, then “Repeat with Each”.</li>
+            <li>Inside the repeat: take the item's <code>v</code> (value) and <code>d</code> (date and time) values and add “Log Health Sample” with type Weight, value <code>v</code>, unit kg and date <code>d</code>.</li>
+            <li>Repeat steps 3 and 4 for <code>grasso</code> (Body Fat Percentage), <code>kcal</code> (Dietary Energy), <code>proteine</code>, <code>carboidrati</code> and <code>grassi</code> (in grams).</li>
+            <li>In Ferro: Account → Apple Health → “Send to Health”. The first time, iPhone asks for permission to write to Health.</li>
+          </ol>
+        </details>
+        <details>
+          <summary>How to create the “Salute Ferro” shortcut</summary>
+          <ol class="guide">
+            <li>Create a shortcut named exactly <b>Salute Ferro</b>.</li>
+            <li>Add “Find Health Samples” with type Weight, in the last 30 days.</li>
+            <li>With “Repeat with Each”, build the text <code>{"v": Value, "d": "Date"}</code> for each one, with the date in the format <code>yyyy-MM-dd HH:mm</code>, and join them with a comma.</li>
+            <li>Compose the text <code>{"peso":[ … ]}</code>, encode it with “URL Encode” and open the address <code>https://palestra-kohl.vercel.app/app/?salute=</code> followed by the encoded text.</li>
+            <li>Ferro opens, shows how many weigh-ins are new and asks for confirmation before saving them.</li>
+          </ol>
+        </details>
+      </div>
+      <p class="note">Action names may differ slightly between iOS versions. We'll publish both shortcuts ready to add with one tap.</p>
+    </div>
+  </section>
+
+  <section id="oltre" aria-labelledby="t-oltre">
+    <div class="wrap sec">
+      <div class="sec-head">
+        <p class="mono">03 · Beyond weights</p>
+        <h2 id="t-oltre">Not just load × reps.</h2>
+        <p class="lead">If your program includes running, swimming, timed planks or an AMRAP, Ferro reads and tracks them. No AI: it recognizes the lines the way your coach writes them.</p>
+      </div>
+      <div class="tiles">
+        <article class="card"><h3>Time and distance</h3><p>“5 km in 25'”, “4×400 m”, “1000 m freestyle”, “plank 3×45"”: they become sets to log, and that's how you read them in your history.</p></article>
+        <article class="card"><h3>Block timer</h3><p>AMRAP counting down with “+1 round”, EMOM minute by minute, Tabata and intervals with rest periods, For Time counting up with a cap. Beeps in the last 3 seconds, screen kept on, and the result goes into the block.</p></article>
+        <article class="card"><h3>Classes and courses</h3><p>Pilates, spinning, yoga: add your regular weekly classes, even from a calendar file. On the right day you'll find them in Workout, with “Done” and “Add to calendar”.</p></article>
+        <article class="card"><h3>Heart rate strap</h3><p>Pair a Bluetooth strap and see your heart rate while you train. From Chrome on Android and desktop, and in the Android app.</p></article>
+        <article class="card"><h3>Strava and Garmin</h3><p>Every session exports to a TCX file with sport, duration, distance and heart rate. Upload it from strava.com or Garmin Connect.</p></article>
+        <article class="card"><span class="tag">Android app</span><h3>From your watch</h3><p>Runs and rides recorded by your watch come into Ferro from Health Connect, with no duplicates. And Ferro's workouts go to Health Connect with the right type: strength, running, cycling, swimming, pilates.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="t-resto">
+    <div class="wrap sec">
+      <div class="feat">
+        <div>
+          <p class="mono">04 · Everything else</p>
+          <h2 id="t-resto" style="margin:18px 0 28px">Everything else, done right.</h2>
+          <div class="phone shot-sm"><img src="/sito/img/pasti-grafite-light.webp" width="780" height="1688" loading="lazy" alt="The meal diary in the Grafite theme: 795 kilocalories eaten out of 2100, with protein, carbs and fat."></div>
+        </div>
+        <dl>
+          <div><dt>Your coach changes it, you know it</dt><dd>If your coach edits the sheet, Ferro tells you and shows you what changed before updating the program.</dd></div>
+          <div><dt>Bonus day</dt><dd>Skipped an exercise this week? You'll find it in the bonus day, and in the sheet it goes into its own cell.</dd></div>
+          <div><dt>Rest that never gets lost</dt><dd>The timer starts on its own after every set, keeps the screen on and alerts you with sound and vibration. It stays accurate even with the phone locked.</dd></div>
+          <div><dt>Meals, water and barcodes</dt><dd>Scan the package, pick the grams, done. The data comes from Open Food Facts, an open database. Water, saved meals and training or rest days, with a summary to send your nutritionist.</dd></div>
+          <div><dt>Your nutritionist's diet plan</dt><dd>Ferro gives you a prompt to use with the service you prefer, attaching your diet plan file. Paste the answer and the day's meals appear, ready to tick off. No artificial intelligence inside the app.</dd></div>
+          <div><dt>Measurements and reports</dt><dd>Weight, waist, arms, body fat: by hand, from a connected scale or from a body composition report, the same way as the diet plan.</dd></div>
+          <div><dt>Records and history</dt><dd>Every new personal best is flagged while you're still under the bar. Your history also exports to Strava and Garmin.</dd></div>
+          <div><dt>Android widgets</dt><dd>In the Android app: today's workout, your meals and a quote to motivate you, right on your Home screen.</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="t-temi">
+    <div class="wrap sec">
+      <div class="sec-head">
+        <p class="mono">05 · Three themes</p>
+        <h2 id="t-temi">Pick your iron.</h2>
+        <p class="lead">Three complete looks, each in dark or light: colors, fonts, icons and even the app icon change with the theme.</p>
+      </div>
+      <div class="themes">
+        <figure><div class="phone"><img src="/sito/img/allenamento-classico-dark.webp" width="780" height="1688" loading="lazy" alt="Classico theme, dark."></div><figcaption><b>Classico</b><span>rubber, chalk and the yellow of the 15 kg plate</span></figcaption></figure>
+        <figure><div class="phone"><img src="/sito/img/allenamento-grafite-light.webp" width="780" height="1688" loading="lazy" alt="Grafite theme, light."></div><figcaption><b>Grafite</b><span>black and white, dot-matrix numbers</span></figcaption></figure>
+        <figure><div class="phone"><img src="/sito/img/allenamento-brace-dark.webp" width="780" height="1688" loading="lazy" alt="Brace theme, dark."></div><figcaption><b>Brace</b><span>solid surfaces and an orange accent</span></figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="manifesto" aria-label="How Ferro is made">
+    <div class="wrap">
+      <p class="big">No ads. No subscription. No AI deciding instead of your coach.</p>
+      <p class="small">Your data is yours: it stays on your phone or in your private space, and you can export it whenever you want. Ferro is made in Italy by someone who trains with it.</p>
+    </div>
+  </section>
+
+  <section id="coach" aria-labelledby="t-coach">
+    <div class="wrap sec">
+      <div class="sec-head">
+        <p class="mono">06 · Custom versions</p>
+        <h2 id="t-coach">A Ferro all your own.</h2>
+        <p class="lead">Ferro adapts. For a coach, a gym or a company, I build a version with your name and your rules.</p>
+      </div>
+      <div class="two">
+        <article class="card">
+          <h3>Are you a coach?</h3>
+          <p>Keep your sheet. Your athletes get the program on their phone, you get back the real loads of every set, and you don't pay for any platform.</p>
+          <ul>
+            <li>No migration: start from the sheet you already use</li>
+            <li>Loads and measurements written in your columns</li>
+            <li>Free for you and your athletes</li>
+          </ul>
+          <a class="btn btn--primary" data-contact="coach" href="#">Get in touch</a>
+          <p class="pending" data-contact-pending hidden>The contact for coaches is coming soon.</p>
+        </article>
+        <article class="card">
+          <h3>Gyms and companies</h3>
+          <p>A version of Ferro with your brand: for a gym, a chain, a fitness equipment or food company.</p>
+          <ul>
+            <li>Your name, your colors and your icon</li>
+            <li>Your website and your Android app, with automatic updates</li>
+            <li>Exercises with your equipment, programs from your trainers</li>
+            <li>Your products ready to use in the meal diary</li>
+          </ul>
+          <a class="btn" data-contact="aziende" href="#">Request a presentation</a>
+          <p class="pending" data-contact-pending hidden>The contact for companies is coming soon.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="installa" aria-labelledby="t-install">
+    <div class="wrap sec">
+      <div class="sec-head">
+        <p class="mono">07 · Installation</p>
+        <h2 id="t-install">On your phone in ten seconds.</h2>
+        <p class="lead">Ferro opens in the browser and installs like an app, no store needed. Once installed it works offline too.</p>
+      </div>
+      <div class="install">
+        <div class="card"><h3>Android</h3><ol><li>Open <a href="/app/">Ferro</a> in Chrome</li><li>Tap “Install app” when it appears, or the ⋮ menu</li><li>Find Ferro among your apps</li></ol></div>
+        <div class="card"><h3>iPhone</h3><ol><li>Open <a href="/app/">Ferro</a> in Safari</li><li>Tap Share, then “Add to Home Screen”</li><li>Open Ferro from its icon</li></ol></div>
+        <div class="card"><h3>Android app</h3><p class="pending" style="margin-top:4px" data-apk-pending>With Health Connect, widgets and the workout notification. The file is coming soon: in the meantime use the browser version, it's the same app.</p><a class="btn" data-apk href="#" hidden>Download the APK</a></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="t-dona">
+    <div class="wrap sec">
+      <div class="sec-head">
+        <p class="mono">08 · Support Ferro</p>
+        <h2 id="t-dona">Free, as long as we keep it going together.</h2>
+        <div>
+          <p class="lead">Ferro doesn't sell your data and shows no ads. Donations cover the server and the domain.</p>
+          <div class="cta" style="margin-top:24px">
+            <a class="btn btn--primary" data-donate href="#" hidden target="_blank" rel="noopener">Buy me a coffee with PayPal</a>
+            <p class="pending" data-donate-pending>Donations will open soon.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="domande" aria-labelledby="t-faq">
+    <div class="wrap sec">
+      <div class="sec-head">
+        <p class="mono">09 · Questions</p>
+        <h2 id="t-faq">Frequently asked questions.</h2>
+      </div>
+      <div class="faq">
+        <details><summary>How much does it cost?</summary><p>Nothing. Ferro is free and has no ads. If you want to help cover the costs you can make a donation, once they open.</p></details>
+        <details><summary>Does my coach need to do anything?</summary><p>Just share their Google Sheet with you as “Editor”. Ferro recognizes the day rows, the week columns and the exercises. The cells your coach writes are never modified.</p></details>
+        <details><summary>Does it work for running, swimming or functional training?</summary><p>Yes. Timed or distance lines, holds and blocks (AMRAP, EMOM, For Time, Tabata) are logged as written in the program, with a timer for the blocks. Regular classes and courses are added separately.</p></details>
+        <details><summary>What if I don't have a coach?</summary><p>You can create and edit your program right in the app, with a library of more than 800 exercises with photos and muscles.</p></details>
+        <details><summary>Does it work on iPhone?</summary><p>Yes, from the browser: in Safari you add it to the Home Screen and it behaves like an app. Data goes to Apple Health with two Shortcuts (see <a href="#salute">iPhone and Apple Health</a>). There's no vibration, because Safari doesn't allow it.</p></details>
+        <details><summary>Health Connect or Google Health?</summary><p>On Android, use Health Connect, from Ferro's Android app: it's on your phone, works for everyone and the data doesn't go through external servers. Google Health is for the website and iPhone, with the same Google account; until Google completes its review it's only available to a group of test accounts. On iPhone there's also Apple Health, with Shortcuts.</p></details>
+        <details><summary>Why does Google show a warning when I connect my coach's sheet?</summary><p>To read and write your coach's Google Sheet, Ferro asks Google for permission. Until Google's review is complete you may see the “Google hasn't verified this app” screen: tap “Advanced”, then “Go to Ferro”. Ferro only uses the sheet you connect.</p></details>
+        <details><summary>Where does my data go?</summary><p>Without an account it stays only on your phone. With a Google account it's in your private space, readable only by you. You can export everything to a file at any time. The details are in the <a href="/privacypolicy.html">privacy policy (in Italian)</a>.</p></details>
+        <details><summary>How do I update the Android app?</summary><p>When a new version comes out, Ferro tells you as soon as you open it. Tap “Update”, the phone downloads the file and you install it over the old one: program, workouts and settings stay.</p></details>
+        <details><summary>Can I get a custom version?</summary><p>Yes: name, colors, icon, exercises and products tailored for coaches, gyms and companies. See <a href="#coach">Custom versions</a> or write to me from the <a href="#contatti">contact</a> section.</p></details>
+        <details><summary>Is the code open?</summary><p>Yes, Ferro is open source under the GPL-3.0 license: the code is <a href="https://github.com/JackMagna/ferro">on GitHub</a>. You can check what it does with your data, report a problem or propose a change.</p></details>
+        <details><summary>Does it work offline?</summary><p>Yes. At the gym you can log your sets even without signal: the data syncs as soon as the connection is back.</p></details>
+      </div>
+    </div>
+  </section>
+  <section id="contatti" aria-labelledby="t-contatti">
+    <div class="wrap sec">
+      <div class="sec-head">
+        <p class="mono">10 · Contact</p>
+        <h2 id="t-contatti">Write to me.</h2>
+        <p class="lead">A question, an idea, a custom version or a problem with the app: I'll answer myself.</p>
+      </div>
+      <div class="two">
+        <article class="card">
+          <h3>Email</h3>
+          <p>For coaches, gyms, companies and anything about your data.</p>
+          <a class="btn btn--primary" data-mail href="#">Send an email</a>
+          <p class="pending" data-mail-text></p>
+        </article>
+        <article class="card">
+          <h3>GitHub</h3>
+          <p>To report a bug or suggest a feature. You need a GitHub account, which is free.</p>
+          <a class="btn" href="https://github.com/JackMagna/ferro/issues/new" target="_blank" rel="noopener">Report a problem</a>
+          <p class="pending"><a href="https://github.com/JackMagna" target="_blank" rel="noopener">github.com/JackMagna</a></p>
+        </article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Ferro · made in Italy · 2026</span>
+    <a href="/app/">Open the app</a>
+    <a href="/privacypolicy.html">Privacy policy (in Italian)</a>
+    <a href="/licenze.html">Licenses and credits (in Italian)</a>
+    <a href="#contatti">Contact</a>
+    <a href="/novita.html">What's new (in Italian)</a>
+    <a href="https://github.com/JackMagna/ferro">Source code (GPL-3.0)</a>
+    <nav class="langs" aria-label="Language">
+      <a href="/" hreflang="it" lang="it" data-lang="it">Italiano</a>
+      <a href="/en/" hreflang="en" lang="en" data-lang="en" aria-current="page">English</a>
+      <a href="/es/" hreflang="es" lang="es" data-lang="es">Español</a>
+      <a href="/fr/" hreflang="fr" lang="fr" data-lang="fr">Français</a>
+      <a href="/de/" hreflang="de" lang="de" data-lang="de">Deutsch</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+  // Opened from the installed app's old address: go straight to the app.
+  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) location.replace('/app/');
+  // A language picked by hand is kept for later visits.
+  document.querySelectorAll('[data-lang]').forEach(function (a) {
+    a.addEventListener('click', function () { try { localStorage.setItem('ferro:site-lang', a.getAttribute('data-lang')); } catch (e) {} });
+  });
+</script>
+<script>
+  // Fill in when ready: the buttons appear on their own.
+  var CONFIG = {
+    email: 'ferro.privacy@gmail.com',  // contact, coaches and companies (written by the script: less spam from address harvesters)
+    paypal: '',     // e.g. https://paypal.me/name
+    apk: 'https://github.com/JackMagna/ferro/releases/latest/download/ferro-release.apk'  // always the latest Release (src/lib/appUpdate.ts)
+  };
+  (function () {
+    document.querySelectorAll('[data-contact]').forEach(function (a) {
+      var card = a.closest('.card');
+      if (!CONFIG.email) { a.hidden = true; card.querySelector('[data-contact-pending]').hidden = false; return; }
+      var subject = a.getAttribute('data-contact') === 'aziende' ? 'Ferro for my company' : 'Ferro for my athletes';
+      a.href = 'mailto:' + CONFIG.email + '?subject=' + encodeURIComponent(subject);
+    });
+    if (CONFIG.email) {
+      var m = document.querySelector('[data-mail]');
+      m.href = 'mailto:' + CONFIG.email + '?subject=' + encodeURIComponent('Ferro');
+      document.querySelector('[data-mail-text]').textContent = CONFIG.email;
+    } else {
+      document.querySelector('[data-mail]').hidden = true;
+    }
+    if (CONFIG.paypal) {
+      var d = document.querySelector('[data-donate]');
+      d.href = CONFIG.paypal; d.hidden = false;
+      document.querySelector('[data-donate-pending]').hidden = true;
+    }
+    if (CONFIG.apk) {
+      var k = document.querySelector('[data-apk]');
+      k.href = CONFIG.apk; k.hidden = false;
+      document.querySelector('[data-apk-pending]').textContent = 'Download the file and open it on your phone: Android will ask you to allow the installation. When a new version comes out, Ferro tells you as soon as you open it: tap “Update” and your data stays.';
+    }
+  })();
+</script>
+</body>
+</html>

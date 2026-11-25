@@ -1,5 +1,6 @@
 import FOODS from '../data/foods.json';
 import type { OffProduct } from './offMap';
+import { t } from './i18n';
 
 /** Alimento della tabella interna: valori per 100 g da USDA FoodData Central (pubblico dominio). */
 export interface CommonFood {
@@ -18,7 +19,7 @@ export interface CommonFood {
 }
 
 export const COMMON_FOODS = FOODS as CommonFood[];
-export const FOODS_SOURCE = 'USDA FoodData Central (SR Legacy, pubblico dominio)';
+export const FOODS_SOURCE = t('USDA FoodData Central (SR Legacy, pubblico dominio)');
 
 const fold = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]+/g, ' ');
 

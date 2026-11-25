@@ -3,6 +3,7 @@ import { workoutNotes } from '../lib/workoutKind';
 import { nutritionDataPoint } from '../lib/healthNutrition';
 import { estimateCalories, isoDay, mergeBody, summarizeHeartRate, type BodyEntry } from '../lib/healthMath';
 import { GoogleTokenExpiredError } from './firebase';
+import { t } from '../lib/i18n';
 
 /**
  * Google Health API (v4): sostituisce le vecchie API Fitbit, che vengono spente il 30 ottobre 2026.
@@ -13,7 +14,7 @@ const BASE = 'https://health.googleapis.com/v4/users/me';
 
 export class HealthNotLinkedError extends Error {
   constructor() {
-    super('Il tuo account Google non ha un profilo Google Health collegato. Apri l\'app Google Health sul telefono, tocca "Accedi con Google" e scegli questo account (o migra l\'account Fitbit), poi riprova.');
+    super(t('Il tuo account Google non ha un profilo Google Health collegato. Apri l\'app Google Health sul telefono, tocca "Accedi con Google" e scegli questo account (o migra l\'account Fitbit), poi riprova.'));
     this.name = 'HealthNotLinkedError';
   }
 }
@@ -30,9 +31,9 @@ async function call<T>(token: string, path: string, init: RequestInit = {}): Pro
   if (res.status === 401) throw new GoogleTokenExpiredError();
   if (res.status === 400 && /ACCOUNT_NOT_LINKED/i.test(`${status} ${message} ${JSON.stringify(body)}`)) throw new HealthNotLinkedError();
   // il motivo di Google (permesso mancante, API non attiva…) serve a capire cosa non va
-  if (res.status === 403) throw new Error(`Google Health ha negato l'accesso. Ricollega Google Health e accetta tutti i permessi richiesti.${message ? ` (Google: ${message})` : ''}`);
-  if (res.status === 429) throw new Error('Google Health ha limitato le richieste: riprova tra qualche minuto.');
-  throw new Error(`Errore Google Health (${res.status}): ${message}`);
+  if (res.status === 403) throw new Error(t("Google Health ha negato l'accesso. Ricollega Google Health e accetta tutti i permessi richiesti.") + (message ? ` (Google: ${message})` : ''));
+  if (res.status === 429) throw new Error(t('Google Health ha limitato le richieste: riprova tra qualche minuto.'));
+  throw new Error(t('Errore Google Health ({stato}): {motivo}', { stato: res.status, motivo: message }));
 }
 
 /** Controlla che l'account Google abbia un profilo Google Health attivo. */
@@ -113,7 +114,7 @@ const create = (token: string, dataType: string, dataPoint: object) =>
  * l'id giusto è in `response.name`. Se non c'è `done`, la risposta è il data point stesso.
  */
 export function dataPointName(res: CreateResult): string {
-  if (res.error?.message) throw new Error(`Google Health non ha salvato il dato: ${res.error.message}`);
+  if (res.error?.message) throw new Error(t('Google Health non ha salvato il dato: {motivo}', { motivo: res.error.message }));
   if (res.response?.name) return res.response.name;
   return res.done === undefined ? res.name ?? '' : '';
 }

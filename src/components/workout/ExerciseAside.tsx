@@ -6,6 +6,7 @@ import { ExerciseInfo } from '../exercise/ExerciseInfo';
 import { MuscleMap } from '../exercise/MuscleMap';
 import { LinkPicker } from '../exercise/LinkPicker';
 import { Sheet } from '../ui/Sheet';
+import { t } from '../../lib/i18n';
 
 interface Props {
   exercise?: LibraryExercise;
@@ -28,15 +29,15 @@ export function ExerciseAside({ exercise, name, collapsible, onLink }: Props) {
         <>
           <MuscleMap primary={exercise.primaryMuscles} secondary={exercise.secondaryMuscles} compact />
           <button type="button" onClick={() => setDetails(true)} className="text-[15px] font-medium text-plate hover:underline">
-            Istruzioni e dettagli
+            {t('Istruzioni e dettagli')}
           </button>
         </>
       )}
-      {!exercise && <p className="text-sm text-muted">Nessuna foto collegata a questo esercizio.</p>}
+      {!exercise && <p className="text-sm text-muted">{t('Nessuna foto collegata a questo esercizio.')}</p>}
       {onLink && (
         <button type="button" onClick={() => setFixing(true)} className="flex min-h-11 items-center gap-1.5 text-[15px] font-medium text-plate hover:underline">
           <Link2 className="h-4 w-4" />
-          {exercise ? 'Foto sbagliata? Correggi' : 'Scegli la foto'}
+          {exercise ? t('Foto sbagliata? Correggi') : t('Scegli la foto')}
         </button>
       )}
       <Sheet open={details && !!exercise} onClose={() => setDetails(false)} title={name} size="lg">
@@ -46,14 +47,14 @@ export function ExerciseAside({ exercise, name, collapsible, onLink }: Props) {
     </div>
   );
 
-  if (!collapsible) return <aside aria-label="Come si esegue">{body}</aside>;
+  if (!collapsible) return <aside aria-label={t('Come si esegue')}>{body}</aside>;
 
   return (
-    <aside aria-label="Come si esegue" className="card">
+    <aside aria-label={t('Come si esegue')} className="card">
       <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="flex w-full items-center justify-between gap-3 p-4 text-left">
         <span>
-          <span className="block font-display text-lg font-semibold">Come si esegue</span>
-          <span className="block text-sm text-muted">{exercise ? exercise.name : 'Nessun esercizio collegato'}</span>
+          <span className="block font-display text-lg font-semibold">{t('Come si esegue')}</span>
+          <span className="block text-sm text-muted">{exercise ? exercise.name : t('Nessun esercizio collegato')}</span>
         </span>
         <ChevronDown className={`h-5 w-5 shrink-0 text-muted transition ${open ? 'rotate-180' : ''}`} />
       </button>

@@ -1,5 +1,6 @@
 import type { ProgramExercise, SetLog } from '../types';
 import { formatLoad } from './ids';
+import { t } from './i18n';
 
 /** Quello che la notifica dell'allenamento mostra (formato letto da WorkoutNotice.java). */
 export interface WorkoutNoticeState {
@@ -39,18 +40,18 @@ const load = (s: SetLog | undefined) => (s ? `${formatLoad(s.weightKg)} kg × ${
 export function workoutNoticeState({ dayTitle, exercise, sets, setIndex, prescription, done, total, restEndAt, alert }: Input): WorkoutNoticeState {
   const current = sets[setIndex];
   const allDone = sets.length > 0 && sets.every((s) => s.completed);
-  const title = allDone ? `${exercise.name} · fatto` : `${exercise.name} · serie ${setIndex + 1} di ${sets.length}`;
-  const next = allDone ? 'Passa al prossimo esercizio' : load(current);
+  const title = allDone ? t('{name} · fatto', { name: exercise.name }) : t('{name} · serie {n} di {total}', { name: exercise.name, n: setIndex + 1, total: sets.length });
+  const next = allDone ? t('Passa al prossimo esercizio') : load(current);
   return {
     title,
     text: [next, prescription].filter(Boolean).join(' · '),
-    restText: next ? `Recupero · poi ${next}` : 'Recupero',
-    sub: `${dayTitle} · ${done} di ${total} serie`,
+    restText: next ? t('Recupero · poi {next}', { next }) : t('Recupero'),
+    sub: t('{day} · {done} di {total} serie', { day: dayTitle, done, total }),
     endAt: restEndAt && restEndAt > Date.now() ? restEndAt : 0,
     done,
     total,
-    endTitle: 'Recupero finito',
-    endText: allDone ? `${exercise.name} completato: passa al prossimo esercizio` : `${exercise.name}, serie ${setIndex + 1}: ${next}`,
+    endTitle: t('Recupero finito'),
+    endText: allDone ? t('{name} completato: passa al prossimo esercizio', { name: exercise.name }) : t('{name}, serie {n}: {next}', { name: exercise.name, n: setIndex + 1, next }),
     alert
   };
 }

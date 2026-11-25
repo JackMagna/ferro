@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { t } from './lib/i18n';
 import type { User } from 'firebase/auth';
 import { authErrorMessage, deleteAccount, logout, signInWithGoogle, watchAuth } from './services/firebase';
 import { useAppData } from './hooks/useAppData';
@@ -64,18 +65,18 @@ export default function App() {
   const linkExercise = (name: string, libraryId: string | undefined, previous: string | undefined) => {
     actions.saveProgram(linkByName(data.program, name, libraryId));
     void shareLink(name, libraryId, previous);
-    toast(libraryId ? 'Foto aggiornata' : 'Foto tolta');
+    toast(libraryId ? t('Foto aggiornata') : t('Foto tolta'));
   };
 
   /** Elimina misure, pasti e dieta (dopo conferma). I dati già inviati a Google Health, Health Connect o al foglio restano lì. */
   const deleteHealthData = (confirmed = false) => {
-    if (!confirmed && !window.confirm('Eliminare misure, pasti, acqua e dieta salvati in Ferro? Non si può annullare. I dati già inviati a Google Health, Health Connect, Apple Salute o al foglio del coach restano lì.')) return;
+    if (!confirmed && !window.confirm(t('Eliminare misure, pasti, acqua e dieta salvati in Ferro? Non si può annullare. I dati già inviati a Google Health, Health Connect, Apple Salute o al foglio del coach restano lì.'))) return;
     data.measurements.forEach((m) => actions.deleteMeasurement(m.id));
     data.meals.forEach((m) => actions.deleteMeal(m.id));
     if (data.dietPlan) actions.saveDietPlan(null);
     if (data.savedMeals.length) actions.saveSavedMeals([]);
     Object.keys(data.water).forEach((date) => actions.setWater(date, 0));
-    toast('Dati sanitari eliminati');
+    toast(t('Dati sanitari eliminati'));
   };
   /** Pasto da inviare alla fonte dati salute, se è collegata e l'invio dei pasti è attivo. */
   const toHealth = (m: FoodEntry): FoodEntry => (health.source !== 'none' && health.connected && health.autoMeals ? { ...m, healthSynced: false } : m);
@@ -108,7 +109,7 @@ export default function App() {
     return () => { clearTimeout(t); clearTimeout(t2); };
   }, []);
   useEffect(() => {
-    if (waitedTooLong && user && !data.ready) toast('Connessione lenta: i dati si aggiorneranno appena Firestore risponde.', 'error');
+    if (waitedTooLong && user && !data.ready) toast(t('Connessione lenta: i dati si aggiorneranno appena Firestore risponde.'), 'error');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [waitedTooLong]);
 
@@ -116,11 +117,11 @@ export default function App() {
     setLoggingIn(true);
     try {
       const u = await signInWithGoogle();
-      toast(`Ciao ${u.displayName?.split(' ')[0] ?? ''}`.trim());
+      toast(t('Ciao {nome}', { nome: u.displayName?.split(' ')[0] ?? '' }).trim());
       setAccountOpen(false);
     } catch (err) {
       const msg = authErrorMessage(err);
-      if (msg !== 'Accesso annullato.') toast(msg, 'error');
+      if (msg !== t('Accesso annullato.')) toast(msg, 'error');
     } finally {
       setLoggingIn(false);
     }
@@ -140,8 +141,8 @@ export default function App() {
   };
 
   const removeAccount = async () => {
-    if (!window.confirm('Eliminare l\'account e tutti i dati?\n\nScheda, allenamenti, misure, pasti e dieta vengono cancellati per sempre, dal cloud e da questo dispositivo. Non si può annullare.')) return;
-    if (!window.confirm('Ultima conferma: eliminare definitivamente il tuo account Ferro?')) return;
+    if (!window.confirm(t("Eliminare l'account e tutti i dati?") + '\n\n' + t('Scheda, allenamenti, misure, pasti e dieta vengono cancellati per sempre, dal cloud e da questo dispositivo. Non si può annullare.'))) return;
+    if (!window.confirm(t('Ultima conferma: eliminare definitivamente il tuo account Ferro?'))) return;
     try {
       await deleteAccount();
       // ricarica per svuotare lo stato in memoria
@@ -149,7 +150,7 @@ export default function App() {
     } catch (err) {
       const code = (err as { code?: string })?.code ?? '';
       if (code.includes('popup-closed') || code.includes('cancelled')) return;
-      toast(`Eliminazione non riuscita: ${authErrorMessage(err)}`, 'error');
+      toast(t('Eliminazione non riuscita: {motivo}', { motivo: authErrorMessage(err) }), 'error');
     }
   };
 
@@ -166,14 +167,14 @@ export default function App() {
     const known = data.measurements;
     const fresh = parseAppleImport(raw).filter((e) => !known.some((m) => m.date === e.date && (e.weightKg === undefined || m.weightKg === undefined || Math.abs(m.weightKg - e.weightKg) < 0.1)));
     if (!fresh.length) {
-      toast('Da Apple Salute non arrivano pesate nuove.');
+      toast(t('Da Apple Salute non arrivano pesate nuove.'));
       return;
     }
     void (async () => {
       if (!(await ensureConsent())) return;
-      if (!window.confirm(`Importare ${fresh.length} ${fresh.length === 1 ? 'misura' : 'misure'} da Apple Salute?`)) return;
+      if (!window.confirm(fresh.length === 1 ? t('Importare 1 misura da Apple Salute?') : t('Importare {n} misure da Apple Salute?', { n: fresh.length }))) return;
       fresh.forEach((e) => actions.addMeasurement({ id: newId('m'), date: e.date, weightKg: e.weightKg, bodyFat: e.bodyFat, source: 'Apple Salute', sheetsSynced: data.spreadsheetId ? false : undefined }));
-      toast(`Importate ${fresh.length} misure da Apple Salute`);
+      toast(t('Importate {n} misure da Apple Salute', { n: fresh.length }));
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authReady, user, data.ready]);
@@ -181,16 +182,16 @@ export default function App() {
   const importBackup = async (raw: unknown) => {
     const b = raw as { app?: string; program?: unknown } | null;
     if (!b || b.app !== 'irontrack' || !b.program) {
-      toast('Questo file non è un backup di Ferro.', 'error');
+      toast(t('Questo file non è un backup di Ferro.'), 'error');
       return;
     }
-    if (!window.confirm('Importare il backup? Scheda, allenamenti e misure del file verranno aggiunti o sostituiti.')) return;
+    if (!window.confirm(t('Importare il backup? Scheda, allenamenti e misure del file verranno aggiunti o sostituiti.'))) return;
     try {
       await actions.importAll(b as never);
-      toast('Backup importato');
+      toast(t('Backup importato'));
       setAccountOpen(false);
     } catch (err) {
-      toast(`Importazione non riuscita: ${err instanceof Error ? err.message : ''}`, 'error');
+      toast(t('Importazione non riuscita: {motivo}', { motivo: err instanceof Error ? err.message : '' }), 'error');
     }
   };
 
@@ -199,14 +200,14 @@ export default function App() {
     return (
       <div className="flex min-h-dvh flex-col items-center justify-center gap-4 px-6 text-center" aria-busy="true">
         <Logo className="h-12 w-12 animate-pulse" />
-        {waitedTooLong ? <p className="text-sm text-muted">Accesso in corso: la connessione è lenta.</p> : <span className="sr-only">Caricamento</span>}
+        {waitedTooLong ? <p className="text-sm text-muted">{t('Accesso in corso: la connessione è lenta.')}</p> : <span className="sr-only">{t('Caricamento')}</span>}
       </div>
     );
   }
 
   if (!user && !guest) return <Welcome onLogin={login} onGuest={startGuest} busy={loggingIn} />;
 
-  const accountLabel = user ? (user.displayName?.split(' ')[0] ?? 'Account') : 'Senza account';
+  const accountLabel = user ? (user.displayName?.split(' ')[0] ?? t('Account')) : t('Senza account');
 
   return (
     <HealthConsentContext.Provider value={consentGate.api}>
@@ -222,7 +223,7 @@ export default function App() {
             onLog={(s) => {
               // la lezione fatta è un allenamento: niente foglio del coach, sì Health Connect se è attivo
               actions.addSession({ ...s, healthSynced: health.connected && getHealthPrefs().autoLog ? false : undefined });
-              toast(`Segnata: ${s.dayTitle}`);
+              toast(t('Segnata: {titolo}', { titolo: s.dayTitle }));
             }}
           />
         </div>
@@ -236,7 +237,7 @@ export default function App() {
               // da inviare se la fonte salute è collegata; gli altri si possono reinviare da Progressi
               healthSynced: health.connected && getHealthPrefs().autoLog ? false : undefined
             });
-            toast(`Allenamento salvato: ${s.sets.length} serie`);
+            toast(t('Allenamento salvato: {n} serie', { n: s.sets.length }));
           }}
           onEditProgram={() => { setEditProgram(true); setTab('program'); }}
           onLinkExercise={linkExercise}
@@ -268,11 +269,11 @@ export default function App() {
             water={data.water}
             savedMeals={data.savedMeals}
             athlete={data.program.athlete}
-            onAddMeal={async (m) => { if (!(await ensureConsent())) return; actions.addMeal(toHealth(m)); toast('Pasto salvato'); }}
-            onAddMeals={async (list) => { if (!(await ensureConsent())) return; list.forEach((m) => actions.addMeal(toHealth(m))); toast(`Aggiunti ${list.length} ${list.length === 1 ? 'cibo' : 'cibi'}`); }}
+            onAddMeal={async (m) => { if (!(await ensureConsent())) return; actions.addMeal(toHealth(m)); toast(t('Pasto salvato')); }}
+            onAddMeals={async (list) => { if (!(await ensureConsent())) return; list.forEach((m) => actions.addMeal(toHealth(m))); toast(list.length === 1 ? t('Aggiunto 1 cibo') : t('Aggiunti {n} cibi', { n: list.length })); }}
             onUpdateMeal={async (id, patch) => { if (await ensureConsent()) actions.updateMeal(id, patch); }}
             onDeleteMeal={(id) => { const m = data.meals.find((x) => x.id === id); if (m) void health.removeMeal(m); actions.deleteMeal(id); }}
-            onSavePlan={async (p) => { if (p && !(await ensureConsent())) return; actions.saveDietPlan(p); toast(p ? 'Dieta salvata' : 'Dieta eliminata'); }}
+            onSavePlan={async (p) => { if (p && !(await ensureConsent())) return; actions.saveDietPlan(p); toast(p ? t('Dieta salvata') : t('Dieta eliminata')); }}
             onSaveSavedMeals={async (list) => { if (await ensureConsent()) actions.saveSavedMeals(list); }}
             onAddWater={async (date, delta) => {
               if (!(await ensureConsent())) return;
@@ -295,7 +296,7 @@ export default function App() {
           onAddMeasurement={async (m) => {
             if (!(await ensureConsent())) return;
             actions.addMeasurement({ ...m, sheetsSynced: data.spreadsheetId ? false : undefined, healthSynced: getHealthSource() !== 'none' ? false : undefined });
-            toast('Misura salvata');
+            toast(t('Misura salvata'));
           }}
           onDeleteMeasurement={actions.deleteMeasurement}
           onDeleteSession={actions.deleteSession}

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { formatDate, formatKg } from '../../lib/ids';
+import { t } from '../../lib/i18n';
 
 interface Point { date: string; value: number }
 
@@ -15,7 +16,7 @@ export function LineChart({ data, unit, label }: { data: Point[]; unit: string; 
     return () => ro.disconnect();
   }, []);
 
-  if (data.length === 0) return <div ref={ref} className="py-8 text-center text-[15px] text-muted">Ancora nessun dato.</div>;
+  if (data.length === 0) return <div ref={ref} className="py-8 text-center text-[15px] text-muted">{t('Ancora nessun dato.')}</div>;
 
   const height = 180;
   const pad = { l: 40, r: 12, t: 16, b: 26 };
@@ -35,11 +36,11 @@ export function LineChart({ data, unit, label }: { data: Point[]; unit: string; 
 
   return (
     <div ref={ref} className="w-full">
-      <svg width={width} height={height} role="img" aria-label={`${label}: ultimo valore ${formatKg(last.value)} ${unit}`} className="block">
-        {ticks.map((t, i) => (
+      <svg width={width} height={height} role="img" aria-label={t('{label}: ultimo valore {v} {unit}', { label, v: formatKg(last.value), unit })} className="block">
+        {ticks.map((tk, i) => (
           <g key={i}>
-            <line x1={pad.l} x2={width - pad.r} y1={y(t)} y2={y(t)} stroke="var(--color-line)" strokeDasharray="3 4" />
-            <text x={pad.l - 6} y={y(t) + 4} textAnchor="end" fontSize="11" fill="var(--color-faint)">{formatKg(t)}</text>
+            <line x1={pad.l} x2={width - pad.r} y1={y(tk)} y2={y(tk)} stroke="var(--color-line)" strokeDasharray="3 4" />
+            <text x={pad.l - 6} y={y(tk) + 4} textAnchor="end" fontSize="11" fill="var(--color-faint)">{formatKg(tk)}</text>
           </g>
         ))}
         <path d={path} fill="none" stroke="var(--color-plate)" strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Minus, Pencil, Plus } from '../ui/icons';
 import { decimalText, parseTyped } from '../../lib/weightStep';
+import { t } from '../../lib/i18n';
 
 interface Props {
   label: string;
@@ -52,16 +53,16 @@ export function NumberStepper({ label, unit, value, onChange, steps, min = 0, de
             onClick={() => input.current?.focus()}
             className="inline-flex h-8 items-center gap-1 rounded-lg px-2 text-sm text-muted hover:text-chalk"
           >
-            <Pencil className="h-3.5 w-3.5" />Scrivi
+            <Pencil className="h-3.5 w-3.5" />{t('Scrivi')}
           </button>
         </span>
       </div>
       <div className="flex items-center justify-between gap-2">
-        <button type="button" onClick={() => bump(-steps[0])} aria-label={`Togli ${stepText(steps[0])} ${unit}`} className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-raised text-chalk active:scale-95">
+        <button type="button" onClick={() => bump(-steps[0])} aria-label={t('Togli {n} {unit}', { n: stepText(steps[0]), unit })} className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-raised text-chalk active:scale-95">
           <Minus className="h-6 w-6" />
         </button>
         <label className="flex min-w-0 flex-1 items-baseline justify-center gap-1">
-          <span className="sr-only">{label} in {unit}</span>
+          <span className="sr-only">{t('{label} in {unit}', { label, unit })}</span>
           <input
             ref={input}
             inputMode={decimals ? 'decimal' : 'numeric'}
@@ -76,7 +77,7 @@ export function NumberStepper({ label, unit, value, onChange, steps, min = 0, de
           />
           <span className="font-display text-xl font-semibold text-muted">{unit}</span>
         </label>
-        <button type="button" onClick={() => bump(steps[0])} aria-label={`Aggiungi ${stepText(steps[0])} ${unit}`} className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-raised text-chalk active:scale-95">
+        <button type="button" onClick={() => bump(steps[0])} aria-label={t('Aggiungi {n} {unit}', { n: stepText(steps[0]), unit })} className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-raised text-chalk active:scale-95">
           <Plus className="h-6 w-6" />
         </button>
       </div>

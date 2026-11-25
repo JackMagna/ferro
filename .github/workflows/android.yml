@@ -64,6 +64,7 @@ jobs:
           # dimensione e inizio dell'impronta del file: si confrontano con la chiave originale senza svelarla
           echo "keystore: $(wc -c < "$GITHUB_WORKSPACE/release.jks") byte, sha256 $(sha256sum "$GITHUB_WORKSPACE/release.jks" | cut -c1-16)"
           keytool -list -keystore "$GITHUB_WORKSPACE/release.jks" -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" -v 2>&1 | grep -E "SHA1:|keytool error" || true
+          echo "alias nel keystore: $(keytool -list -keystore "$GITHUB_WORKSPACE/release.jks" -storepass "$KEYSTORE_PASSWORD" 2>&1 | grep -i "entry" | cut -d, -f1 | tr '\n' ' ') (segreto: ${#KEY_ALIAS} caratteri)"
           keytool -list -keystore "$GITHUB_WORKSPACE/release.jks" -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" > /dev/null 2>&1 || { echo "::error::Chiave o password del keystore non valide: ricontrolla i segreti ANDROID_KEYSTORE_*"; exit 1; }
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}

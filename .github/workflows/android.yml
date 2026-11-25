@@ -61,7 +61,10 @@ jobs:
         # tr toglie a capo, spazi e BOM che PowerShell può aggiungere al segreto; keytool ferma subito una chiave sbagliata
         run: |
           printf '%s' "$KEYSTORE_B64" | tr -cd 'A-Za-z0-9+/=' | base64 -d > "$GITHUB_WORKSPACE/release.jks"
-          keytool -list -keystore "$GITHUB_WORKSPACE/release.jks" -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" -v | grep -E "SHA1:" || { echo "::error::Chiave o password del keystore non valide: ricontrolla i segreti ANDROID_KEYSTORE_*"; exit 1; }
+          # dimensione e inizio dell'impronta del file: si confrontano con la chiave originale senza svelarla
+          echo "keystore: $(wc -c < "$GITHUB_WORKSPACE/release.jks") byte, sha256 $(sha256sum "$GITHUB_WORKSPACE/release.jks" | cut -c1-16)"
+          keytool -list -keystore "$GITHUB_WORKSPACE/release.jks" -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" -v 2>&1 | grep -E "SHA1:|keytool error" || true
+          keytool -list -keystore "$GITHUB_WORKSPACE/release.jks" -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" > /dev/null 2>&1 || { echo "::error::Chiave o password del keystore non valide: ricontrolla i segreti ANDROID_KEYSTORE_*"; exit 1; }
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}

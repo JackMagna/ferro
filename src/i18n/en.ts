@@ -88,6 +88,13 @@ const en: Record<string, string> = {
   'Sistema': 'System',
   'Scuro': 'Dark',
   'Novità': "What's new",
+  "Iniziare una scheda nuova da zero? Quella attuale resta finché non salvi; gli allenamenti già fatti restano comunque.": "Start a new program from scratch? The current one stays until you save; past workouts are kept anyway.",
+  "Questo file non è una scheda di Ferro.": "This file is not a Ferro program.",
+  "Scheda caricata: controllala e salva.": "Program loaded: check it and save.",
+  "Modifica scheda": "Edit program",
+  "Crea da zero": "Create from scratch",
+  "Esporta": "Export",
+  "Importa": "Import",
   'Chiaro': 'Light'
 };
 export default en;

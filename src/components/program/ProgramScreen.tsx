@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Pencil } from '../ui/icons';
+import { useEffect, useRef, useState } from 'react';
+import { Download, Pencil, Plus, Upload } from '../ui/icons';
 import type { User } from 'firebase/auth';
 import type { WorkoutProgram } from '../../types';
 import { DEFAULT_PROGRAM } from '../../data/defaultProgram';
@@ -12,6 +12,10 @@ import { CoachSheetImport } from './CoachSheetImport';
 import { LessonsPanel } from '../lessons/TodayLessons';
 import { useToast } from '../ui/Toast';
 import type { CoachWatch } from '../../hooks/useCoachSheetWatch';
+import { t } from '../../lib/i18n';
+import { blankProgram, parseProgramFile, programFile } from '../../lib/programFile';
+import { downloadText } from '../../lib/download';
+import { isAndroidApp } from '../../services/healthConnect';
 
 interface Props {
   user: User | null;
@@ -32,6 +36,23 @@ export function ProgramScreen(props: Props) {
   const [dayId, setDayId] = useState(program.days[0]?.id ?? '');
   const [draft, setDraft] = useState<WorkoutProgram | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const startBlank = () => {
+    if (program.days.some((d) => d.exercises.length) && !window.confirm(t('Iniziare una scheda nuova da zero? Quella attuale resta finché non salvi; gli allenamenti già fatti restano comunque.'))) return;
+    const blank = blankProgram();
+    setDraft(blank);
+    setDayId(blank.days[0].id);
+  };
+  const exportProgram = () => void downloadText(`ferro-scheda-${(program.title || 'mia').replace(/[^\p{L}\p{N}]+/gu, '-').toLowerCase()}.json`, programFile(program), 'application/json');
+  const importProgram = async (file: File) => {
+    let next: WorkoutProgram | null = null;
+    try { next = parseProgramFile(JSON.parse(await file.text())); } catch { next = null; }
+    if (!next) return toast(t('Questo file non è una scheda di Ferro.'), 'error');
+    setDraft(next);
+    setDayId(next.days[0]?.id ?? '');
+    toast(t('Scheda caricata: controllala e salva.'));
+  };
 
   useEffect(() => {
     if (props.startEditing) {
@@ -71,7 +92,22 @@ export function ProgramScreen(props: Props) {
             {[[shown.athlete, shown.trainer && `con ${shown.trainer}`].filter(Boolean).join(' '), `${shown.totalWeeks} settimane`].filter(Boolean).join(' · ')}
           </p>
         </div>
-        {!draft && <Button icon={<Pencil className="h-4 w-4" />} onClick={() => setDraft(structuredClone(program))}>Modifica scheda</Button>}
+        {!draft && (
+          <div className="flex flex-wrap gap-2">
+            <Button icon={<Pencil className="h-4 w-4" />} onClick={() => setDraft(structuredClone(program))}>{t('Modifica scheda')}</Button>
+            <Button icon={<Plus className="h-4 w-4" />} onClick={startBlank}>{t('Crea da zero')}</Button>
+            <Button variant="ghost" icon={<Download className="h-4 w-4" />} onClick={exportProgram}>{t('Esporta')}</Button>
+            <Button variant="ghost" icon={<Upload className="h-4 w-4" />} onClick={() => fileRef.current?.click()}>{t('Importa')}</Button>
+            <input
+              ref={fileRef}
+              type="file"
+              // nell'app Android il selettore non riconosce sempre i .json
+              accept={isAndroidApp() ? undefined : 'application/json,.json'}
+              className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void importProgram(f); }}
+            />
+          </div>
+        )}
       </header>
 
       {shown.days.length > 0 && (

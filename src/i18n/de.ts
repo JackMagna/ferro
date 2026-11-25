@@ -88,6 +88,13 @@ const de: Record<string, string> = {
   'Sistema': 'System',
   'Scuro': 'Dunkel',
   'Novità': "Neuigkeiten",
+  "Iniziare una scheda nuova da zero? Quella attuale resta finché non salvi; gli allenamenti già fatti restano comunque.": "Einen neuen Plan von Grund auf beginnen? Der aktuelle bleibt, bis du speicherst; bisherige Trainings bleiben erhalten.",
+  "Questo file non è una scheda di Ferro.": "Diese Datei ist kein Ferro-Plan.",
+  "Scheda caricata: controllala e salva.": "Plan geladen: prüfe ihn und speichere.",
+  "Modifica scheda": "Plan bearbeiten",
+  "Crea da zero": "Neu erstellen",
+  "Esporta": "Exportieren",
+  "Importa": "Importieren",
   'Chiaro': 'Hell'
 };
 export default de;

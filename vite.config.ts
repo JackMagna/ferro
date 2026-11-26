@@ -21,6 +21,18 @@ const copySite = (): Plugin => ({
   }
 });
 
+/** Senza chiave Firebase l'app si apre ma non accede: meglio fermare la build (su Vercel resta online la versione precedente). */
+const requireFirebaseKey = (): Plugin => ({
+  name: 'ferro-require-firebase-key',
+  apply: 'build',
+  configResolved(config) {
+    if (config.env.VITE_FIREBASE_EMULATOR === '1' || process.env.VITEST) return;
+    if (!config.env.VITE_FIREBASE_API_KEY) {
+      throw new Error('VITE_FIREBASE_API_KEY mancante: impostala su Vercel, nel secret FIREBASE_API_KEY di GitHub o in .env.local (vedi .env.example).');
+    }
+  }
+});
+
 const version = `${(process.env.VERCEL_GIT_COMMIT_SHA ?? 'locale').slice(0, 7)} · ${new Date().toISOString().slice(0, 16).replace('T', ' ')}`;
 
 export default defineConfig({
@@ -32,6 +44,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     copySite(),
+    requireFirebaseKey(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'apple-touch-icon.png'],

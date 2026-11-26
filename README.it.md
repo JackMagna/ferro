@@ -82,8 +82,10 @@ L'app riconosce righe `GIORNO 1`, colonne `1 SETT.`…`6 SETT.`, intestazioni di
 
 ## Firebase
 
-La configurazione è in `firebase-applet-config.json`. La chiave API di Firebase per il web non è un segreto
-(identifica il progetto, non dà accessi): la protezione è nelle regole di `firestore.rules`.
+La configurazione è in `src/services/firebase.ts`; la chiave API arriva dalla variabile `VITE_FIREBASE_API_KEY`
+(su Vercel, nel secret `FIREBASE_API_KEY` di GitHub Actions e in `.env.local` per lo sviluppo, vedi `.env.example`).
+La chiave finisce comunque nell'app scaricata: la protezione vera sono le restrizioni della chiave in Google Cloud
+(referrer HTTP e API consentite) e le regole di `firestore.rules`.
 Dopo il deploy su Vercel, aggiungi il dominio in *Authentication → Impostazioni → Domini autorizzati*.
 
 Le regole di `firestore.rules` (che includono `users/{uid}/meals`) vanno **ripubblicate a mano** dopo ogni modifica:

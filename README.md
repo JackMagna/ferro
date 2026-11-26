@@ -82,8 +82,10 @@ The app recognizes `GIORNO 1` rows, `1 SETT.`…`6 SETT.` columns, section heade
 
 ## Firebase
 
-The configuration is in `firebase-applet-config.json`. The Firebase web API key is not a secret
-(it identifies the project, it grants no access): protection comes from the rules in `firestore.rules`.
+The configuration is in `src/services/firebase.ts`; the API key comes from the `VITE_FIREBASE_API_KEY` variable
+(on Vercel, in the `FIREBASE_API_KEY` GitHub Actions secret and in `.env.local` for development, see `.env.example`).
+The key still ships inside the app: real protection comes from the key's restrictions in Google Cloud
+(HTTP referrers and allowed APIs) and from the rules in `firestore.rules`.
 After deploying to Vercel, add the domain under *Authentication → Settings → Authorized domains*.
 
 The rules in `firestore.rules` (which include `users/{uid}/meals`) must be **republished by hand** after every change:

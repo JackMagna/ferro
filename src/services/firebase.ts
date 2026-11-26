@@ -25,7 +25,6 @@ import {
   writeBatch
 } from 'firebase/firestore';
 import { Capacitor } from '@capacitor/core';
-import firebaseConfig from '../../firebase-applet-config.json';
 import { readJSON, removeKey, writeJSON } from '../lib/storage';
 import { t } from '../lib/i18n';
 // prima di getAuth: guarda se c'è un accesso salvato, per la diagnostica e per non mostrare l'accesso troppo presto
@@ -36,6 +35,25 @@ import '../lib/authProbe';
  * con un progetto finto «demo-ferro». Nessun dato vero e nessun account Google vero.
  */
 const EMULATOR = import.meta.env.VITE_FIREBASE_EMULATOR === '1';
+
+/**
+ * Configurazione del progetto Firebase. I valori qui sotto identificano il progetto e non sono segreti;
+ * la chiave API arriva da VITE_FIREBASE_API_KEY (Vercel, secret FIREBASE_API_KEY su GitHub, .env.local in locale),
+ * così non sta nel repository. Ogni valore si può sovrascrivere con la sua variabile VITE_FIREBASE_*.
+ */
+const env = import.meta.env;
+const firebaseConfig = {
+  // senza chiave Firebase si blocca all'avvio: un segnaposto fa aprire l'app (l'accesso poi fallisce)
+  apiKey: env.VITE_FIREBASE_API_KEY || 'chiave-mancante',
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || 'gen-lang-client-0984682805.firebaseapp.com',
+  projectId: env.VITE_FIREBASE_PROJECT_ID || 'gen-lang-client-0984682805',
+  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || 'gen-lang-client-0984682805.firebasestorage.app',
+  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || '445184633118',
+  appId: env.VITE_FIREBASE_APP_ID || '1:445184633118:web:e4ecd058135e53b3ef010f'
+};
+/** ID client OAuth «Applicazione web» (non segreto): di riserva se manca VITE_GOOGLE_WEB_CLIENT_ID */
+const OAUTH_CLIENT_ID = '445184633118-0npptrge6logrpgvkg3m5k3l52s354n3.apps.googleusercontent.com';
+if (!EMULATOR && !env.VITE_FIREBASE_API_KEY && env.MODE !== 'test') console.error('[Ferro] VITE_FIREBASE_API_KEY mancante: accesso e sincronizzazione non funzioneranno.');
 
 export const app = initializeApp(EMULATOR ? { apiKey: 'demo-key', authDomain: 'localhost', projectId: 'demo-ferro', appId: 'demo-app' } : firebaseConfig);
 export const auth = getAuth(app);
@@ -54,7 +72,7 @@ export const db = initializeFirestore(
     experimentalAutoDetectLongPolling: true,
     localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
   },
-  EMULATOR ? undefined : (firebaseConfig as { firestoreDatabaseId?: string }).firestoreDatabaseId
+  EMULATOR ? undefined : env.VITE_FIREBASE_DATABASE_ID || undefined
 );
 if (EMULATOR) connectFirestoreEmulator(db, '127.0.0.1', 8080);
 
@@ -134,7 +152,7 @@ async function nativeGoogle(scopes: string[]): Promise<{ idToken: string | null;
   if (EMULATOR) return { idToken: emulatorGoogleToken(), accessToken: scopes.length ? 'token-di-prova' : undefined };
   // ID client OAuth «Applicazione web» del progetto: è già nella configurazione Firebase (non è un segreto);
   // la variabile d'ambiente serve solo per usarne un altro.
-  const webClientId = (import.meta.env.VITE_GOOGLE_WEB_CLIENT_ID as string | undefined) || (firebaseConfig as { oAuthClientId?: string }).oAuthClientId;
+  const webClientId = (import.meta.env.VITE_GOOGLE_WEB_CLIENT_ID as string | undefined) || OAUTH_CLIENT_ID;
   if (!webClientId) throw new Error(t("L'accesso con Google nell'app Android non è ancora configurato."));
   const { SocialLogin } = await import('@capgo/capacitor-social-login');
   nativeReady ??= SocialLogin.initialize({ google: { webClientId } });

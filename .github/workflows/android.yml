@@ -4,6 +4,7 @@
 #   usano sempre l'ultima Release (releases/latest), quindi la chiave di firma deve restare la stessa.
 # Segreti (Settings → Secrets and variables → Actions), facoltativi: senza, l'APK è firmato con la chiave di debug.
 #   ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
+# Segreto obbligatorio: FIREBASE_API_KEY = chiave API web di Firebase (non sta più nel repository).
 # Variabile (non segreta): GOOGLE_WEB_CLIENT_ID = ID client OAuth «Applicazione web», per l'accesso Google nell'app.
 name: Android
 
@@ -41,6 +42,7 @@ jobs:
         run: bun run build
         env:
           VITE_GOOGLE_WEB_CLIENT_ID: ${{ vars.GOOGLE_WEB_CLIENT_ID }}
+          VITE_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
           # solo le versioni vere (tag v*) controllano gli aggiornamenti all'apertura (src/lib/appUpdate.ts)
           VITE_APP_VERSION: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}
           # nell'app Android l'app sta alla radice (sul sito è in /app/)

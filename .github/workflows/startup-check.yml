@@ -1,9 +1,8 @@
 # Prova di avvio sull'emulatore Android: APK del ramo (come versione vera, firmato) installato sopra quelli pubblicati, con logcat.
 name: Prova avvio
+# Si avvia a mano (Actions → Prova avvio): prima di pubblicare una versione con codice nativo nuovo.
 on:
   workflow_dispatch:
-  push:
-    branches: ['claude/project-thread-zvci91']
 jobs:
   check:
     runs-on: ubuntu-latest

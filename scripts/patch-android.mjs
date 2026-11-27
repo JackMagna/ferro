@@ -111,9 +111,13 @@ if (!m.includes('.workout.RestAlarmReceiver"')) {
     </application>`);
 }
 // Aggiornamento dell'APK del sito dall'app (native/android/.../update/): installazione dell'APK scaricato.
-// Il controllo giornaliero usa WorkManager e il permesso delle notifiche già chiesto per l'allenamento.
+// Il controllo giornaliero è un JobService (update/UpdateCheckJob.java) e usa il permesso delle notifiche già chiesto per l'allenamento.
 if (!m.includes('android.permission.REQUEST_INSTALL_PACKAGES"')) {
   m = m.replace(/<application/, '<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />\n\n    <application');
+}
+if (!m.includes('.update.UpdateCheckJob"')) {
+  m = m.replace(/<\/application>/, `    <service android:name=".update.UpdateCheckJob" android:permission="android.permission.BIND_JOB_SERVICE" android:exported="false" />
+    </application>`);
 }
 writeFileSync(manifestPath, m);
 
@@ -153,11 +157,6 @@ if (!g.includes('androidx.health.connect:connect-client')) {
     implementation 'androidx.health.connect:connect-client:1.1.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'`
   );
-}
-// controllo giornaliero degli aggiornamenti (update/UpdateCheckWorker.java)
-if (!g.includes('androidx.work:work-runtime')) {
-  g = g.replace(/dependencies\s*\{/, `dependencies {
-    implementation 'androidx.work:work-runtime:2.10.0'`);
 }
 writeFileSync(gradlePath, g);
 console.log('Progetto Android preparato.');

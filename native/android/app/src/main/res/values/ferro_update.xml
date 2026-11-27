@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Notifica della nuova versione (update/UpdateCheckWorker.java) -->
+<!-- Notifica della nuova versione (update/UpdateCheckJob.java) -->
 <resources>
     <string name="ferro_update_channel">Aggiornamenti di Ferro</string>
     <string name="ferro_update_title">Ferro %1$s è disponibile</string>

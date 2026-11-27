@@ -2,6 +2,9 @@ package it.irontrack.app.update;
 
 import android.Manifest;
 import android.app.DownloadManager;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -12,11 +15,6 @@ import android.os.Build;
 import android.os.Environment;
 
 import androidx.core.content.FileProvider;
-import androidx.work.Constraints;
-import androidx.work.ExistingPeriodicWorkPolicy;
-import androidx.work.NetworkType;
-import androidx.work.PeriodicWorkRequest;
-import androidx.work.WorkManager;
 
 import java.io.File;
 import java.util.Arrays;
@@ -26,13 +24,13 @@ import java.util.regex.Pattern;
 
 /**
  * Aggiornamento dell'APK scaricato dal sito: download con DownloadManager, installazione con il programma di
- * installazione di Android, controllo giornaliero (UpdateCheckWorker).
+ * installazione di Android, controllo giornaliero (UpdateCheckJob).
  * Tutto è spento se il manifest non dichiara REQUEST_INSTALL_PACKAGES: il file per Google Play non lo ha
  * (lo toglie scripts/patch-android.mjs --play), perché lì gli aggiornamenti li fa solo il Play Store.
  */
 public final class AppUpdate {
     static final String PREFS = "ferro_update";
-    static final String WORK = "ferro-update-check";
+    static final int JOB_ID = 4210;
     private static final String FILE = "ferro-aggiornamento.apk";
     private static final Pattern VERSION = Pattern.compile("^v?(\\d+)\\.(\\d+)\\.(\\d+)$");
 
@@ -75,18 +73,23 @@ public final class AppUpdate {
         return false;
     }
 
-    /** Controllo una volta al giorno, solo con la rete; se è già in programma non lo riprogramma. */
+    /**
+     * Controllo una volta al giorno, solo con la rete; se è già in programma non lo riprogramma.
+     * Dopo un riavvio del telefono riparte alla prossima apertura dell'app (niente permesso di avvio).
+     */
     public static void schedule(Context ctx) {
-        Constraints c = new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build();
-        PeriodicWorkRequest req = new PeriodicWorkRequest.Builder(UpdateCheckWorker.class, 1, TimeUnit.DAYS)
-            .setConstraints(c)
-            .setInitialDelay(6, TimeUnit.HOURS)
+        JobScheduler js = (JobScheduler) ctx.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        if (js == null || js.getPendingJob(JOB_ID) != null) return;
+        JobInfo job = new JobInfo.Builder(JOB_ID, new ComponentName(ctx, UpdateCheckJob.class))
+            .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+            .setPeriodic(TimeUnit.DAYS.toMillis(1), TimeUnit.HOURS.toMillis(6))
             .build();
-        WorkManager.getInstance(ctx).enqueueUniquePeriodicWork(WORK, ExistingPeriodicWorkPolicy.KEEP, req);
+        js.schedule(job);
     }
 
     public static void cancel(Context ctx) {
-        WorkManager.getInstance(ctx).cancelUniqueWork(WORK);
+        JobScheduler js = (JobScheduler) ctx.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        if (js != null) js.cancel(JOB_ID);
     }
 
     private static File file(Context ctx) {

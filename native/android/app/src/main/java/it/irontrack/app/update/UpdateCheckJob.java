@@ -3,16 +3,15 @@ package it.irontrack.app.update;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.job.JobParameters;
+import android.app.job.JobService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 
-import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.work.Worker;
-import androidx.work.WorkerParameters;
 
 import org.json.JSONObject;
 
@@ -27,35 +26,42 @@ import it.irontrack.app.R;
  * Una volta al giorno chiede a GitHub l'ultima versione (la stessa Release che legge src/lib/appUpdate.ts) e,
  * se è più nuova di quella installata, manda una notifica. Ogni versione si annuncia una volta sola.
  * Aprendo l'app dalla notifica compare il banner con «Aggiorna».
+ * È un JobService di Android (programmato da AppUpdate.schedule): niente WorkManager né altre librerie.
  */
-public class UpdateCheckWorker extends Worker {
+public class UpdateCheckJob extends JobService {
     private static final String LATEST = "https://api.github.com/repos/JackMagna/ferro/releases/latest";
     private static final String CHANNEL = "ferro_update";
     private static final int NOTIFICATION_ID = 4210;
 
-    public UpdateCheckWorker(@NonNull Context context, @NonNull WorkerParameters params) {
-        super(context, params);
+    @Override
+    public boolean onStartJob(JobParameters params) {
+        Context ctx = getApplicationContext();
+        new Thread(() -> jobFinished(params, !check(ctx))).start();
+        return true;
     }
 
-    @NonNull
     @Override
-    public Result doWork() {
-        Context ctx = getApplicationContext();
+    public boolean onStopJob(JobParameters params) {
+        return true;
+    }
+
+    /** false se va ripetuto più tardi (rete o GitHub non rispondono). */
+    static boolean check(Context ctx) {
         if (!AppUpdate.selfUpdating(ctx)) {
             AppUpdate.cancel(ctx);
-            return Result.success();
+            return true;
         }
         try {
             String tag = latestTag();
             String current = AppUpdate.installedVersion(ctx);
             SharedPreferences prefs = ctx.getSharedPreferences(AppUpdate.PREFS, Context.MODE_PRIVATE);
-            if (!AppUpdate.isNewer(tag, current) || tag.equals(prefs.getString("notified", null))) return Result.success();
-            if (!NotificationManagerCompat.from(ctx).areNotificationsEnabled()) return Result.success();
-            notify(ctx, tag);
+            if (!AppUpdate.isNewer(tag, current) || tag.equals(prefs.getString("notified", null))) return true;
+            if (!NotificationManagerCompat.from(ctx).areNotificationsEnabled()) return true;
+            postNotice(ctx, tag);
             prefs.edit().putString("notified", tag).apply();
-            return Result.success();
+            return true;
         } catch (Exception e) {
-            return Result.retry();
+            return false;
         }
     }
 
@@ -77,7 +83,7 @@ public class UpdateCheckWorker extends Worker {
         }
     }
 
-    private static void notify(Context ctx, String tag) {
+    private static void postNotice(Context ctx, String tag) {
         NotificationManager nm = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= 26) {
             nm.createNotificationChannel(new NotificationChannel(CHANNEL, ctx.getString(R.string.ferro_update_channel), NotificationManager.IMPORTANCE_DEFAULT));

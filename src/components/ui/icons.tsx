@@ -73,6 +73,9 @@ export const Users = make('Users', 'M9 4a3.5 3.5 0 1 1 0 7a3.5 3.5 0 0 1 0-7zM2.
 /** Lezioni: il calendario */
 export const Calendar = make('Calendar', 'M4 5h16v15H4zM4 10h16M8 3v4M16 3v4');
 
+/** Guida: la bussola */
+export const Compass = make('Compass', 'M12 3a9 9 0 1 1 0 18a9 9 0 0 1 0-18zM15.5 8.5l-2 5l-5 2l2-5z');
+
 /* le altre restano di lucide-react */
 export {
   AlertTriangle, ArrowDown, ArrowUp, CheckCircle2, CloudOff, Copy, Download, ExternalLink, FileText, Heart, ImageOff,

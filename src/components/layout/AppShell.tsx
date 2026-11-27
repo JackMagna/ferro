@@ -40,6 +40,7 @@ export function AppShell({ tab, onTab, accountLabel, onAccount, children }: Prop
                 <button
                   type="button"
                   onClick={() => onTab(id)}
+                data-tour={`tab-${id}`}
                   aria-current={tab === id ? 'page' : undefined}
                   className={`flex h-11 w-full items-center gap-3 rounded-xl px-3 text-[15px] font-semibold transition ${tab === id ? 'bg-raised text-chalk' : 'text-muted hover:text-chalk'}`}
                 >
@@ -50,7 +51,7 @@ export function AppShell({ tab, onTab, accountLabel, onAccount, children }: Prop
             ))}
           </ul>
         </nav>
-        <button type="button" onClick={onAccount} className="flex h-12 items-center gap-3 rounded-xl px-3 text-left text-[15px] text-muted hover:bg-raised hover:text-chalk">
+        <button type="button" data-tour="account" onClick={onAccount} className="flex h-12 items-center gap-3 rounded-xl px-3 text-left text-[15px] text-muted hover:bg-raised hover:text-chalk">
           <UserRound className="h-5 w-5 shrink-0" />
           <span className="truncate">{accountLabel}</span>
         </button>
@@ -63,7 +64,7 @@ export function AppShell({ tab, onTab, accountLabel, onAccount, children }: Prop
             <Logo className="h-7 w-7" />
             <span className="font-display text-xl font-bold">Ferro</span>
           </div>
-          <button type="button" onClick={onAccount} className="inline-flex h-11 max-w-[55%] items-center gap-2 rounded-xl px-3 text-sm text-muted hover:text-chalk" aria-label={t('Account e impostazioni')}>
+          <button type="button" data-tour="account" onClick={onAccount} className="inline-flex h-11 max-w-[55%] items-center gap-2 rounded-xl px-3 text-sm text-muted hover:text-chalk" aria-label={t('Account e impostazioni')}>
             <span className="truncate">{accountLabel}</span>
             <UserRound className="h-5 w-5 shrink-0" />
           </button>
@@ -88,6 +89,7 @@ export function AppShell({ tab, onTab, accountLabel, onAccount, children }: Prop
               <button
                 type="button"
                 onClick={() => onTab(id)}
+                data-tour={`tab-${id}`}
                 aria-current={tab === id ? 'page' : undefined}
                 className={`flex h-full w-full flex-col items-center justify-center gap-0.5 text-xs font-semibold ${tab === id ? 'text-chalk' : 'text-faint'}`}
               >

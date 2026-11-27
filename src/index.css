@@ -281,3 +281,83 @@ html[data-mode="light"] .text-plate {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Guida al primo accesso (Driver.js): fumetto con i colori e gli angoli del tema */
+.driver-popover.ferro-tour {
+  background: var(--color-panel);
+  color: var(--color-chalk);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  padding: 18px 18px 14px;
+  max-width: min(360px, calc(100vw - 32px));
+  min-width: min(300px, calc(100vw - 32px));
+  font-family: var(--font-sans);
+}
+.driver-popover.ferro-tour .driver-popover-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.15;
+  padding-right: 32px;
+}
+.driver-popover.ferro-tour .driver-popover-description {
+  margin-top: 6px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--color-muted);
+}
+.driver-popover.ferro-tour .driver-popover-close-btn {
+  width: 44px;
+  height: 44px;
+  top: 4px;
+  right: 4px;
+  color: var(--color-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.driver-popover.ferro-tour .driver-popover-close-btn:hover { color: var(--color-chalk); }
+.ferro-tour-x { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.driver-popover.ferro-tour .driver-popover-footer {
+  margin-top: 14px;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.driver-popover.ferro-tour .driver-popover-progress-text { color: var(--color-faint); font-size: 13px; }
+.driver-popover.ferro-tour .driver-popover-navigation-btns { gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.driver-popover.ferro-tour button.driver-popover-prev-btn,
+.driver-popover.ferro-tour button.driver-popover-next-btn,
+.driver-popover.ferro-tour button.ferro-tour-alt,
+.driver-popover.ferro-tour button.ferro-tour-skip {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: var(--radius-xl, 12px);
+  font: 600 15px var(--font-sans);
+  text-shadow: none;
+  border: 1px solid var(--color-line);
+  background: var(--color-raised);
+  color: var(--color-chalk);
+}
+.driver-popover.ferro-tour button.driver-popover-next-btn {
+  background: var(--color-plate);
+  color: var(--color-plate-ink);
+  border-color: var(--color-plate);
+}
+.driver-popover.ferro-tour button.ferro-tour-skip {
+  background: transparent;
+  border-color: transparent;
+  color: var(--color-muted);
+  padding: 0 8px;
+}
+.driver-popover.ferro-tour button:focus-visible { outline: 2px solid var(--color-plate); outline-offset: 2px; border-radius: var(--radius-xl, 12px); }
+.driver-popover.ferro-tour .driver-popover-close-btn:focus-visible { outline-offset: -6px; }
+/* ultima tappa: i due pulsanti uno sotto l'altro, a tutta larghezza */
+.driver-popover.ferro-tour .ferro-tour-last .driver-popover-navigation-btns { width: 100%; flex-direction: column-reverse; }
+.driver-popover.ferro-tour .ferro-tour-last .driver-popover-navigation-btns button { width: 100%; }
+.driver-popover.ferro-tour .ferro-tour-last .driver-popover-prev-btn { display: none !important; }
+.driver-popover.ferro-tour .driver-popover-arrow-side-top.driver-popover-arrow { border-top-color: var(--color-panel); }
+.driver-popover.ferro-tour .driver-popover-arrow-side-bottom.driver-popover-arrow { border-bottom-color: var(--color-panel); }
+.driver-popover.ferro-tour .driver-popover-arrow-side-left.driver-popover-arrow { border-left-color: var(--color-panel); }
+.driver-popover.ferro-tour .driver-popover-arrow-side-right.driver-popover-arrow { border-right-color: var(--color-panel); }

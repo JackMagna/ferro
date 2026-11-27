@@ -17,6 +17,7 @@ import { AppShell, type Tab } from './components/layout/AppShell';
 import { AccountSheet } from './components/layout/AccountSheet';
 import { UpdateBanner } from './components/layout/UpdateBanner';
 import { Welcome } from './components/onboarding/Welcome';
+import { TourNews, useTour } from './components/onboarding/Tour';
 import { WorkoutScreen } from './components/workout/WorkoutScreen';
 import { ProgramScreen } from './components/program/ProgramScreen';
 import { TodayLessons } from './components/lessons/TodayLessons';
@@ -80,6 +81,8 @@ export default function App() {
   };
   /** Pasto da inviare alla fonte dati salute, se è collegata e l'invio dei pasti è attivo. */
   const toHealth = (m: FoodEntry): FoodEntry => (health.source !== 'none' && health.connected && health.autoMeals ? { ...m, healthSynced: false } : m);
+  const signedIn = !!user || guest;
+  const tour = useTour({ ready: signedIn && data.ready && authReady, sessionsCount: data.sessions.length, guest: !user, onTab: setTab, notify: (m) => toast(m) });
   const consentGate = useHealthConsentGate({ consent: data.consent, onSave: actions.saveHealthConsent, onDeclined: (m) => toast(m, 'error'), onDeleteHealthData: () => deleteHealthData() });
   const ensureConsent = consentGate.api.ensure;
 
@@ -217,6 +220,7 @@ export default function App() {
       {/* L'allenamento resta montato: timer e sensore cardio non si interrompono cambiando sezione */}
       <div hidden={tab !== 'workout'}>
         <ErrorBoundary inline resetKey={tab}>
+        {tour.showNews && <TourNews onOpen={tour.start} onDismiss={tour.dismissNews} />}
         <div className="mb-4 empty:hidden">
           <TodayLessons
             sessions={data.sessions}
@@ -322,6 +326,7 @@ export default function App() {
         onImport={importBackup}
         health={health}
         onDeleteHealthData={deleteHealthData}
+        onTour={() => { setAccountOpen(false); setTab('workout'); setTimeout(tour.start, 300); }}
       />
     </AppShell>
     {consentGate.sheet}

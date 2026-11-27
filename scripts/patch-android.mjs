@@ -6,6 +6,14 @@ import { cpSync, existsSync, readFileSync, readdirSync, rmSync, writeFileSync } 
 const manifestPath = 'android/app/src/main/AndroidManifest.xml';
 let m = readFileSync(manifestPath, 'utf8');
 
+// «--play»: si lancia dopo assembleRelease e prima di bundleRelease. Google Play vieta che un'app si aggiorni da sola,
+// quindi il file per Play non dichiara REQUEST_INSTALL_PACKAGES: senza, update/AppUpdate.java resta spento.
+if (process.argv.includes('--play')) {
+  writeFileSync(manifestPath, m.replace(/\s*<uses-permission android:name="android\.permission\.REQUEST_INSTALL_PACKAGES" \/>/, ''));
+  console.log('Manifest per Google Play: niente aggiornamento dall\'app.');
+  process.exit(0);
+}
+
 const perms = [
   'READ_WEIGHT', 'WRITE_WEIGHT', 'READ_BODY_FAT', 'WRITE_BODY_FAT', 'READ_HEART_RATE', 'READ_HEALTH_DATA_HISTORY',
   // pasti (calorie), acqua, calorie bruciate con l'attività
@@ -102,6 +110,11 @@ if (!m.includes('.workout.RestAlarmReceiver"')) {
   m = m.replace(/<\/application>/, `    <receiver android:name=".workout.RestAlarmReceiver" android:exported="false" />
     </application>`);
 }
+// Aggiornamento dell'APK del sito dall'app (native/android/.../update/): installazione dell'APK scaricato.
+// Il controllo giornaliero usa WorkManager e il permesso delle notifiche già chiesto per l'allenamento.
+if (!m.includes('android.permission.REQUEST_INSTALL_PACKAGES"')) {
+  m = m.replace(/<application/, '<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />\n\n    <application');
+}
 writeFileSync(manifestPath, m);
 
 // Health Connect richiede Android 8 (API 26) o più recente
@@ -140,6 +153,11 @@ if (!g.includes('androidx.health.connect:connect-client')) {
     implementation 'androidx.health.connect:connect-client:1.1.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'`
   );
+}
+// controllo giornaliero degli aggiornamenti (update/UpdateCheckWorker.java)
+if (!g.includes('androidx.work:work-runtime')) {
+  g = g.replace(/dependencies\s*\{/, `dependencies {
+    implementation 'androidx.work:work-runtime:2.10.0'`);
 }
 writeFileSync(gradlePath, g);
 console.log('Progetto Android preparato.');

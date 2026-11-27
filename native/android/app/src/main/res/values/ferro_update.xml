@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Notifica della nuova versione (update/UpdateCheckWorker.java) -->
+<resources>
+    <string name="ferro_update_channel">Aggiornamenti di Ferro</string>
+    <string name="ferro_update_title">Ferro %1$s è disponibile</string>
+    <string name="ferro_update_text">Tocca per aprire Ferro e aggiornare: i tuoi dati restano.</string>
+</resources>

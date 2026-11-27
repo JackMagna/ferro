@@ -1,0 +1,26 @@
+{
+  "format": "ferro-animations-v1",
+  "license": "CC BY-SA 4.0",
+  "commit": "5859e893df335256d4a0bcbae0a8f94f4375141c",
+  "items": [
+    {
+      "id": "lat-machine",
+      "libraryIds": [
+        "Wide-Grip_Lat_Pulldown",
+        "Close-Grip_Front_Lat_Pulldown"
+      ]
+    },
+    {
+      "id": "leg-extension",
+      "libraryIds": [
+        "Leg_Extensions"
+      ]
+    },
+    {
+      "id": "leg-press",
+      "libraryIds": [
+        "Leg_Press"
+      ]
+    }
+  ]
+}

@@ -233,5 +233,10 @@ const de: Record<string, string> = {
   "Fonti consultate": "Verwendete Quellen",
   "Testo scritto da Ferro confrontando le istruzioni pubbliche di produttori e associazioni (licenza {license}).": "Text von Ferro, verfasst anhand öffentlicher Anleitungen von Herstellern und Verbänden (Lizenz {license}).",
   "Istruzioni originali della libreria (inglese)": "Originalanleitung der Bibliothek (Englisch)",
+  "{name}: animazione del movimento": "{name}: Animation der Bewegung",
+  "Foto": "Fotos",
+  "Animazione 3D": "3D-Animation",
+  "Posizione di partenza: i numeri corrispondono alle regolazioni qui sotto": "Startposition: Die Zahlen entsprechen den Einstellungen unten",
+  "Animazione e disegno di ferro-esercizi, fatti da Ferro in 3D (licenza {license}).": "Animation und Zeichnung aus ferro-esercizi, von Ferro in 3D erstellt (Lizenz {license}).",
 };
 export default de;

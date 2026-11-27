@@ -13,7 +13,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 /** Scheda da coach: regolazioni, esecuzione, errori comuni, sensazione giusta, quando fermarsi, fonti. */
-export function GuideSections({ resolved }: { resolved: ResolvedGuide }) {
+export function GuideSections({ resolved, setupImage }: { resolved: ResolvedGuide; setupImage?: string }) {
   const { guide, sources, safety, general, license } = resolved;
   return (
     <div className="space-y-5 text-[15px] leading-relaxed text-chalk/90">
@@ -23,9 +23,23 @@ export function GuideSections({ resolved }: { resolved: ResolvedGuide }) {
       </p>
 
       <Section title={guide.kind === 'macchina' || guide.kind === 'cavi' ? t('Regolazioni') : t('Posizione di partenza')}>
-        <ul className="list-disc space-y-1.5 pl-5">
-          {guide.setup.map((s, i) => <li key={i}>{s}</li>)}
-        </ul>
+        {setupImage ? (
+          <>
+            <img
+              src={setupImage}
+              alt={t('Posizione di partenza: i numeri corrispondono alle regolazioni qui sotto')}
+              loading="lazy"
+              className="mb-3 aspect-square w-full max-w-[320px] rounded-2xl bg-[#2a2e33] object-contain"
+            />
+            <ol className="list-decimal space-y-1.5 pl-5">
+              {guide.setup.map((s, i) => <li key={i}>{s}</li>)}
+            </ol>
+          </>
+        ) : (
+          <ul className="list-disc space-y-1.5 pl-5">
+            {guide.setup.map((s, i) => <li key={i}>{s}</li>)}
+          </ul>
+        )}
       </Section>
 
       <Section title={t('Esecuzione')}>
@@ -70,6 +84,7 @@ export function GuideSections({ resolved }: { resolved: ResolvedGuide }) {
         <details className="text-sm text-muted">
           <summary className="min-h-11 cursor-pointer py-2 font-medium text-chalk">{t('Fonti consultate')}</summary>
           <p className="mb-2">{t('Testo scritto da Ferro confrontando le istruzioni pubbliche di produttori e associazioni (licenza {license}).', { license })}</p>
+          {setupImage && <p className="mb-2">{t('Animazione e disegno di ferro-esercizi, fatti da Ferro in 3D (licenza {license}).', { license })}</p>}
           <ul className="space-y-1.5">
             {sources.map((s) => (
               <li key={s.url}>

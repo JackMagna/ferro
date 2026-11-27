@@ -221,5 +221,17 @@ const en: Record<string, string> = {
   "Principiante": "Beginner",
   "Intermedio": "Intermediate",
   "Esperto": "Expert",
+  "Da ricordare durante la serie": "Remember during the set",
+  "Regolazioni": "Machine setup",
+  "Posizione di partenza": "Starting position",
+  "Errori comuni": "Common mistakes",
+  "Errore:": "Mistake:",
+  "Correzione:": "Fix:",
+  "Dove lo devi sentire": "Where you should feel it",
+  "Muscoli: {list}": "Muscles: {list}",
+  "Quando fermarti": "When to stop",
+  "Fonti consultate": "Sources consulted",
+  "Testo scritto da Ferro confrontando le istruzioni pubbliche di produttori e associazioni (licenza {license}).": "Text written by Ferro by comparing public instructions from manufacturers and associations (licence {license}).",
+  "Istruzioni originali della libreria (inglese)": "Original library instructions (English)",
 };
 export default en;

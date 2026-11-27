@@ -5,8 +5,14 @@ OUT=startup-check; mkdir -p $OUT
 shot() { sleep "$2"; adb exec-out screencap -p > "$OUT/$1.png"; adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1; adb pull /sdcard/ui.xml "$OUT/$1.xml" >/dev/null 2>&1; adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" > "$OUT/$1.activity.txt"; }
 tap_text() { # tocca il primo elemento con questo testo
   adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1; adb pull /sdcard/ui.xml /tmp/ui.xml >/dev/null 2>&1
-  b=$(grep -o "text=\"[^\"]*$1[^\"]*\"[^>]*bounds=\"\[[0-9]*,[0-9]*\]\[[0-9]*,[0-9]*\]\"" /tmp/ui.xml | head -1 | grep -o '\[[0-9]*,[0-9]*\]\[[0-9]*,[0-9]*\]' | tr -d '[]' | tr ',' ' ')
-  [ -n "$b" ] && set -- $b && adb shell input tap $(( ($1+$3)/2 )) $(( ($2+$4)/2 ))
+  xy=$(python3 -c "
+import re,sys
+x=open('/tmp/ui.xml').read()
+for n in re.findall(r'<node [^>]*>', x):
+    if sys.argv[1].lower() in n.lower():
+        a=list(map(int,re.findall(r'bounds=\"\[(\d+),(\d+)\]\[(\d+),(\d+)\]', n)[0])); print((a[0]+a[2])//2,(a[1]+a[3])//2); break
+" "$1")
+  [ -n "$xy" ] && adb shell input tap $xy
 }
 launch() { adb shell am force-stop it.irontrack.app; adb shell monkey -p it.irontrack.app -c android.intent.category.LAUNCHER 1; }
 run() { # nome, apk...
@@ -18,10 +24,12 @@ run() { # nome, apk...
     v=$(basename $apk .apk)
     adb install -r $apk
     launch; shot "$name-$v-a" 15
-    if [ $first = 1 ]; then tap_text "senza account"; tap_text "without an account"; shot "$name-$v-guest" 8; first=0; fi
+    if [ $first = 1 ]; then tap_text "senza account"; tap_text "without an account"; shot "$name-$v-guest" 15; echo "== guest $name"; grep -o 'text="[^"]\{3,40\}"' $OUT/$name-$v-guest.xml | head -15; first=0; fi
     launch; shot "$name-$v-b" 20
   done
   adb logcat -d > "$OUT/$name.logcat.txt"
+  echo "===== $name: crash"; adb logcat -b crash -d | tail -60
+  echo "===== $name: activity"; cat $OUT/$name-*.activity.txt
   grep -E "AndroidRuntime|FATAL|Capacitor|chromium|Console|ferro|irontrack" "$OUT/$name.logcat.txt" > "$OUT/$name.filtered.txt" || true
 }
 run fresh261 apk/v2.6.1.apk

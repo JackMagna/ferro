@@ -6,6 +6,10 @@ import { newId } from '../lib/ids';
 import { watchSessions } from '../lib/watchImport';
 import { bodyAlreadyThere, measurementsForHealthConnect, sessionInHealthConnect, sessionOnGoogleHealth, sessionsForHealthConnect } from '../lib/healthTargets';
 import { t } from '../lib/i18n';
+import { readJSON, writeJSON } from '../lib/storage';
+
+const HC_LOG_KEY = 'irontrack:hc-log';
+interface HcLog { sentAt?: number; error?: string; errorAt?: number }
 import {
   getHealthPrefs, getHealthSource, isGoogleHealthConnected, SOURCE_LABEL, setGoogleHealthConnected, setHealthPrefs, setHealthSource,
   subscribeHealth
@@ -69,7 +73,11 @@ export function useHealthSync(args: Args) {
 
   /* ---- stato di Health Connect: permessi concessi e ultimo errore, mostrati nel pannello ---- */
   const [hcStatus, setHcStatus] = useState<hc.HealthConnectStatus | null>(null);
-  const [lastError, setLastError] = useState<string | null>(null);
+  // ultimo invio riuscito e ultimo errore, salvati sul telefono: si vedono anche dopo aver chiuso l'app
+  const [hcLog, setHcLog] = useState<HcLog>(() => readJSON<HcLog>(HC_LOG_KEY, {}));
+  const logHc = (p: HcLog) => setHcLog((l) => { const n = { ...l, ...p }; writeJSON(HC_LOG_KEY, n); return n; });
+  const setLastError = (message: string | null) => logHc(message ? { error: message, errorAt: Date.now() } : { error: undefined, errorAt: undefined });
+  const markSent = () => logHc({ sentAt: Date.now(), error: undefined, errorAt: undefined });
   const refreshStatus = useCallback(async () => {
     if (getHealthSource() !== 'healthconnect' || !hc.isHealthConnectConnected()) { setHcStatus(null); return; }
     setHcStatus(await hc.healthConnectStatus().catch(() => null));
@@ -89,7 +97,7 @@ export function useHealthSync(args: Args) {
         await hc.writeWorkout(s);
         // segno solo per Health Connect: healthSynced resta quello di Google Health
         latest.current.actions.updateSession(s.id, { hcSynced: true });
-        setLastError(null);
+        markSent();
         if (interactive && !quiet) latest.current.notify(t('Allenamento salvato in Health Connect'));
         return true;
       } catch (err) {
@@ -182,7 +190,7 @@ export function useHealthSync(args: Args) {
       backfilling.current = false;
     }
     if (firstError) hcFail(firstError);
-    else setLastError(null);
+    else if (sentSessions || sentBody) markSent();
     if (sentSessions > 1) latest.current.notify(t('Inviati {n} allenamenti a {app}', { n: sentSessions, app: 'Health Connect' }));
     if (sentBody > 1) latest.current.notify(t('Inviate {n} pesate a Health Connect', { n: sentBody }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -436,7 +444,9 @@ export function useHealthSync(args: Args) {
     /** L'allenamento è già nella fonte collegata (per il pulsante e l'etichetta nello storico). */
     isSent: (s: WorkoutSession) => (source === 'healthconnect' ? sessionInHealthConnect(s) : sessionOnGoogleHealth(s)),
     hcStatus,
-    lastError,
+    lastError: hcLog.error ?? null,
+    lastErrorAt: hcLog.errorAt,
+    lastSentAt: hcLog.sentAt,
     refreshStatus,
     unsent: unsent.length,
     syncAllSessions,

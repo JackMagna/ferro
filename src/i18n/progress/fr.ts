@@ -335,5 +335,7 @@ const fr: Record<string, string> = {
   "Concedi i permessi": "Accorder les autorisations",
   "Ultimo errore: {err}": "Dernière erreur : {err}",
   "Inviate {n} pesate a Health Connect": "{n} pesées envoyées à Health Connect",
+  "Ultimo invio riuscito: {quando}": "Dernier envoi réussi : {quando}",
+  "Nessun invio riuscito finora.": "Aucun envoi réussi pour l'instant.",
 };
 export default fr;

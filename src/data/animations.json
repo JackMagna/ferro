@@ -1,13 +1,127 @@
 {
   "format": "ferro-animations-v1",
   "license": "CC BY-SA 4.0",
-  "commit": "5859e893df335256d4a0bcbae0a8f94f4375141c",
+  "commit": "2ddda355f0473712a0476d3a4a17c8a42c9fc188",
   "items": [
+    {
+      "id": "abductor",
+      "libraryIds": [
+        "Thigh_Abductor"
+      ]
+    },
+    {
+      "id": "adductor",
+      "libraryIds": [
+        "Thigh_Adductor",
+        "Cable_Hip_Adduction"
+      ]
+    },
+    {
+      "id": "affondi",
+      "libraryIds": [
+        "Dumbbell_Lunges"
+      ]
+    },
+    {
+      "id": "alzate-laterali",
+      "libraryIds": [
+        "Side_Lateral_Raise"
+      ]
+    },
+    {
+      "id": "chest-press",
+      "libraryIds": [
+        "Machine_Bench_Press",
+        "Leverage_Chest_Press"
+      ]
+    },
+    {
+      "id": "croci-cavi",
+      "libraryIds": [
+        "Cable_Crossover"
+      ]
+    },
+    {
+      "id": "crunch-macchina",
+      "libraryIds": [
+        "Ab_Crunch_Machine"
+      ]
+    },
+    {
+      "id": "curl-bilanciere",
+      "libraryIds": [
+        "Barbell_Curl"
+      ]
+    },
+    {
+      "id": "curl-macchina",
+      "libraryIds": [
+        "Machine_Preacher_Curls"
+      ]
+    },
+    {
+      "id": "curl-manubri",
+      "libraryIds": [
+        "Dumbbell_Bicep_Curl",
+        "Dumbbell_Alternate_Bicep_Curl",
+        "Hammer_Curls"
+      ]
+    },
+    {
+      "id": "dip",
+      "libraryIds": [
+        "Dips_-_Triceps_Version",
+        "Parallel_Bar_Dip"
+      ]
+    },
+    {
+      "id": "face-pull",
+      "libraryIds": [
+        "Face_Pull"
+      ]
+    },
+    {
+      "id": "goblet-squat",
+      "libraryIds": [
+        "Goblet_Squat"
+      ]
+    },
+    {
+      "id": "hack-squat",
+      "libraryIds": [
+        "Hack_Squat"
+      ]
+    },
+    {
+      "id": "hip-thrust",
+      "libraryIds": [
+        "Barbell_Hip_Thrust",
+        "Barbell_Glute_Bridge"
+      ]
+    },
+    {
+      "id": "iperestensioni",
+      "libraryIds": [
+        "Hyperextensions_Back_Extensions"
+      ]
+    },
     {
       "id": "lat-machine",
       "libraryIds": [
         "Wide-Grip_Lat_Pulldown",
         "Close-Grip_Front_Lat_Pulldown"
+      ]
+    },
+    {
+      "id": "leg-curl-sdraiato",
+      "libraryIds": [
+        "Lying_Leg_Curls"
+      ]
+    },
+    {
+      "id": "leg-curl-seduto",
+      "libraryIds": [
+        "Seated_Leg_Curl"
       ]
     },
     {
@@ -17,9 +131,157 @@
       ]
     },
     {
+      "id": "leg-press-polpacci",
+      "libraryIds": [
+        "Calf_Press_On_The_Leg_Press_Machine"
+      ]
+    },
+    {
       "id": "leg-press",
       "libraryIds": [
         "Leg_Press"
+      ]
+    },
+    {
+      "id": "lento-avanti",
+      "libraryIds": [
+        "Standing_Military_Press"
+      ]
+    },
+    {
+      "id": "lento-manubri",
+      "libraryIds": [
+        "Seated_Dumbbell_Press",
+        "Dumbbell_Shoulder_Press"
+      ]
+    },
+    {
+      "id": "panca-inclinata-manubri",
+      "libraryIds": [
+        "Incline_Dumbbell_Press"
+      ]
+    },
+    {
+      "id": "panca-manubri",
+      "libraryIds": [
+        "Dumbbell_Bench_Press"
+      ]
+    },
+    {
+      "id": "panca-piana",
+      "libraryIds": [
+        "Barbell_Bench_Press_-_Medium_Grip"
+      ]
+    },
+    {
+      "id": "pectoral-machine",
+      "libraryIds": [
+        "Butterfly"
+      ]
+    },
+    {
+      "id": "piegamenti",
+      "libraryIds": [
+        "Pushups"
+      ]
+    },
+    {
+      "id": "plank",
+      "libraryIds": [
+        "Plank"
+      ]
+    },
+    {
+      "id": "polpacci-in-piedi",
+      "libraryIds": [
+        "Standing_Calf_Raises"
+      ]
+    },
+    {
+      "id": "polpacci-seduto",
+      "libraryIds": [
+        "Seated_Calf_Raise"
+      ]
+    },
+    {
+      "id": "pulley",
+      "libraryIds": [
+        "Seated_Cable_Rows"
+      ]
+    },
+    {
+      "id": "pushdown",
+      "libraryIds": [
+        "Triceps_Pushdown",
+        "Triceps_Pushdown_-_Rope_Attachment"
+      ]
+    },
+    {
+      "id": "rematore-bilanciere",
+      "libraryIds": [
+        "Bent_Over_Barbell_Row"
+      ]
+    },
+    {
+      "id": "rematore-manubrio",
+      "libraryIds": [
+        "One-Arm_Dumbbell_Row"
+      ]
+    },
+    {
+      "id": "reverse-fly-macchina",
+      "libraryIds": [
+        "Reverse_Machine_Flyes"
+      ]
+    },
+    {
+      "id": "row-macchina",
+      "libraryIds": [
+        "Leverage_Iso_Row"
+      ]
+    },
+    {
+      "id": "shoulder-press-macchina",
+      "libraryIds": [
+        "Machine_Shoulder_Military_Press",
+        "Leverage_Shoulder_Press"
+      ]
+    },
+    {
+      "id": "squat-bilanciere",
+      "libraryIds": [
+        "Barbell_Squat",
+        "Barbell_Full_Squat"
+      ]
+    },
+    {
+      "id": "squat-multipower",
+      "libraryIds": [
+        "Smith_Machine_Squat"
+      ]
+    },
+    {
+      "id": "stacco-rumeno",
+      "libraryIds": [
+        "Romanian_Deadlift"
+      ]
+    },
+    {
+      "id": "stacco",
+      "libraryIds": [
+        "Barbell_Deadlift"
+      ]
+    },
+    {
+      "id": "trazioni",
+      "libraryIds": [
+        "Pullups"
+      ]
+    },
+    {
+      "id": "tricipiti-macchina",
+      "libraryIds": [
+        "Machine_Triceps_Extension"
       ]
     }
   ]

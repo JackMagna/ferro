@@ -48,6 +48,8 @@ function HealthConnectDisclosure() {
   );
 }
 
+const when = (ms: number) => new Date(ms).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
 /** Cosa Ferro può fare davvero in Health Connect, e l'ultimo errore: per capire subito se qualcosa si blocca. */
 function HealthConnectStatusBox({ health }: { health: HealthApi }) {
   const s = health.hcStatus;
@@ -78,7 +80,15 @@ function HealthConnectStatusBox({ health }: { health: HealthApi }) {
           <Button size="sm" variant="primary" disabled={health.busy} onClick={() => void health.connect()}>{t('Concedi i permessi')}</Button>
         </div>
       )}
-      {health.lastError && <p className="text-stop">{t('Ultimo errore: {err}', { err: health.lastError })}</p>}
+      <p className="text-muted">
+        {health.lastSentAt ? t('Ultimo invio riuscito: {quando}', { quando: when(health.lastSentAt) }) : t('Nessun invio riuscito finora.')}
+      </p>
+      {health.lastError && (
+        <p className="text-stop">
+          {t('Ultimo errore: {err}', { err: health.lastError })}
+          {health.lastErrorAt ? ` (${when(health.lastErrorAt)})` : ''}
+        </p>
+      )}
     </div>
   );
 }

@@ -335,5 +335,7 @@ const en: Record<string, string> = {
   "Concedi i permessi": "Grant permissions",
   "Ultimo errore: {err}": "Last error: {err}",
   "Inviate {n} pesate a Health Connect": "{n} weigh-ins sent to Health Connect",
+  "Ultimo invio riuscito: {quando}": "Last successful upload: {quando}",
+  "Nessun invio riuscito finora.": "Nothing uploaded yet.",
 };
 export default en;

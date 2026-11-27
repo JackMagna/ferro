@@ -41,9 +41,12 @@ export function parseMeasuresTab(rows: string[][]): { layout: MeasuresLayout; va
   let weekCols: Record<number, number> = {};
   for (let i = 0; i < rows.length; i++) {
     const cols: Record<number, number> = {};
+    // «SETTIMANE | 1 | 2 | 3…»: sulla riga che si chiama SETTIMANE bastano i numeri
+    const bareNumbers = /SETTIMAN/.test(normLabel(rows[i]?.[0]));
     (rows[i] ?? []).forEach((c, j) => {
-      const w = weekOf(String(c ?? ''));
-      if (w !== null && j > 0) cols[w] = j;
+      const text = String(c ?? '').trim();
+      const w = weekOf(text) ?? (bareNumbers && /^\d{1,2}$/.test(text) ? Number(text) : null);
+      if (w !== null && j > 0 && cols[w] === undefined) cols[w] = j;
     });
     if (Object.keys(cols).length >= 2 || (Object.keys(cols).length === 1 && /SETTIMAN/.test(normLabel(rows[i]?.[0])))) {
       header = i;

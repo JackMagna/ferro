@@ -70,7 +70,7 @@ test.describe('App Android', () => {
       'READ_ACTIVE_CALORIES_BURNED', 'READ_BODY_FAT', 'READ_DISTANCE', 'READ_EXERCISE', 'READ_HEALTH_DATA_HISTORY', 'READ_HEART_RATE', 'READ_WEIGHT',
       'WRITE_BODY_FAT', 'WRITE_DISTANCE', 'WRITE_EXERCISE', 'WRITE_HYDRATION', 'WRITE_NUTRITION', 'WRITE_WEIGHT'
     ]);
-    for (const p of ['POST_NOTIFICATIONS', 'SCHEDULE_EXACT_ALARM', 'CAMERA', 'BLUETOOTH_SCAN', 'BLUETOOTH_CONNECT']) expect(requested).toContain(`android.permission.${p}`);
+    for (const p of ['POST_NOTIFICATIONS', 'SCHEDULE_EXACT_ALARM', 'CAMERA', 'BLUETOOTH_SCAN', 'BLUETOOTH_CONNECT', 'ACCESS_NETWORK_STATE', 'REQUEST_INSTALL_PACKAGES']) expect(requested).toContain(`android.permission.${p}`);
     // la posizione serve al Bluetooth solo fino ad Android 11: su Android 12+ non deve esserci
     expect(requested).not.toContain('android.permission.ACCESS_COARSE_LOCATION');
     for (const p of ['ACCESS_FINE_LOCATION', 'RECORD_AUDIO', 'READ_CONTACTS', 'com.google.android.gms.permission.AD_ID']) expect(requested).not.toContain(p);

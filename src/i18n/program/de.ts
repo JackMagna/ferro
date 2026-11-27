@@ -221,5 +221,17 @@ const de: Record<string, string> = {
   "Principiante": "Anfänger",
   "Intermedio": "Fortgeschritten",
   "Esperto": "Experte",
+  "Da ricordare durante la serie": "Während des Satzes merken",
+  "Regolazioni": "Einstellungen",
+  "Posizione di partenza": "Ausgangsposition",
+  "Errori comuni": "Häufige Fehler",
+  "Errore:": "Fehler:",
+  "Correzione:": "Korrektur:",
+  "Dove lo devi sentire": "Wo du es spüren solltest",
+  "Muscoli: {list}": "Muskeln: {list}",
+  "Quando fermarti": "Wann du aufhören solltest",
+  "Fonti consultate": "Verwendete Quellen",
+  "Testo scritto da Ferro confrontando le istruzioni pubbliche di produttori e associazioni (licenza {license}).": "Text von Ferro, verfasst anhand öffentlicher Anleitungen von Herstellern und Verbänden (Lizenz {license}).",
+  "Istruzioni originali della libreria (inglese)": "Originalanleitung der Bibliothek (Englisch)",
 };
 export default de;

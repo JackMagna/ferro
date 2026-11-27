@@ -27,7 +27,12 @@ public class FerroUpdatePlugin extends Plugin {
     /** Programma il controllo giornaliero con notifica (solo nell'APK del sito). */
     @PluginMethod
     public void schedule(PluginCall call) {
-        if (AppUpdate.selfUpdating(getContext())) AppUpdate.schedule(getContext());
+        // un errore qui (permessi, JobScheduler) non deve mai chiudere l'app: il controllo giornaliero è facoltativo
+        try {
+            if (AppUpdate.selfUpdating(getContext())) AppUpdate.schedule(getContext());
+        } catch (Exception e) {
+            android.util.Log.w("FerroUpdate", "Controllo giornaliero non programmato", e);
+        }
         call.resolve(statusObject());
     }
 

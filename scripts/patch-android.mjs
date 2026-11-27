@@ -115,6 +115,11 @@ if (!m.includes('.workout.RestAlarmReceiver"')) {
 if (!m.includes('android.permission.REQUEST_INSTALL_PACKAGES"')) {
   m = m.replace(/<application/, '<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />\n\n    <application');
 }
+// Il controllo giornaliero chiede la rete (setRequiredNetworkType): senza ACCESS_NETWORK_STATE JobScheduler
+// lancia una SecurityException e l'app si chiudeva all'apertura (v2.6.0 e v2.6.1). Permesso normale, concesso da sé.
+if (!m.includes('android.permission.ACCESS_NETWORK_STATE"')) {
+  m = m.replace(/<application/, '<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />\n\n    <application');
+}
 if (!m.includes('.update.UpdateCheckJob"')) {
   m = m.replace(/<\/application>/, `    <service android:name=".update.UpdateCheckJob" android:permission="android.permission.BIND_JOB_SERVICE" android:exported="false" />
     </application>`);

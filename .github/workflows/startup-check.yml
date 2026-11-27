@@ -1,23 +1,49 @@
-# Prova di avvio degli APK pubblicati sull'emulatore Android (aggiornamento da una versione all'altra), con logcat.
+# Prova di avvio sull'emulatore Android: APK del ramo (come versione vera, firmato) installato sopra quelli pubblicati, con logcat.
 name: Prova avvio
 on:
   workflow_dispatch:
   push:
     branches: ['claude/project-thread-zvci91']
-    paths: ['.github/workflows/startup-check.yml', 'scripts/startup-check.sh']
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 50
     permissions: { contents: read }
     steps:
       - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '21' }
+      - run: bun install --frozen-lockfile
+      - name: Build web (come una versione vera)
+        run: bun run build
+        env:
+          VITE_GOOGLE_WEB_CLIENT_ID: ${{ vars.GOOGLE_WEB_CLIENT_ID }}
+          VITE_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          VITE_APP_VERSION: v9.9.9
+          APP_BASE: /
+      - name: APK firmato
+        run: |
+          printf '%s' "$KEYSTORE_B64" | tr -cd 'A-Za-z0-9+/=' | base64 -d > "$GITHUB_WORKSPACE/release.jks"
+          npx cap add android
+          node scripts/patch-android.mjs
+          npx cap sync android
+          (cd android && ./gradlew --no-daemon -q assembleRelease)
+          mkdir -p apk && cp $(find android/app/build/outputs -name '*release*.apk' | head -1) apk/new.apk
+          grep -o 'android.permission.[A-Z_]*NETWORK[A-Z_]*' android/app/src/main/AndroidManifest.xml || true
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          VERSION_CODE: 99999
+          VERSION_NAME: v9.9.9
+          ANDROID_KEYSTORE_FILE: ${{ github.workspace }}/release.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
       - name: APK delle release
         env: { GH_TOKEN: '${{ github.token }}' }
         run: |
-          mkdir -p apk
-          for v in v2.5.2 v2.6.0 v2.6.1; do gh release download $v -R ${{ github.repository }} -p ferro-release.apk -O apk/$v.apk; done
-          ls -la apk
+          for v in v2.6.0 v2.6.1; do gh release download $v -R ${{ github.repository }} -p ferro-release.apk -O apk/$v.apk; done
+          rm -f release.jks; ls -la apk
       - name: KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -34,6 +60,3 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           script: bash scripts/startup-check.sh
-      - if: always()
-        uses: actions/upload-artifact@v4
-        with: { name: prova-avvio, path: startup-check/ }

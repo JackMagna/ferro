@@ -17,6 +17,7 @@ for n in re.findall(r'<node [^>]*>', x):
 launch() { adb shell am force-stop it.irontrack.app; adb shell monkey -p it.irontrack.app -c android.intent.category.LAUNCHER 1; }
 run() { # nome, apk...
   name=$1; shift
+  adb logcat -b all -c
   adb uninstall it.irontrack.app || true
   adb logcat -c
   first=1
@@ -32,6 +33,10 @@ run() { # nome, apk...
   echo "===== $name: activity"; cat $OUT/$name-*.activity.txt
   grep -E "AndroidRuntime|FATAL|Capacitor|chromium|Console|ferro|irontrack" "$OUT/$name.logcat.txt" > "$OUT/$name.filtered.txt" || true
 }
-run fresh261 apk/v2.6.1.apk
-run up260to261 apk/v2.6.0.apk apk/v2.6.1.apk
-run up252to261 apk/v2.5.2.apk apk/v2.6.1.apk
+# dopo ogni avvio: testi sullo schermo (si vede se l'app è aperta)
+
+run fresh-new apk/new.apk
+run up260-new apk/v2.6.0.apk apk/new.apk
+run up261-new apk/v2.6.1.apk apk/new.apk
+for f in $OUT/*-new-b.xml; do echo "== testi $f"; grep -o 'text="[^"]\{3,40\}"' $f | head -12; done
+echo "== crash totali"; grep -c "FATAL EXCEPTION" $OUT/*.logcat.txt || true

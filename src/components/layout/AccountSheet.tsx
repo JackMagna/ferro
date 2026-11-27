@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { Download, LogIn, LogOut, Smartphone, Upload } from '../ui/icons';
+import { Compass, Download, LogIn, LogOut, Smartphone, Upload } from '../ui/icons';
 import type { User } from 'firebase/auth';
 import type { AppData } from '../../hooks/useAppData';
 import { useInstallPrompt } from '../../hooks/usePWA';
@@ -31,9 +31,11 @@ interface Props {
   health: HealthApi;
   /** elimina misure, pasti e dieta; con true non chiede conferma (già chiesta) */
   onDeleteHealthData: (confirmed?: boolean) => void;
+  /** riapre la guida al primo accesso */
+  onTour: () => void;
 }
 
-export function AccountSheet({ open, onClose, user, data, onLogin, onLogout, onDeleteAccount, onImport, health, onDeleteHealthData }: Props) {
+export function AccountSheet({ open, onClose, user, data, onLogin, onLogout, onDeleteAccount, onImport, health, onDeleteHealthData, onTour }: Props) {
   const consent = useHealthConsent();
   const revoke = () => {
     if (!window.confirm(t('Revocare il consenso ai dati sulla salute? Ferro scollega Google Health e Health Connect e non salva più misure, pasti e dieta.'))) return;
@@ -74,6 +76,12 @@ export function AccountSheet({ open, onClose, user, data, onLogin, onLogout, onD
               <Button variant="primary" icon={<LogIn className="h-4 w-4" />} onClick={onLogin}>{t('Accedi con Google')}</Button>
             </>
           )}
+        </section>
+
+        <section className="space-y-3 border-t border-line pt-5">
+          <h3 className="font-display text-lg font-semibold">{t('Guida')}</h3>
+          <p className="text-sm text-muted">{t('Un minuto per vedere tutto quello che fa Ferro, sezione per sezione.')}</p>
+          <Button icon={<Compass className="h-4 w-4" />} onClick={onTour}>{t('Rivedi la guida')}</Button>
         </section>
 
         <AppearancePanel />

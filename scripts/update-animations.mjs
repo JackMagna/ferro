@@ -5,7 +5,7 @@
 // funzionano anche offline) e scrive l'elenco in src/data/animations.json.
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 
-const ANIMATIONS_COMMIT = '5859e893df335256d4a0bcbae0a8f94f4375141c';
+const ANIMATIONS_COMMIT = '2ddda355f0473712a0476d3a4a17c8a42c9fc188';
 const commit = process.argv[2] ?? ANIMATIONS_COMMIT;
 const FILES = ['webm', 'mp4', 'poster.webp', 'setup.webp'];
 const url = (file) => `https://raw.githubusercontent.com/JackMagna/ferro-esercizi/${commit}/dist/animations/${file}`;

@@ -48,6 +48,41 @@ function HealthConnectDisclosure() {
   );
 }
 
+/** Cosa Ferro può fare davvero in Health Connect, e l'ultimo errore: per capire subito se qualcosa si blocca. */
+function HealthConnectStatusBox({ health }: { health: HealthApi }) {
+  const s = health.hcStatus;
+  const items: [string, boolean | undefined][] = s
+    ? [
+        [t('Allenamenti'), s.workouts],
+        [t('Peso'), s.write.includes('weight')],
+        [t('Frequenza cardiaca'), s.read.includes('heartRate')]
+      ]
+    : [];
+  return (
+    <div className="space-y-2 rounded-xl border border-line p-3 text-sm" role="status">
+      <p className="font-semibold">{t('Permessi concessi a Ferro')}</p>
+      {s ? (
+        <ul className="flex flex-wrap gap-x-4 gap-y-1">
+          {items.map(([label, ok]) => (
+            <li key={label} className={ok === false ? 'text-stop' : 'text-muted'}>
+              {ok === undefined ? '?' : ok ? '✓' : '✗'} {label}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-muted">{t('Health Connect non risponde: controlla che sia installato e aggiornato.')}</p>
+      )}
+      {s?.workouts === false && (
+        <div className="space-y-2">
+          <p>{t('Manca il permesso per gli allenamenti: Ferro non può salvarli in Health Connect.')}</p>
+          <Button size="sm" variant="primary" disabled={health.busy} onClick={() => void health.connect()}>{t('Concedi i permessi')}</Button>
+        </div>
+      )}
+      {health.lastError && <p className="text-stop">{t('Ultimo errore: {err}', { err: health.lastError })}</p>}
+    </div>
+  );
+}
+
 const OPTIONS: { id: HealthSource; label: string; hint: string }[] = [
   { id: 'none', label: t('Nessuna'), hint: t('Non collegare niente') },
   { id: 'googlehealth', label: 'Google Health', hint: t('Anche dal sito. Consigliata') },
@@ -142,6 +177,7 @@ export function HealthPanel({ health }: { health: HealthApi }) {
               </span>
             </span>
           </label>
+          {health.source === 'healthconnect' && <HealthConnectStatusBox health={health} />}
           {health.unsent > 0 && (
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted">
               <span>{health.unsent === 1 ? t('1 allenamento non è stato inviato.') : t('{n} allenamenti non sono stati inviati.', { n: health.unsent })}</span>

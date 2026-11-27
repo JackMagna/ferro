@@ -78,7 +78,8 @@ export function watchSessions(workouts: WatchWorkout[], sessions: WorkoutSession
       totalVolumeKg: 0,
       sets: [{ exerciseId: WATCH_DAY_ID, exerciseName: label, setIndex: 0, weightKg: 0, reps: 0, durationSec: seconds, ...(distance ? { distanceM: distance } : {}) }],
       healthSynced: true,
-      healthLogId: 'hc'
+      healthLogId: 'hc',
+      hcSynced: true
     });
   }
   return out.sort((a, b) => b.startedAt - a.startedAt);

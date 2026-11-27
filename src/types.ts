@@ -130,6 +130,8 @@ export interface WorkoutSession {
   /** false = da registrare su Google Health; true = registrato */
   healthSynced?: boolean;
   healthLogId?: string;
+  /** true = già in Health Connect (segno separato da Google Health, dalla v2.5.2) */
+  hcSynced?: boolean;
 }
 
 export interface Measurement {
@@ -149,6 +151,8 @@ export interface Measurement {
   sheetsSynced?: boolean;
   /** false = da inviare alla fonte dati salute scelta */
   healthSynced?: boolean;
+  /** true = già in Health Connect (dalla v2.5.2) */
+  hcSynced?: boolean;
   /** da dove arriva: Foglio, Google Health, Health Connect (vuoto = inserita nell'app) */
   source?: string;
 }

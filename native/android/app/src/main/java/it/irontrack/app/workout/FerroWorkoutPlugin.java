@@ -111,6 +111,31 @@ public class FerroWorkoutPlugin extends Plugin {
         }).start();
     }
 
+    /** Senza chiedere niente: Health Connect c'è? Ferro può salvare gli allenamenti (e la distanza)? Risponde { available, granted, distance }. */
+    @PluginMethod
+    public void healthWorkoutStatus(PluginCall call) {
+        if (!HealthWorkout.available(getContext())) {
+            JSObject r = new JSObject();
+            r.put("available", false);
+            r.put("granted", false);
+            r.put("distance", false);
+            call.resolve(r);
+            return;
+        }
+        new Thread(() -> {
+            try {
+                java.util.Set<String> granted = HealthWorkout.grantedSet(getContext());
+                JSObject r = new JSObject();
+                r.put("available", true);
+                r.put("granted", granted.contains(HealthWorkout.PERMISSION));
+                r.put("distance", granted.contains(HealthWorkout.DISTANCE));
+                call.resolve(r);
+            } catch (Exception e) {
+                call.reject("Health Connect non risponde: " + e.getMessage());
+            }
+        }).start();
+    }
+
     @ActivityCallback
     private void healthWorkoutResult(PluginCall call, ActivityResult result) {
         if (call == null) return;

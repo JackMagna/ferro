@@ -329,5 +329,11 @@ const en: Record<string, string> = {
   "Arrampicata": "Climbing",
   "Sci": "Skiing",
   "Allenamento": "Workout",
+  "Permessi concessi a Ferro": "Permissions granted to Ferro",
+  "Health Connect non risponde: controlla che sia installato e aggiornato.": "Health Connect is not responding: check that it is installed and up to date.",
+  "Manca il permesso per gli allenamenti: Ferro non può salvarli in Health Connect.": "The workouts permission is missing: Ferro can't save them to Health Connect.",
+  "Concedi i permessi": "Grant permissions",
+  "Ultimo errore: {err}": "Last error: {err}",
+  "Inviate {n} pesate a Health Connect": "{n} weigh-ins sent to Health Connect",
 };
 export default en;

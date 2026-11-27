@@ -114,6 +114,8 @@ export async function readActiveCalories(date: string): Promise<number | null> {
 /* ---------- allenamenti: li scrive il plugin nativo di Ferro (FerroWorkoutPlugin / HealthWorkout.java) ---------- */
 interface FerroHealthWorkout {
   requestHealthWorkout(): Promise<{ granted: boolean }>;
+  /** dalla v2.5.2: stato del permesso senza aprire la richiesta */
+  healthWorkoutStatus(): Promise<{ available: boolean; granted: boolean; distance: boolean }>;
   /** type: vedi lib/workoutKind.ts (le versioni vecchie dell'app lo ignorano e salvano «forza») */
   saveHealthWorkout(o: { id: string; start: number; end: number; title: string; notes?: string; type?: WorkoutKind; distance?: number }): Promise<void>;
 }
@@ -124,6 +126,17 @@ export async function requestWorkoutPermission(): Promise<boolean> {
   if (!isAndroidApp() || !Capacitor.isPluginAvailable('FerroWorkout')) return false;
   return (await ferro.requestHealthWorkout()).granted;
 }
+
+/** Permessi concessi a Ferro in Health Connect, senza chiedere niente. workouts undefined = app troppo vecchia per saperlo. */
+export interface HealthConnectStatus { read: string[]; write: string[]; workouts?: boolean }
+export async function healthConnectStatus(): Promise<HealthConnectStatus> {
+  const a = await (await plugin()).checkAuthorization({ read: [...READ], write: [...WRITE] });
+  const workouts = Capacitor.isPluginAvailable('FerroWorkout') ? await ferro.healthWorkoutStatus().then((r) => r.granted, () => undefined) : undefined;
+  return { read: a.readAuthorized, write: a.writeAuthorized, workouts };
+}
+
+/** L'errore dice che manca il permesso degli allenamenti (FerroWorkoutPlugin lo rifiuta con il codice PERMISSION). */
+export const isPermissionError = (err: unknown) => (err as { code?: string } | null)?.code === 'PERMISSION';
 
 /** Salva l'allenamento con il suo tipo (forza, bici, nuoto, pilates…), una volta: Health Connect lo riconosce dall'id di Ferro. */
 export async function writeWorkout(s: WorkoutSession): Promise<void> {

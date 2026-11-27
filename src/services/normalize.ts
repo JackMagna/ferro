@@ -55,7 +55,8 @@ export function normalizeSession(raw: Loose, fallbackId?: string): WorkoutSessio
     maxBpm: raw.maxBpm === undefined ? undefined : num(raw.maxBpm),
     sheetsSynced: raw.sheetsSynced === undefined ? undefined : !!raw.sheetsSynced,
     healthSynced: raw.healthSynced === undefined ? undefined : !!raw.healthSynced,
-    healthLogId: str(raw.healthLogId) || undefined
+    healthLogId: str(raw.healthLogId) || undefined,
+    hcSynced: raw.hcSynced === true ? true : undefined
   };
 }
 
@@ -76,6 +77,7 @@ export function normalizeMeasurement(raw: Loose, fallbackId?: string): Measureme
     notes: str(raw.notes) || undefined,
     sheetsSynced: raw.sheetsSynced === undefined ? undefined : !!raw.sheetsSynced,
     healthSynced: raw.healthSynced === undefined ? undefined : !!raw.healthSynced,
+    hcSynced: raw.hcSynced === true ? true : undefined,
     source: str(raw.source) || undefined
   };
 }

@@ -19,6 +19,7 @@ import { Sheet } from '../ui/Sheet';
 import { EmptyState } from '../ui/EmptyState';
 import { Segmented } from '../ui/Segmented';
 import type { HealthApi } from '../../hooks/useHealthSync';
+import { sessionInHealthConnect, sessionOnGoogleHealth } from '../../lib/healthTargets';
 import { t } from '../../lib/i18n';
 
 interface Props {
@@ -149,7 +150,7 @@ export function ProgressScreen({ program, sessions, measurements, onAddMeasureme
                           <p className="font-semibold">{formatDate(s.date, { weekday: 'short', day: 'numeric', month: 'short' })} · {s.dayTitle}</p>
                           <p className="text-sm text-muted">
                             {t('Settimana {n}', { n: s.weekNumber })} · {t('{n} serie', { n: s.sets.length })} · {sessionAmount(s)} · {s.durationMinutes} min
-                            {s.avgBpm ? ` · ${t('{n} bpm medi', { n: s.avgBpm })}` : ''}{s.healthSynced ? (s.healthLogId === 'hc' ? ` · ${t('in Health Connect')}` : ` · ${t('su Google Health')}`) : ''}
+                            {s.avgBpm ? ` · ${t('{n} bpm medi', { n: s.avgBpm })}` : ''}{sessionOnGoogleHealth(s) ? ` · ${t('su Google Health')}` : ''}{sessionInHealthConnect(s) ? ` · ${t('in Health Connect')}` : ''}
                           </p>
                         </div>
                         <ChevronDown className={`h-5 w-5 shrink-0 text-muted transition ${open ? 'rotate-180' : ''}`} />
@@ -168,7 +169,7 @@ export function ProgressScreen({ program, sessions, measurements, onAddMeasureme
                             <Button size="sm" icon={<Download className="h-4 w-4" />} onClick={() => downloadText(tcxFilename(s), sessionToTCX(s), 'application/vnd.garmin.tcx+xml')}>
                               {t('Esporta TCX (Strava, Garmin)')}
                             </Button>
-                            {health.connected && s.healthSynced !== true && (
+                            {health.connected && !health.isSent(s) && (
                               <Button size="sm" disabled={health.busy} onClick={() => health.syncSession(s)}>
                                 {health.source === 'googlehealth' ? t('Registra su Google Health') : t('Salva in Health Connect')}
                               </Button>

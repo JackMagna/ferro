@@ -4,6 +4,7 @@ import type { AppDataActions } from './useAppData';
 import type { BodyEntry } from '../lib/healthMath';
 import { newId } from '../lib/ids';
 import { watchSessions } from '../lib/watchImport';
+import { bodyAlreadyThere, measurementsForHealthConnect, sessionInHealthConnect, sessionOnGoogleHealth, sessionsForHealthConnect } from '../lib/healthTargets';
 import { t } from '../lib/i18n';
 import {
   getHealthPrefs, getHealthSource, isGoogleHealthConnected, SOURCE_LABEL, setGoogleHealthConnected, setHealthPrefs, setHealthSource,
@@ -66,6 +67,19 @@ export function useHealthSync(args: Args) {
   const fail = (err: unknown) => latest.current.notify(err instanceof Error ? err.message : t('La fonte dati non risponde'), 'error');
   const lastWeight = () => [...latest.current.measurements].filter((m) => m.weightKg !== undefined).sort((a, b) => a.date.localeCompare(b.date)).at(-1)?.weightKg;
 
+  /* ---- stato di Health Connect: permessi concessi e ultimo errore, mostrati nel pannello ---- */
+  const [hcStatus, setHcStatus] = useState<hc.HealthConnectStatus | null>(null);
+  const [lastError, setLastError] = useState<string | null>(null);
+  const refreshStatus = useCallback(async () => {
+    if (getHealthSource() !== 'healthconnect' || !hc.isHealthConnectConnected()) { setHcStatus(null); return; }
+    setHcStatus(await hc.healthConnectStatus().catch(() => null));
+  }, []);
+  useEffect(() => { void refreshStatus(); }, [source, hcConnected, tick, refreshStatus]);
+  const hcFail = (err: unknown) => {
+    setLastError(err instanceof Error ? err.message : String((err as { message?: string })?.message ?? err));
+    fail(err);
+  };
+
   /* ---- allenamento su Google Health o Health Connect ---- */
   const syncSession = useCallback(async (s: WorkoutSession, interactive: boolean, quiet = false): Promise<boolean> => {
     if (inFlight.current.has(s.id)) return false;
@@ -73,12 +87,14 @@ export function useHealthSync(args: Args) {
       inFlight.current.add(s.id);
       try {
         await hc.writeWorkout(s);
-        latest.current.actions.updateSession(s.id, { healthSynced: true, healthLogId: 'hc' });
+        // segno solo per Health Connect: healthSynced resta quello di Google Health
+        latest.current.actions.updateSession(s.id, { hcSynced: true });
+        setLastError(null);
         if (interactive && !quiet) latest.current.notify(t('Allenamento salvato in Health Connect'));
         return true;
       } catch (err) {
         failed.current.add(s.id);
-        fail(err);
+        hcFail(err);
         return false;
       } finally {
         inFlight.current.delete(s.id);
@@ -111,15 +127,81 @@ export function useHealthSync(args: Args) {
   }, []);
 
   useEffect(() => {
-    if (!connected || !autoLog || !args.consented) return;
+    if (source !== 'googlehealth' || !connected || !autoLog || !args.consented) return;
     args.sessions.filter((s) => s.healthSynced === false && !failed.current.has(s.id)).forEach((s) => void syncSession(s, false));
   }, [args.sessions, source, connected, autoLog, syncSession, tick, args.consented]);
 
+  /**
+   * Health Connect: manda da solo, uno alla volta, tutto quello che non c'è ancora, anche gli allenamenti
+   * e le pesate di prima del collegamento. Health Connect riconosce gli allenamenti già ricevuti (stesso id),
+   * le pesate già presenti si saltano confrontandole con quelle lette. Un solo avviso alla fine.
+   */
+  const backfilling = useRef(false);
+  const backfillHealthConnect = useCallback(async (sessions: WorkoutSession[], body: Measurement[]) => {
+    backfilling.current = true;
+    let sentSessions = 0;
+    let sentBody = 0;
+    let firstError: unknown = null;
+    try {
+      for (const s of sessions) {
+        if (inFlight.current.has(s.id)) continue;
+        inFlight.current.add(s.id);
+        try {
+          await hc.writeWorkout(s);
+          latest.current.actions.updateSession(s.id, { hcSynced: true });
+          sentSessions++;
+        } catch (err) {
+          failed.current.add(s.id);
+          firstError ??= err;
+          // senza permesso falliscono tutti: inutile continuare
+          if (hc.isPermissionError(err)) { sessions.forEach((x) => failed.current.add(x.id)); break; }
+        } finally {
+          inFlight.current.delete(s.id);
+        }
+      }
+      if (body.length) {
+        const existing = await hc.readBody(3650).catch(() => []);
+        for (const m of body) {
+          if (inFlight.current.has(m.id)) continue;
+          inFlight.current.add(m.id);
+          try {
+            if (!bodyAlreadyThere(m, existing)) {
+              await hc.writeBody({ date: m.date, weightKg: m.weightKg, bodyFat: m.bodyFat });
+              sentBody++;
+            }
+            latest.current.actions.updateMeasurement(m.id, { hcSynced: true });
+          } catch (err) {
+            failed.current.add(m.id);
+            firstError ??= err;
+          } finally {
+            inFlight.current.delete(m.id);
+          }
+        }
+      }
+    } finally {
+      backfilling.current = false;
+    }
+    if (firstError) hcFail(firstError);
+    else setLastError(null);
+    if (sentSessions > 1) latest.current.notify(t('Inviati {n} allenamenti a {app}', { n: sentSessions, app: 'Health Connect' }));
+    if (sentBody > 1) latest.current.notify(t('Inviate {n} pesate a Health Connect', { n: sentBody }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (source !== 'healthconnect' || !hcConnected || !args.consented || backfilling.current) return;
+    const sessions = autoLog ? sessionsForHealthConnect(args.sessions).filter((s) => !failed.current.has(s.id)) : [];
+    const body = measurementsForHealthConnect(args.measurements).filter((m) => !failed.current.has(m.id));
+    if (sessions.length || body.length) void backfillHealthConnect(sessions, body);
+  }, [args.sessions, args.measurements, source, hcConnected, autoLog, tick, args.consented, backfillHealthConnect]);
+
   /** Allenamenti non ancora inviati alla fonte collegata (anche quelli salvati prima di collegarla). */
-  const unsent = connected ? args.sessions.filter((s) => s.healthSynced !== true) : [];
+  const pendingFor = (sessions: WorkoutSession[]) =>
+    getHealthSource() === 'healthconnect' ? sessionsForHealthConnect(sessions) : sessions.filter((s) => s.healthSynced !== true);
+  const unsent = connected ? pendingFor(args.sessions) : [];
   /** Reinvia tutti gli allenamenti non inviati, uno alla volta (dopo un tocco: può chiedere il permesso Google). */
   const syncAllSessions = useCallback(async () => {
-    const list = latest.current.sessions.filter((s) => s.healthSynced !== true);
+    const list = pendingFor(latest.current.sessions);
     if (!list.length) return;
     setBusy(true);
     failed.current.clear();
@@ -208,9 +290,9 @@ export function useHealthSync(args: Args) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source, ghConnected]);
 
-  /* ---- misure dell'app verso la fonte dati ---- */
+  /* ---- misure dell'app verso Google Health (per Health Connect ci pensa backfillHealthConnect) ---- */
   useEffect(() => {
-    if (!ops || !connected || !args.consented) return;
+    if (source !== 'googlehealth' || !ops || !connected || !args.consented) return;
     args.measurements
       .filter((m) => m.healthSynced === false && !inFlight.current.has(m.id) && !failed.current.has(m.id))
       .forEach(async (m) => {
@@ -306,6 +388,7 @@ export function useHealthSync(args: Args) {
         await hc.connectHealthConnect();
         // gli allenamenti hanno un permesso a parte, chiesto dal plugin di Ferro
         const workouts = getHealthPrefs().autoLog ? await hc.requestWorkoutPermission().catch(() => false) : true;
+        setLastError(null);
         latest.current.notify(workouts ? t('Health Connect collegato') : t('Health Connect collegato, ma senza il permesso per gli allenamenti: non verranno salvati lì.'), workouts ? 'success' : 'error');
       }
       failed.current.clear();
@@ -350,6 +433,11 @@ export function useHealthSync(args: Args) {
     logWater,
     readActiveCalories,
     syncSession: (s: WorkoutSession) => { failed.current.delete(s.id); return syncSession(s, true); },
+    /** L'allenamento è già nella fonte collegata (per il pulsante e l'etichetta nello storico). */
+    isSent: (s: WorkoutSession) => (source === 'healthconnect' ? sessionInHealthConnect(s) : sessionOnGoogleHealth(s)),
+    hcStatus,
+    lastError,
+    refreshStatus,
     unsent: unsent.length,
     syncAllSessions,
     importHeartRate,

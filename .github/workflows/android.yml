@@ -1,5 +1,6 @@
 # Costruisce l'app Android di Ferro (Capacitor) da questo stesso codice.
 # - A mano: Actions → Android → Run workflow (scarichi l'APK dagli Artifacts).
+# - Da Actions → Android → Run workflow con «versione» (es. v2.7.0): crea il tag su questo commit e la Release, come un tag v*.
 # - Con un tag v* (es. v2.3.0): crea la Release con ferro-release.apk. Il sito e l'avviso di aggiornamento nell'app
 #   usano sempre l'ultima Release (releases/latest), quindi la chiave di firma deve restare la stessa.
 # Segreti (Settings → Secrets and variables → Actions), facoltativi: senza, l'APK è firmato con la chiave di debug.
@@ -10,6 +11,11 @@ name: Android
 
 on:
   workflow_dispatch:
+    inputs:
+      versione:
+        description: 'Versione da pubblicare (es. v2.7.0): crea tag e Release. Vuoto = solo APK negli Artifacts'
+        required: false
+        default: ''
   push:
     tags: ['v*']
     # un push sul ramo android-build costruisce l'APK senza creare una Release (utile per le prove)
@@ -25,8 +31,16 @@ jobs:
     env:
       # i segreti non si possono usare direttamente negli "if": si passa da una variabile
       HAS_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+      # versione vera: dal tag v* o dal campo «versione» del lancio a mano; vuota per le prove
+      TAG: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || inputs.versione || '' }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Controlla la versione
+        if: env.TAG != ''
+        run: |
+          [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::Versione non valida: $TAG (serve vX.Y.Z)"; exit 1; }
+          [ "v$(node -p "require('./package.json').version")" = "$TAG" ] || { echo "::error::$TAG diversa da package.json"; exit 1; }
 
       - uses: oven-sh/setup-bun@v2
 
@@ -44,7 +58,7 @@ jobs:
           VITE_GOOGLE_WEB_CLIENT_ID: ${{ vars.GOOGLE_WEB_CLIENT_ID }}
           VITE_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
           # solo le versioni vere (tag v*) controllano gli aggiornamenti all'apertura (src/lib/appUpdate.ts)
-          VITE_APP_VERSION: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}
+          VITE_APP_VERSION: ${{ env.TAG }}
           # nell'app Android l'app sta alla radice (sul sito è in /app/)
           APP_BASE: /
 
@@ -55,7 +69,7 @@ jobs:
           npx cap sync android
         env:
           VERSION_CODE: ${{ github.run_number }}
-          VERSION_NAME: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('build-{0}', github.run_number) }}
+          VERSION_NAME: ${{ env.TAG != '' && env.TAG || format('build-{0}', github.run_number) }}
           ANDROID_KEYSTORE_FILE: ${{ env.HAS_KEYSTORE == 'true' && format('{0}/release.jks', github.workspace) || '' }}
 
       - name: Chiave di firma
@@ -113,13 +127,15 @@ jobs:
           path: out/
 
       - name: Release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: env.TAG != ''
         uses: softprops/action-gh-release@v2
         with:
-          name: Ferro ${{ github.ref_name }}
+          tag_name: ${{ env.TAG }}
+          target_commitish: ${{ github.sha }}
+          name: Ferro ${{ env.TAG }}
           files: out/*
           # novità della versione (le legge anche il banner di aggiornamento nell'app): rilascio/vX.Y.Z.md, se c'è
-          body_path: ${{ hashFiles(format('rilascio/{0}.md', github.ref_name)) != '' && format('rilascio/{0}.md', github.ref_name) || '' }}
+          body_path: ${{ hashFiles(format('rilascio/{0}.md', env.TAG)) != '' && format('rilascio/{0}.md', env.TAG) || '' }}
 
       # Il ramo android-build pubblica anche una versione di prova scaricabile con un link diretto
       - name: Versione di prova

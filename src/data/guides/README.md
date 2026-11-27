@@ -36,3 +36,16 @@ I testi sono originali, scritti confrontando le istruzioni pubbliche di produtto
 
 Il test `src/lib/__tests__/exerciseGuides.test.ts` controlla che ogni scheda sia completa,
 che gli esercizi esistano in free-exercise-db e che le fonti citate ci siano.
+
+## Animazioni
+
+Per alcune schede ferro-esercizi ha anche un mini video 3D in loop e un disegno della posizione di partenza
+(i numeri corrispondono ai passi di `setup`). Ferro li copia in `public/animations/` e ne tiene l'elenco in
+`src/data/animations.json`:
+
+```bash
+node scripts/update-animations.mjs        # scarica il commit indicato in ANIMATIONS_COMMIT
+```
+
+Si vedono al posto delle foto in «Come si esegue» (con il pulsante «Foto» per tornare alle foto di
+free-exercise-db). Licenza CC BY-SA 4.0, come i testi.

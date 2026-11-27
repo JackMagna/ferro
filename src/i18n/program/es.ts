@@ -233,5 +233,10 @@ const es: Record<string, string> = {
   "Fonti consultate": "Fuentes consultadas",
   "Testo scritto da Ferro confrontando le istruzioni pubbliche di produttori e associazioni (licenza {license}).": "Texto escrito por Ferro comparando las instrucciones públicas de fabricantes y asociaciones (licencia {license}).",
   "Istruzioni originali della libreria (inglese)": "Instrucciones originales de la biblioteca (inglés)",
+  "{name}: animazione del movimento": "{name}: animación del movimiento",
+  "Foto": "Fotos",
+  "Animazione 3D": "Animación 3D",
+  "Posizione di partenza: i numeri corrispondono alle regolazioni qui sotto": "Posición inicial: los números corresponden a los ajustes de abajo",
+  "Animazione e disegno di ferro-esercizi, fatti da Ferro in 3D (licenza {license}).": "Animación y dibujo de ferro-esercizi, hechos en 3D por Ferro (licencia {license}).",
 };
 export default es;

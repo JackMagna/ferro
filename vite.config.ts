@@ -71,9 +71,20 @@ export default defineConfig({
         clientsClaim: true,
         skipWaiting: true,
         cleanupOutdatedCaches: true,
-        globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2}'],
         navigateFallback: `${base}index.html`,
         runtimeCaching: [
+          {
+            // mini video degli esercizi: in cache alla prima visione, con le richieste a pezzi che chiede Safari
+            urlPattern: ({ url }) => /\/animations\/[^/]+\.(mp4|webm)$/.test(url.pathname),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'exercise-animations',
+              rangeRequests: true,
+              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 180 },
+              cacheableResponse: { statuses: [200] }
+            }
+          },
           {
             // libreria esercizi: subito dalla cache, aggiornata in background
             urlPattern: ({ url }) => url.pathname.endsWith('/data/exercises.json'),

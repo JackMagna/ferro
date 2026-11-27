@@ -6,6 +6,7 @@ import {
 import { guideFor, guidesAvailable, loadGuides, type ResolvedGuide } from '../../lib/exerciseGuides';
 import { ExerciseMedia } from './ExerciseMedia';
 import { GuideSections } from './GuideSections';
+import { animationForGuide } from '../../lib/exerciseAnimations';
 import { MuscleMap } from './MuscleMap';
 import { t } from '../../lib/i18n';
 
@@ -50,7 +51,7 @@ export function ExerciseInfo({ exercise, displayName, showMedia = true }: { exer
       <MuscleMap primary={exercise.primaryMuscles} secondary={exercise.secondaryMuscles} />
       {guide ? (
         <>
-          <GuideSections resolved={guide} />
+          <GuideSections resolved={guide} setupImage={animationForGuide(guide.guide.id)?.setup} />
           {original && (
             <details className="text-sm text-muted">
               <summary className="min-h-11 cursor-pointer py-2 font-medium text-chalk">{t('Istruzioni originali della libreria (inglese)')}</summary>

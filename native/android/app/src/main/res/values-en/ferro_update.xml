@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ferro_update_channel">Ferro updates</string>
+    <string name="ferro_update_title">Ferro %1$s is available</string>
+    <string name="ferro_update_text">Tap to open Ferro and update: your data stays.</string>
+</resources>

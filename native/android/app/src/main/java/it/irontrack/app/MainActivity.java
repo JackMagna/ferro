@@ -12,6 +12,7 @@ import ee.forgr.capacitor.social.login.ModifiedMainActivityForSocialLoginPlugin;
 import ee.forgr.capacitor.social.login.SocialLoginPlugin;
 
 import it.irontrack.app.calendar.FerroCalendarPlugin;
+import it.irontrack.app.update.FerroUpdatePlugin;
 import it.irontrack.app.widgets.FerroWidgetsPlugin;
 import it.irontrack.app.widgets.WidgetData;
 import it.irontrack.app.workout.FerroWorkoutPlugin;
@@ -19,7 +20,8 @@ import it.irontrack.app.workout.FerroWorkoutPlugin;
 /**
  * Attività principale di Ferro. Sostituisce quella generata da "npx cap add android"
  * (la copia scripts/patch-android.mjs):
- * - registra i plugin dei widget, della notifica dell'allenamento e del calendario (modulo «Nuovo evento»);
+ * - registra i plugin dei widget, della notifica dell'allenamento, del calendario (modulo «Nuovo evento»)
+ *   e dell'aggiornamento dell'APK del sito;
  * - ricorda quale sezione aprire quando l'app parte da un widget;
  * - passa al plugin di accesso Google la risposta della richiesta dei permessi
  *   (senza questo l'accesso con permessi extra, come Google Sheets, viene rifiutato).
@@ -31,6 +33,7 @@ public class MainActivity extends BridgeActivity implements ModifiedMainActivity
         registerPlugin(FerroWidgetsPlugin.class);
         registerPlugin(FerroWorkoutPlugin.class);
         registerPlugin(FerroCalendarPlugin.class);
+        registerPlugin(FerroUpdatePlugin.class);
         super.onCreate(savedInstanceState);
         WidgetData.rememberLaunch(this, getIntent());
     }

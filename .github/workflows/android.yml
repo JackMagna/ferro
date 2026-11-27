@@ -73,10 +73,22 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
 
-      - name: Compila (firmato)
+      - name: Compila APK (firmato)
         if: env.HAS_KEYSTORE == 'true'
         working-directory: android
-        run: ./gradlew --no-daemon assembleRelease bundleRelease
+        run: ./gradlew --no-daemon assembleRelease
+        env:
+          ANDROID_KEYSTORE_FILE: ${{ github.workspace }}/release.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+      # Il file per Google Play (AAB) non può aggiornarsi da solo: si toglie REQUEST_INSTALL_PACKAGES prima di compilarlo
+      - name: Compila AAB per Google Play (firmato)
+        if: env.HAS_KEYSTORE == 'true'
+        run: |
+          node scripts/patch-android.mjs --play
+          cd android && ./gradlew --no-daemon bundleRelease
         env:
           ANDROID_KEYSTORE_FILE: ${{ github.workspace }}/release.jks
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}

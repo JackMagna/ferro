@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ferro_update_channel">Actualizaciones de Ferro</string>
+    <string name="ferro_update_title">Ferro %1$s está disponible</string>
+    <string name="ferro_update_text">Toca para abrir Ferro y actualizar: tus datos se conservan.</string>
+</resources>

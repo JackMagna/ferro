@@ -221,5 +221,17 @@ const es: Record<string, string> = {
   "Principiante": "Principiante",
   "Intermedio": "Intermedio",
   "Esperto": "Experto",
+  "Da ricordare durante la serie": "Recuerda durante la serie",
+  "Regolazioni": "Ajustes",
+  "Posizione di partenza": "Posición inicial",
+  "Errori comuni": "Errores comunes",
+  "Errore:": "Error:",
+  "Correzione:": "Corrección:",
+  "Dove lo devi sentire": "Dónde debes sentirlo",
+  "Muscoli: {list}": "Músculos: {list}",
+  "Quando fermarti": "Cuándo parar",
+  "Fonti consultate": "Fuentes consultadas",
+  "Testo scritto da Ferro confrontando le istruzioni pubbliche di produttori e associazioni (licenza {license}).": "Texto escrito por Ferro comparando las instrucciones públicas de fabricantes y asociaciones (licencia {license}).",
+  "Istruzioni originali della libreria (inglese)": "Instrucciones originales de la biblioteca (inglés)",
 };
 export default es;

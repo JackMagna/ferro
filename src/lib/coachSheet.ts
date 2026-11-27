@@ -1,5 +1,6 @@
 import type { ProgramBlock, ProgramDay, ProgramExercise, SectionType, WorkoutProgram } from '../types';
 import { looksLikeActivityText, parseBlockHeader } from './activity';
+import { isPrescriptionText, parsePrescription } from './prescription';
 
 export interface ParsedSheet {
   program: WorkoutProgram;
@@ -38,11 +39,26 @@ function restFrom(label: string): number | null {
   const min = label.match(/rip(?:oso)?\.?\s*(\d+(?:[.,]\d+)?)\s*(?:'|’|′|min|m\b)/i);
   if (min) return Math.round(Number(min[1].replace(',', '.')) * 60);
   const sec = label.match(/rip(?:oso)?\.?\s*(\d+)\s*(?:"|''|″|sec|s\b)/i);
-  return sec ? Number(sec[1]) : null;
+  if (sec) return Number(sec[1]);
+  // senza unità («JUMP SET RIP. 90»): da 10 in su sono secondi, sotto sono minuti
+  const bare = label.match(/rip(?:oso)?\.?\s*(\d+)\s*$/i);
+  if (!bare) return null;
+  const n = Number(bare[1]);
+  return n >= 10 ? n : n * 60;
 }
 
 /** Una prescrizione vera ha "x", "MAX" o un trattino (3X10, 4xMAX, 10-9-8..): i numeri soli sono carichi scritti a mano. */
-const isPrescription = (v: string) => /[x×]|max|\d\s*-\s*\d/i.test(v);
+/**
+ * Piramidi con «/» o «,» («12/10/8», «12,10,8,6»): almeno tre numeri, in discesa, fino a 30.
+ * Così «40/42,5» o «12/14/16» scritti a mano restano carichi e non diventano serie.
+ */
+const isSlashPyramid = (v: string) => {
+  const m = v.match(/^\d+(?:\s*([/,])\s*\d+)(?:\s*\1\s*\d+)+\s*\.*$/);
+  if (!m) return false;
+  const n = v.replace(/\.+$/, '').split(/[/,]/).map((x) => Number(x.trim()));
+  return n.every((x, i) => x <= 30 && (i === 0 || x < n[i - 1]));
+};
+const isPrescription = (v: string) => /[x×]|max|\d\s*-\s*\d/i.test(v) || isSlashPyramid(v) || (/\d\s*serie/i.test(v) && isPrescriptionText(v));
 /**
  * Toglie le nostre note ("3X10 · 40 kg", "40/42,5 kg") quando si rilegge un foglio già compilato dall'app.
  * Tiene le prescrizioni da palestra e anche quelle a tempo, distanza o ripetute ("20'", "5 km", "6x1000 r 2'").
@@ -51,12 +67,31 @@ export function cleanCell(v: string): string {
   const t = clean(v);
   if (/^\d+([.,]\d+)?(\/\d+([.,]\d+)?)*\s*(kg|rip)$/i.test(t)) return '';
   const base = t.split(' · ')[0].trim();
+  if (isAthleteLog(base) && !looksLikeActivityText(base)) return '';
   return isPrescription(base) || looksLikeActivityText(base) ? base : '';
 }
+/**
+ * Quello che l'atleta scrive a mano dopo la serie: carico e poi ripetizioni fatte
+ * («75. 7-6», «16/18 all. 11-9», «20 face pull. 7-7», «12sed. 10-10»). Non è una prescrizione.
+ * Le liste di sole ripetizioni («10 - 8 - 6») e le prescrizioni con «x», MAX o «serie» restano.
+ */
+export function isAthleteLog(v: string): boolean {
+  const t = v.trim();
+  if (/\d\s*[x×]\s*(\d|max)|max|serie/i.test(t)) return false;
+  if (/^\d+(\s*[-/,]\s*\d+)*\s*[-.]*$/.test(t)) return false;
+  return /^\d+([.,]\d+)?\S*\s+.*\d/.test(t);
+}
+
+/** Prescrizione «vera» sulla riga dell'esercizio: serie per ripetizioni o MAX («4xMAX», «3x12»). */
+const hasSetsTimesReps = (v: string) => /\d\s*[x×]\s*(\d|max)|max/i.test(v);
+
 /** Dentro un blocco (AMRAP, EMOM…) anche un numero solo è una quantità ("15" ripetizioni), non un carico. */
 const blockCell = (v: string) => clean(v).split(' · ')[0].trim();
 
-const isSectionLabel = (c0: string) => /^(progressione|cedimento|core|addominali)\b/i.test(c0) && /(serie|rip|rec)/i.test(c0);
+const isSectionLabel = (c0: string) =>
+  (/^(progressione|cedimento|core|addominali)\b/i.test(c0) && /(serie|rip|rec)/i.test(c0)) ||
+  // «SERIE X REP RIP. 2'», «JUMP SET RIP. 90», «SET X REP»: intestazione con le prescrizioni nelle colonne
+  (/^(serie|series|sets?|jump\s*set)(\s|$)/i.test(c0) && /(rip|rep|rec)/i.test(c0));
 const isBareLabel = (c0: string) => /^(progressione|cedimento)\s*:?$/i.test(c0);
 
 /**
@@ -83,9 +118,10 @@ export function parseCoachSheet(rows: string[][], tab = ''): ParsedSheet {
   let athlete = '';
   let trainer = '';
   if (head[1]) {
-    const parts = head[1].split(/\s*[•·|–—]\s*|\s+-\s+|\s+con\s+/i).map(clean).filter(Boolean);
+    // «• LUCA PERSONAL TRAINER» senza nome davanti: c'è solo il trainer
+    const parts = head[1].split(/\s*[•·|–—]\s*|\s+-\s+|\s+con\s+/i).map(clean);
     athlete = sentenceCase(parts[0] ?? '');
-    trainer = sentenceCase(parts.slice(1).join(' '));
+    trainer = sentenceCase(parts.slice(1).filter(Boolean).join(' '));
   }
 
   const days: ProgramDay[] = [];
@@ -96,9 +132,12 @@ export function parseCoachSheet(rows: string[][], tab = ''): ParsedSheet {
     const header = rows[start] ?? [];
     const cols: Record<number, number> = {};
     let noteCol = -1;
+    let lastWeek = 0;
     header.forEach((c, j) => {
-      const w = weekOf(clean(c));
-      if (w !== null && j > 0) cols[w] = j;
+      let w = weekOf(clean(c));
+      // settimana ripetuta per sbaglio («6 SETT.», «6 SETT.», «6 SETT.»): è la successiva
+      if (w !== null && j > 0 && w <= lastWeek && cols[w] !== undefined) w = lastWeek + 1;
+      if (w !== null && j > 0) { cols[w] = j; lastWeek = w; }
       else if (/^note/i.test(clean(c))) noteCol = j;
     });
     if (Object.keys(cols).length === 0) {
@@ -116,7 +155,18 @@ export function parseCoachSheet(rows: string[][], tab = ''): ParsedSheet {
     for (let i = start + 1; i < next; i++) {
       const r = rows[i];
       const c0 = cell(r, 0);
-      if (!filled(r) || !c0) continue;
+      if (!filled(r)) continue;
+      if (!c0) {
+        // riga senza nome con solo prescrizioni nelle settimane («2x8/10» in ogni colonna): nuova sezione senza titolo
+        const vals = Object.values(cols).map((j) => cell(r, j)).filter(Boolean);
+        if (vals.length && vals.every(hasSetsTimesReps)) {
+          const sectionWeeks: Record<number, string> = {};
+          Object.entries(cols).forEach(([w, j]) => { const v = cleanCell(cell(r, j)); if (v) sectionWeeks[Number(w)] = v; });
+          section = { type: 'progressione', rest: (section as { rest: number | null } | null)?.rest ?? null, warm: '', weeks: sectionWeeks };
+          block = null;
+        }
+        continue;
+      }
       if (GUIDE_RE.test(c0)) {
         guidelinesStart = Math.min(guidelinesStart, i);
         break;
@@ -165,7 +215,9 @@ export function parseCoachSheet(rows: string[][], tab = ''): ParsedSheet {
 
       // prescrizione scritta sulla riga dell'esercizio (es. addome 4xMAX), se c'è
       const own: Record<number, string> = {};
-      Object.entries(cols).forEach(([w, j]) => { const v = cleanCell(cell(r, j)); if (v) own[Number(w)] = v; });
+      // sotto una sezione con le prescrizioni conta solo ciò che ha «x», MAX, tempo o distanza: il resto («9-7», «11/10/8…») è scritto dall'atleta
+      const sectionHasWeeks = !!section && Object.keys(section.weeks).length > 0;
+      Object.entries(cols).forEach(([w, j]) => { const v = cleanCell(cell(r, j)); if (v && (!sectionHasWeeks || hasSetsTimesReps(v) || looksLikeActivityText(v))) own[Number(w)] = v; });
       const ownValues = Object.values(own);
       const ownIsMax = ownValues.length > 0 && ownValues.every((v) => /max/i.test(v));
       const inherits = ownValues.length === 0 && !!section && Object.keys(section.weeks).length > 0;
@@ -181,7 +233,8 @@ export function parseCoachSheet(rows: string[][], tab = ''): ParsedSheet {
         note: note ? capFirst(sentenceCase(note)) : undefined,
         warmupNote: usesSection && section?.warm ? capFirst(sentenceCase(section.warm)) : undefined,
         sectionType: type,
-        restTimeSec: usesSection ? section?.rest ?? 120 : type === 'core' ? 90 : 120,
+        // il recupero scritto nella cella («4x8 rec 90"») vale più di quello della sezione
+        restTimeSec: (values.length ? parsePrescription(values[0]).restSec : undefined) ?? (usesSection ? section?.rest ?? 120 : type === 'core' ? 90 : 120),
         weeks,
         cellMode: inherits ? 'loads' : undefined,
         sheetRow: i + 1

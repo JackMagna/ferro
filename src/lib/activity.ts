@@ -8,7 +8,7 @@
  * (minuti in «20' corsa», secondi nel nuoto in «a 45'» e «r 15'»): si decide guardando disciplina e contesto.
  */
 import type { ProgramBlock, ProgramExercise } from '../types';
-import { parsePrescription } from './prescription';
+import { isPrescriptionText, parsePrescription } from './prescription';
 
 export type Activity = NonNullable<ProgramExercise['activity']>;
 
@@ -122,6 +122,8 @@ const strokeIn = (text: string) => STROKES.find(([, re]) => re.test(text))?.[0];
 
 /** Prescrizione «da palestra»: 3X10, 4xMAX, 10-9-8, senza unità di tempo o distanza. */
 const STRENGTH_RE = /(\d+\s*[x×]\s*(\d+|max)(?!\s*(?:''|"|″|'|’|′|m(?![a-z])|km|min|sec|s(?![a-z])|cal)))|^\d+(\s*-\s*\d+)+|max/;
+/** Forza: le forme brevi qui sopra o una prescrizione che il lettore capisce («3 serie da 10», «10/8/6»). */
+const isStrength = (t: string) => STRENGTH_RE.test(t) || isPrescriptionText(t);
 
 /** Il testo parla di tempo, distanza o blocchi? (serve al lettore del foglio per non scartare la cella) */
 export function looksLikeActivityText(raw: string): boolean {
@@ -137,7 +139,7 @@ export function parseActivity(raw: string | undefined, activity: Activity): Acti
   if (!t) return isCardio(activity) || activity === 'pilates' || activity === 'mobilita' ? { kind: 'testo', text: '' } : { kind: 'carico' };
 
   // forza: «3X10», «4xMAX», «10-9-8..» restano carico × ripetizioni
-  if (!isCardio(activity) && STRENGTH_RE.test(t) && !looksLikeActivityText(t.replace(/(?:rec|r|riposo|recupero)\.?\s*\d+\s*(?:''|"|″|'|’|′|min|sec|s)/g, ''))) return { kind: 'carico' };
+  if (!isCardio(activity) && isStrength(t) && !looksLikeActivityText(t.replace(/(?:rec|r|riposo|recupero)\.?\s*\d+\s*(?:['’′]\s*\d+\s*(?:''|"|″)?|''|"|″|'|’|′|min|sec|s)/g, ''))) return { kind: 'carico' };
 
   // nuoto con più parti: «400 risc + 8x50 SL r 15'' + 200 def», una per riga o separate da + , ;
   if (swim) {
@@ -188,7 +190,7 @@ export function parseActivity(raw: string | undefined, activity: Activity): Acti
   // nuoto con un numero solo: «1500» = metri
   if (swim && /^\d{2,4}(?![0-9])/.test(t)) return { kind: 'distanza', distanceM: Number(t.match(/^\d+/)![0]) };
 
-  if (!isCardio(activity) && STRENGTH_RE.test(t)) return { kind: 'carico' };
+  if (!isCardio(activity) && isStrength(t)) return { kind: 'carico' };
   return { kind: 'testo', text: original };
 }
 

@@ -2,12 +2,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MISURE, SHEET } from '../../lib/__tests__/fixtures';
 import { parseCoachSheet } from '../../lib/coachSheet';
 import type { Measurement, WorkoutSession } from '../../types';
+import type { GridRange } from '../../lib/sheetMerges';
 
 vi.mock('../firebase', () => ({ GoogleTokenExpiredError: class extends Error {} }));
 const { annotateGrid, appendMeasurements, appendSessions, findMeasuresTab, listTabs, readMeasures, readTab, writeMeasureCells } = await import('../googleSheets');
 
 /** Un Google Sheets finto in memoria, con solo le chiamate che usa l'app. */
-function fakeSheets(initial: Record<string, string[][]>) {
+function fakeSheets(initial: Record<string, string[][]>, merges: Record<string, GridRange[]> = {}) {
   const tabs = new Map<string, string[][]>(Object.entries(initial).map(([k, v]) => [k, v.map((r) => [...r])]));
   const calls: string[] = [];
   const key = (name: string) => [...tabs.keys()].find((k) => k.toLowerCase() === name.toLowerCase()) ?? name;
@@ -54,6 +55,10 @@ function fakeSheets(initial: Record<string, string[][]>) {
       return ok({});
     }
     if (method === 'GET' && path.includes('/values/')) return ok({ values: tabs.get(key(path.split('/values/')[1].replace(/^'|'$/g, ''))) });
+    if (method === 'GET' && url.searchParams.get('fields') === 'sheets(merges)') {
+      const tab = key(url.searchParams.get('ranges')!.replace(/^'|'$/g, '').replace(/''/g, "'"));
+      return ok({ sheets: [{ merges: merges[tab] }] });
+    }
     if (method === 'GET') return ok({ sheets: [...tabs.keys()].map((title) => ({ properties: { title } })) });
     return { ok: false, status: 404, statusText: 'x', json: async () => ({}) };
   }));
@@ -150,5 +155,43 @@ describe('misure nel foglio del coach', () => {
     await appendMeasurements('t', 'ID', [m]);
     expect(fake.tabs.get('Misure app')![1]).toEqual(['2026-10-19', 3, 80.4, '', '', '', 100, 112, '', '', '']);
     expect(fake.tabs.get('MISURE')).toEqual(MISURE); // quella del coach resta intatta
+  });
+});
+
+describe('celle unite', () => {
+  // dati inventati: la prescrizione della settimana 1 è unita su tre esercizi (C3:C5)
+  const UNITE = [
+    ['', 'SCHEDA DI PROVA'],
+    ['GIORNO 1', 'NOTE', '1 SETT.', '2 SETT.'],
+    ['PANCA PIANA', '', '3x10', '4x8'],
+    ['CROCI AI CAVI', '', '', '4x8'],
+    ['DIP', '', '', '4x10']
+  ];
+  const merges = { Unite: [{ sheetId: 0, startRowIndex: 2, endRowIndex: 5, startColumnIndex: 2, endColumnIndex: 3 }] };
+
+  it('copia la prescrizione unita in tutte le righe', async () => {
+    fakeSheets({ Unite: UNITE }, merges);
+    const rows = await readTab('t', 'ID', 'Unite');
+    expect(rows.map((r) => r[2])).toEqual([undefined, '1 SETT.', '3x10', '3x10', '3x10']);
+    const days = parseCoachSheet(rows, 'Unite').program.days;
+    expect(days[0].exercises.map((e) => e.weeks)).toEqual([{ 1: '3x10', 2: '4x8' }, { 1: '3x10', 2: '4x8' }, { 1: '3x10', 2: '4x10' }]);
+  });
+  it('senza unioni legge come prima', async () => {
+    fakeSheets({ Unite: UNITE });
+    expect((await readTab('t', 'ID', 'Unite'))[3][2]).toBe('');
+  });
+  it('non scrive i carichi nelle celle unite', async () => {
+    const f = fakeSheets({ Unite: UNITE }, merges);
+    const prog = parseCoachSheet(await readTab('t', 'ID', 'Unite'), 'Unite').program;
+    const s = session(40, {
+      dayId: prog.days[0].id, weekNumber: 1,
+      sets: prog.days[0].exercises.map((e) => ({ exerciseId: e.id, exerciseName: e.name, setIndex: 0, weightKg: 40, reps: 10 }))
+    });
+    const w1 = await annotateGrid('t', 'ID', prog, [s]);
+    expect(w1).toEqual({ written: 0, skipped: 3 });
+    expect(f.tabs.get('Unite')!.map((r) => r[2])).toEqual(UNITE.map((r) => r[2]));
+    const w2 = await annotateGrid('t', 'ID', prog, [{ ...s, weekNumber: 2 }]);
+    expect(w2.written).toBe(3); // la settimana 2 non è unita: si scrive come sempre
+    expect(f.tabs.get('Unite')![2][3]).toBe('4x8 · 40 kg');
   });
 });

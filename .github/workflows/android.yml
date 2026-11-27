@@ -116,7 +116,10 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
+          name: Ferro ${{ github.ref_name }}
           files: out/*
+          # novità della versione (le legge anche il banner di aggiornamento nell'app): rilascio/vX.Y.Z.md, se c'è
+          body_path: ${{ hashFiles(format('rilascio/{0}.md', github.ref_name)) != '' && format('rilascio/{0}.md', github.ref_name) || '' }}
 
       # Il ramo android-build pubblica anche una versione di prova scaricabile con un link diretto
       - name: Versione di prova

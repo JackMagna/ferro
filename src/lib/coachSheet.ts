@@ -1,5 +1,6 @@
 import type { ProgramBlock, ProgramDay, ProgramExercise, SectionType, WorkoutProgram } from '../types';
 import { looksLikeActivityText, parseBlockHeader } from './activity';
+import { isPrescriptionText, parsePrescription } from './prescription';
 
 export interface ParsedSheet {
   program: WorkoutProgram;
@@ -42,7 +43,17 @@ function restFrom(label: string): number | null {
 }
 
 /** Una prescrizione vera ha "x", "MAX" o un trattino (3X10, 4xMAX, 10-9-8..): i numeri soli sono carichi scritti a mano. */
-const isPrescription = (v: string) => /[x×]|max|\d\s*-\s*\d/i.test(v);
+/**
+ * Piramidi con «/» o «,» («12/10/8», «12,10,8,6»): almeno tre numeri, in discesa, fino a 30.
+ * Così «40/42,5» o «12/14/16» scritti a mano restano carichi e non diventano serie.
+ */
+const isSlashPyramid = (v: string) => {
+  const m = v.match(/^\d+(?:\s*([/,])\s*\d+)(?:\s*\1\s*\d+)+\s*\.*$/);
+  if (!m) return false;
+  const n = v.replace(/\.+$/, '').split(/[/,]/).map((x) => Number(x.trim()));
+  return n.every((x, i) => x <= 30 && (i === 0 || x < n[i - 1]));
+};
+const isPrescription = (v: string) => /[x×]|max|\d\s*-\s*\d/i.test(v) || isSlashPyramid(v) || (/\d\s*serie/i.test(v) && isPrescriptionText(v));
 /**
  * Toglie le nostre note ("3X10 · 40 kg", "40/42,5 kg") quando si rilegge un foglio già compilato dall'app.
  * Tiene le prescrizioni da palestra e anche quelle a tempo, distanza o ripetute ("20'", "5 km", "6x1000 r 2'").
@@ -181,7 +192,8 @@ export function parseCoachSheet(rows: string[][], tab = ''): ParsedSheet {
         note: note ? capFirst(sentenceCase(note)) : undefined,
         warmupNote: usesSection && section?.warm ? capFirst(sentenceCase(section.warm)) : undefined,
         sectionType: type,
-        restTimeSec: usesSection ? section?.rest ?? 120 : type === 'core' ? 90 : 120,
+        // il recupero scritto nella cella («4x8 rec 90"») vale più di quello della sezione
+        restTimeSec: (values.length ? parsePrescription(values[0]).restSec : undefined) ?? (usesSection ? section?.rest ?? 120 : type === 'core' ? 90 : 120),
         weeks,
         cellMode: inherits ? 'loads' : undefined,
         sheetRow: i + 1

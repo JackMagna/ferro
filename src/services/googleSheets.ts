@@ -2,6 +2,7 @@ import type { Measurement, WorkoutProgram, WorkoutSession } from '../types';
 import { canOverwrite, planAnnotations } from '../lib/sheetWrite';
 import { parseMeasuresTab, type MeasuresLayout, type SheetValues } from '../lib/measuresSheet';
 import { programRows } from '../lib/csv';
+import { a1ToCell, fillMergedCells, isInMerge, type GridRange } from '../lib/sheetMerges';
 import { GoogleTokenExpiredError } from './firebase';
 import { t } from '../lib/i18n';
 
@@ -87,13 +88,23 @@ export async function listTabs(token: string, spreadsheetId: string): Promise<st
   return meta.sheets.map((s) => s.properties.title);
 }
 
-/** Legge le celle di una scheda così come le vedi nel foglio. */
-export async function readTab(token: string, spreadsheetId: string, tab: string): Promise<string[][]> {
-  const res = await call<{ values?: string[][] }>(
+/** Le celle unite di una scheda (stesso permesso della lettura, nessun dato in più). */
+export async function readMerges(token: string, spreadsheetId: string, tab: string): Promise<GridRange[]> {
+  const res = await call<{ sheets?: { merges?: GridRange[] }[] }>(
     token,
-    `${API}/${spreadsheetId}/values/${encodeURIComponent(quote(tab))}?valueRenderOption=FORMATTED_VALUE`
+    `${API}/${spreadsheetId}?ranges=${encodeURIComponent(quote(tab))}&fields=${encodeURIComponent('sheets(merges)')}`
   );
-  return res.values ?? [];
+  return res.sheets?.[0]?.merges ?? [];
+}
+
+/** Legge le celle di una scheda così come le vedi nel foglio, con il valore delle celle unite copiato sotto. */
+export async function readTab(token: string, spreadsheetId: string, tab: string): Promise<string[][]> {
+  const [res, merges] = await Promise.all([
+    call<{ values?: string[][] }>(token, `${API}/${spreadsheetId}/values/${encodeURIComponent(quote(tab))}?valueRenderOption=FORMATTED_VALUE`),
+    // se le unioni non si leggono, si va avanti con i soli valori, come prima
+    readMerges(token, spreadsheetId, tab).catch((err) => { if (err instanceof GoogleTokenExpiredError) throw err; return [] as GridRange[]; })
+  ]);
+  return fillMergedCells(res.values ?? [], merges);
 }
 
 /** Aggiunge le serie delle sessioni al foglio "Log carichi". Numeri come numeri, non come testo. */
@@ -140,8 +151,13 @@ export async function annotateGrid(
   // in ordine di data: se due allenamenti toccano la stessa cella vince il più recente
   const latest = new Map<string, ReturnType<typeof planAnnotations>[number]>();
   [...sessions].sort((a, b) => a.startedAt - b.startedAt).forEach((s) => planAnnotations(program, s, history).forEach((p) => latest.set(p.a1, p)));
-  const plans = [...latest.values()];
-  if (!plans.length) return { written: 0, skipped: 0 };
+  const all = [...latest.values()];
+  if (!all.length) return { written: 0, skipped: 0 };
+  // niente scritture nelle celle unite: sono nascoste o valgono per più esercizi (i carichi restano in «Log carichi»)
+  const merges = await readMerges(token, spreadsheetId, tab).catch((err) => { if (err instanceof GoogleTokenExpiredError) throw err; return [] as GridRange[]; });
+  const plans = all.filter((p) => { const c = a1ToCell(p.a1); return !c || !isInMerge(merges, c.row, c.col); });
+  const hidden = all.length - plans.length;
+  if (!plans.length) return { written: 0, skipped: hidden };
 
   const ranges = plans.map((p) => `${quote(tab)}!${p.a1}`);
   const query = ranges.map((r) => `ranges=${encodeURIComponent(r)}`).join('&');
@@ -156,7 +172,7 @@ export async function annotateGrid(
       })
     });
   }
-  return { written: writable.length, skipped: plans.length - writable.length };
+  return { written: writable.length, skipped: plans.length - writable.length + hidden };
 }
 
 /** La scheda delle misure del coach: quella che si chiama MISURE (o simile). */

@@ -18,7 +18,8 @@ describe('parsePrescription', () => {
   });
   it('usa un valore di riserva per testo vuoto o sconosciuto', () => {
     expect(parsePrescription('')).toMatchObject({ sets: 3, reps: [10, 10, 10] });
-    expect(parsePrescription('a piacere')).toMatchObject({ sets: 3 });
+    expect(parsePrescription('a piacere')).toMatchObject({ sets: 3, understood: false });
+    expect(parsePrescription('3X10').understood).toBe(true);
   });
   it('limita le serie a un numero ragionevole', () => {
     expect(parsePrescription('99X5').sets).toBe(10);
@@ -32,5 +33,9 @@ describe('describePrescription', () => {
     expect(describePrescription('10-9-8..')).toBe('3 serie: 10, 9, 8');
     expect(describePrescription('4xMAX')).toBe('4 serie al massimo');
     expect(describePrescription('3X6 AUMENTO PESO')).toBe('3 × 6, aumenta il carico');
+    expect(describePrescription('4x8-10')).toBe('4 × 8-10');
+    expect(describePrescription('2x15 + 1xMAX')).toBe('2 × 15 + 1 al massimo');
+    expect(describePrescription('5x5 @80% RPE 8,5')).toBe('5 × 5 80% · RPE 8,5');
+    expect(describePrescription('a piacere')).toBe('non la capisco: propongo 3 × 10');
   });
 });

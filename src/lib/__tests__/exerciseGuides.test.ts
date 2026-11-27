@@ -11,7 +11,7 @@ const KINDS = ['macchina', 'cavi', 'pesi liberi', 'corpo libero'];
 describe('schede degli esercizi in italiano', () => {
   it('ha formato, licenza e almeno 40 schede', () => {
     expect(book.format).toBe('ferro-guides-v1');
-    expect(book.license).toBe('CC BY 4.0');
+    expect(book.license).toBe('CC BY-SA 4.0');
     expect(book.guides.length).toBeGreaterThanOrEqual(40);
   });
 
